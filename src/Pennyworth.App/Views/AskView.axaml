@@ -70,8 +70,8 @@
           <TextBlock FontSize="19" FontWeight="Medium" Text="{l:Tr SetupTitle}" />
           <TextBlock Classes="secondary" FontSize="13" Text="{l:Tr SetupSub}" />
         </StackPanel>
-        <UniformGrid Columns="2" ColumnSpacing="16">
-          <Border Classes="card" Padding="22,20" VerticalAlignment="Stretch">
+        <UniformGrid Columns="{Binding SetupColumns}" ColumnSpacing="16">
+          <Border Classes="card" Padding="22,20" VerticalAlignment="Stretch" IsVisible="{Binding CanRunLocally}">
             <StackPanel Spacing="12">
               <TextBlock Classes="label" Text="{l:Tr SetupLocalTitle, Upper=True}" />
               <TextBlock FontSize="17" FontWeight="Medium" TextWrapping="Wrap" Text="{Binding LocalModelName}" />

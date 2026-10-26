@@ -10,6 +10,10 @@ namespace Pennyworth.Platform;
 /// <param name="Download">Downloads and verifies a catalogued model into a folder.</param>
 /// <param name="AvailableMemory">Physical memory free right now, in bytes.</param>
 /// <param name="FreeSpace">Free bytes on the drive holding a folder.</param>
+/// <param name="CanRunLocally">
+/// Whether this platform can run the on-PC model. When false the Ask screen does not offer it at all:
+/// better than offering a download that cannot work.
+/// </param>
 public sealed record AssistantServices(
     ICredentialStore Keys,
     ConversationStore Conversations,
@@ -20,4 +24,5 @@ public sealed record AssistantServices(
     Func<LocalModel, string, IProgress<DownloadProgress>, CancellationToken, Task> Download,
     Anonymizer Anonymizer,
     Func<long> AvailableMemory,
-    Func<string, long> FreeSpace);
+    Func<string, long> FreeSpace,
+    bool CanRunLocally = true);

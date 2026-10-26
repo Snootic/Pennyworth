@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Pennyworth.Core\Pennyworth.Core.csproj" />
     <ProjectReference Include="..\Pennyworth.Platform\Pennyworth.Platform.csproj" />
+    <ProjectReference Include="..\Pennyworth.Platform.Linux\Pennyworth.Platform.Linux.csproj" />
     <ProjectReference Include="..\Pennyworth.Insights\Pennyworth.Insights.csproj" />
     <ProjectReference Include="..\Pennyworth.Scanning\Pennyworth.Scanning.csproj" />
     <ProjectReference Include="..\Pennyworth.Monitoring\Pennyworth.Monitoring.csproj" />

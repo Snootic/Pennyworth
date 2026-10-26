@@ -2,7 +2,11 @@ using Pennyworth.Assistant.Providers;
 
 namespace Pennyworth.Platform.Linux;
 
-/// <summary>The Ask screen's services with their files under the XDG data home and free space measured per file system.</summary>
+/// <summary>
+/// The Ask screen's services with their files under the XDG data home and free space measured per file system.
+/// The on-PC model is not offered yet: it needs the Linux inference runtime, and a download that cannot
+/// run would be worse than no option.
+/// </summary>
 public static class LinuxAssistantServices
 {
     public static AssistantServices Create(XdgPaths paths, ICredentialStore keys, Func<long> availableMemory) =>
@@ -12,7 +16,8 @@ public static class LinuxAssistantServices
             paths.UsagePath,
             paths.ModelRoot,
             availableMemory,
-            folder => FreeSpace(folder, Directory.Exists, DriveFreeSpace));
+            folder => FreeSpace(folder, Directory.Exists, DriveFreeSpace),
+            canRunLocally: false);
 
     /// <summary>
     /// Free bytes for the user on the file system that holds <paramref name="folder"/>, which need not exist yet:

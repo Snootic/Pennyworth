@@ -58,6 +58,18 @@ public sealed class AskViewModelTests : IDisposable
     }
 
     [Fact]
+    public void Offers_the_on_pc_model_only_where_the_platform_can_run_it()
+    {
+        var capable = new MainWindowViewModel(TestApp.Services() with { Assistant = Services() }).Ask!;
+        var incapable = new MainWindowViewModel(TestApp.Services() with { Assistant = Services() with { CanRunLocally = false } }).Ask!;
+
+        Assert.True(capable.CanRunLocally);
+        Assert.Equal(2, capable.SetupColumns);
+        Assert.False(incapable.CanRunLocally);
+        Assert.Equal(1, incapable.SetupColumns);
+    }
+
+    [Fact]
     public async Task Starts_with_setup_and_recommends_a_model_for_this_PC()
     {
         var (shell, ask) = Create();

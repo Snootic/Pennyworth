@@ -143,6 +143,11 @@ public sealed partial class AskViewModel : ObservableObject
 
     public bool IsInstalled => _services.Models.IsInstalled(RecommendedModel);
 
+    /// <summary>False when this platform cannot run the on-PC model: the setup then offers only an AI account.</summary>
+    public bool CanRunLocally => _services.CanRunLocally;
+
+    public int SetupColumns => CanRunLocally ? 2 : 1;
+
     public string VerdictTitle => Verdict?.Fit switch
     {
         null => "",
@@ -661,7 +666,17 @@ public sealed partial class AskViewModel : ObservableObject
     private void SaveCloudProfile()
     {
         string id = "cloud-" + Guid.NewGuid().ToString("N")[..8];
-        _services.Keys.Save(id, ApiKey.Trim());
+        try
+        {
+            _services.Keys.Save(id, ApiKey.Trim());
+        }
+        catch (InvalidOperationException ex)
+        {
+            // No keyring to keep the key in: say so, store nothing, and keep what was typed.
+            TestResult = ex.Message;
+            return;
+        }
+
         ApiKey = "";
         AddProfile(DraftProfile(id));
         TestResult = null;

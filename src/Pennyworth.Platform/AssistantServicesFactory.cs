@@ -17,7 +17,8 @@ public static class AssistantServicesFactory
         string usagePath,
         string modelRoot,
         Func<long> availableMemory,
-        Func<string, long> freeSpace)
+        Func<string, long> freeSpace,
+        bool canRunLocally = true)
     {
         var catalog = ModelCatalog.Load();
         var models = new LocalModelStore(modelRoot);
@@ -53,7 +54,8 @@ public static class AssistantServicesFactory
             (model, folder, progress, ct) => downloader.DownloadAsync(model, folder, progress, ct),
             Anonymizer.ForCurrentUser(),
             availableMemory,
-            freeSpace);
+            freeSpace,
+            canRunLocally);
     }
 
     /// <summary>Lets the screen dispose what it was given without unloading a shared local model.</summary>

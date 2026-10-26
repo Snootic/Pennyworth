@@ -11,6 +11,7 @@ using Pennyworth.Insights.Classification;
 using Pennyworth.KnowledgeBase;
 using Pennyworth.Monitoring;
 using Pennyworth.Platform;
+using Pennyworth.Platform.Linux;
 
 namespace Pennyworth.App;
 
@@ -68,8 +69,8 @@ public sealed partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private static IPlatform CreatePlatform() => OperatingSystem.IsWindows()
-        ? new WindowsPlatform()
-        : throw new PlatformNotSupportedException(
-            "Pennyworth does not run on this operating system yet. Only Windows is supported.");
+    private static IPlatform CreatePlatform() =>
+        OperatingSystem.IsWindows() ? new WindowsPlatform()
+        : OperatingSystem.IsLinux() ? new LinuxPlatform()
+        : throw new PlatformNotSupportedException("Pennyworth runs on Windows and Linux only.");
 }
