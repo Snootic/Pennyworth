@@ -28,6 +28,7 @@ public sealed class LinuxAssistantServicesTests : IDisposable
         Assert.True(File.Exists(Path.Combine(_root, "data", "Pennyworth", "usage.json")));
         Assert.StartsWith(Path.Combine(_root, "data", "Pennyworth", "models") + Path.DirectorySeparatorChar, services.Models.FolderOf(services.Catalog.Models[0]));
         Assert.Equal(123, services.AvailableMemory());
+        Assert.Equal("linux", services.PlatformName);
     }
 
     [LinuxFact]

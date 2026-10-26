@@ -52,5 +52,5 @@ public sealed class LinuxPlatform : IPlatform
     public ISystemMonitor? CreateMonitor(IEnumerable<ProcessExplanation> explanations) => new LinuxMonitor(explanations);
 
     public AssistantServices CreateAssistant(Func<long> availableMemory) =>
-        LinuxAssistantServices.Create(_paths, new SecretServiceStore(), availableMemory, Name);
+        LinuxAssistantServices.Create(_paths, new SecretServiceStore(), availableMemory);
 }

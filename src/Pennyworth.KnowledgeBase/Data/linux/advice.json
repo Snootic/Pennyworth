@@ -16,7 +16,8 @@
       "id": "delete-system-tree",
       "patterns": [
         "\\brm\\s+(-{1,2}[a-z-]+\\s+)+(--no-preserve-root\\s+)?(/|~|\\$HOME|/home|/etc|/usr|/var|/boot|/bin|/sbin|/lib(64)?|/opt|/root)/?\\*?(?=[\\s;|&)\"\\'`.,]|$)",
-        "\b(delet|remov|eras|wip)\\w*\b.{0,40}(/boot|/etc|/usr|/lib(64)?|/bin|/sbin|/var/lib/(rpm|dpkg|pacman|zypp)|vmlinuz|initramfs|initrd)\b",
+        "\\brm\\s+(-{1,2}[a-z-]+\\s+)+/(boot|etc|usr|bin|sbin|lib(64)?|root|opt|var/lib)\\b",
+        "\\b(delet|remov|eras|wip)\\w*\\b.{0,40}(/boot|/etc|/usr|/lib(64)?|/bin|/sbin|/var/lib/(rpm|dpkg|pacman|zypp)|vmlinuz|initramfs|initrd)\\b",
         "\\b(apag|exclu|remov|delet)\\w*\\b.{0,40}(/boot|/etc|/usr|/lib(64)?|/bin|/sbin|/var/lib/(rpm|dpkg|pacman|zypp)|vmlinuz|initramfs|initrd)\\b"
       ]
     },
