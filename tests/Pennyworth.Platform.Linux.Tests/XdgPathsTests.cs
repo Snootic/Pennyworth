@@ -61,14 +61,12 @@ public class EnvironmentScopeTests
     }
 
     [Theory]
-    [InlineData("USERPROFILE", "/home/ana")]
     [InlineData("HOME", "/home/ana")]
-    [InlineData("LOCALAPPDATA", "/home/ana/.cache")]
-    [InlineData("LocalAppData", "/home/ana/.cache")]
-    [InlineData("APPDATA", "/home/ana/.config")]
+    [InlineData("XDG_CACHE_HOME", "/home/ana/.cache")]
+    [InlineData("XDG_CONFIG_HOME", "/home/ana/.config")]
     [InlineData("XDG_DATA_HOME", "/home/ana/.local/share")]
-    [InlineData("SystemDrive", "/")]
-    public void Maps_the_names_the_data_uses(string name, string expected)
+    [InlineData("XDG_STATE_HOME", "/home/ana/.local/state")]
+    public void Resolves_the_names_the_linux_data_uses(string name, string expected)
     {
         string? resolved = Scope(("HOME", "/home/ana")).Resolve(name);
 
@@ -76,19 +74,26 @@ public class EnvironmentScopeTests
     }
 
     [Theory]
+    [InlineData("TEMP")]
+    [InlineData("TMP")]
+    [InlineData("LOCALAPPDATA")]
+    [InlineData("APPDATA")]
+    [InlineData("USERPROFILE")]
+    [InlineData("SystemDrive")]
     [InlineData("SystemRoot")]
     [InlineData("ProgramFiles")]
     [InlineData("ProgramData")]
     [InlineData("PATH")]
+    [InlineData("home")]
     [InlineData("")]
-    public void Leaves_names_without_a_meaning_here_unresolved(string name) =>
+    public void Windows_names_and_anything_else_stay_unresolved_so_their_rules_are_dropped(string name) =>
         Assert.Null(Scope(("HOME", "/home/ana")).Resolve(name));
 
     [Fact]
     public void Temp_follows_tmpdir_and_otherwise_slash_tmp()
     {
-        Assert.Equal("/run/user/1000", Scope(("HOME", "/h"), ("TMPDIR", "/run/user/1000/")).Resolve("TEMP"));
-        Assert.Equal("/tmp", Scope(("HOME", "/h")).Resolve("TEMP"));
-        Assert.Equal("/tmp", Scope(("HOME", "/h"), ("TMPDIR", "relative")).Resolve("TMP"));
+        Assert.Equal("/run/user/1000", Scope(("HOME", "/h"), ("TMPDIR", "/run/user/1000/")).Resolve("TMPDIR"));
+        Assert.Equal("/tmp", Scope(("HOME", "/h")).Resolve("TMPDIR"));
+        Assert.Equal("/tmp", Scope(("HOME", "/h"), ("TMPDIR", "relative")).Resolve("TMPDIR"));
     }
 }
