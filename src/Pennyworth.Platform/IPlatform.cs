@@ -12,6 +12,12 @@ namespace Pennyworth.Platform;
 /// </summary>
 public interface IPlatform
 {
+    /// <summary>
+    /// Which data set this OS uses: <see cref="KnowledgeBaseLoader.Windows"/> or <see cref="KnowledgeBaseLoader.Linux"/>.
+    /// The composition root passes it to every <see cref="KnowledgeBaseLoader"/> call.
+    /// </summary>
+    string Name { get; }
+
     IDriveService Drives { get; }
 
     IStorageScanner Scanner { get; }

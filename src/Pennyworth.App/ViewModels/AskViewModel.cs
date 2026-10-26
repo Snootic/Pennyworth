@@ -50,9 +50,8 @@ public sealed partial class AskViewModel : ObservableObject
     private const int HistoryMessages = 6;
     private const int TitleLength = 60;
 
-    private static readonly Lazy<DiagnosisEngine> Engine = new(DiagnosisEngine.FromKnowledgeBase);
-    private static readonly Lazy<AdviceCatalog> Advice = new(KnowledgeBaseLoader.LoadBlockedAdvice);
-
+    private readonly Lazy<DiagnosisEngine> _engine;
+    private readonly Lazy<AdviceCatalog> _advice;
     private readonly AssistantServices _services;
     private readonly IAskHost _host;
     private readonly Func<DateTimeOffset> _clock;
@@ -66,6 +65,8 @@ public sealed partial class AskViewModel : ObservableObject
     public AskViewModel(AssistantServices services, IAskHost host, Func<DateTimeOffset> clock)
     {
         _services = services;
+        _engine = new(() => DiagnosisEngine.FromKnowledgeBase(services.PlatformName));
+        _advice = new(() => KnowledgeBaseLoader.LoadBlockedAdvice(services.PlatformName));
         _host = host;
         _clock = clock;
         RecommendedModel = services.Catalog.Models.First(m => m.Device == ModelDevice.Cpu);
@@ -358,7 +359,7 @@ public sealed partial class AskViewModel : ObservableObject
         }
 
         IChatClient client = _services.CreateClient(profile, key);
-        var session = new AssistantSession(client, profile, Engine.Value, Advice.Value, profile.IsLocal ? null : _services.Anonymizer);
+        var session = new AssistantSession(client, profile, _engine.Value, _advice.Value, profile.IsLocal ? null : _services.Anonymizer);
         PcSnapshot snapshot = await _host.SnapshotAsync();
         PreparedQuestion prepared = session.Prepare(question, Topic, snapshot, Localizer.Instance.Culture, History());
 

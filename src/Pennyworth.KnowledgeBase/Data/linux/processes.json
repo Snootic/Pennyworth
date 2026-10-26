@@ -1,0 +1,286 @@
+{
+  "version": 1,
+  "processes": [
+    {
+      "id": "systemd",
+      "names": ["systemd"],
+      "title": { "en": "System manager (systemd)", "pt-BR": "Gerenciador do sistema (systemd)" },
+      "subtitle": { "en": "Starts and watches everything else", "pt-BR": "Inicia e vigia todo o resto" },
+      "note": {
+        "en": "The first process that runs. It starts services and your session, and restarts them if they stop. It can't be closed.",
+        "pt-BR": "O primeiro processo a rodar. Ele inicia os serviços e a sua sessão e os reinicia se pararem. Não pode ser fechado."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "system-log",
+      "names": ["systemd-journald", "systemd-journal", "syslog-ng", "rsyslogd"],
+      "title": { "en": "System log keeper", "pt-BR": "Guardião dos registros do sistema" },
+      "subtitle": { "en": "Writes down what the system and services do", "pt-BR": "Anota o que o sistema e os serviços fazem" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "login-sessions",
+      "names": ["systemd-logind", "elogind"],
+      "title": { "en": "Login and sessions", "pt-BR": "Login e sessões" },
+      "subtitle": { "en": "Knows who is signed in and what the power button does", "pt-BR": "Sabe quem está conectado e o que o botão de energia faz" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "device-manager",
+      "names": ["systemd-udevd", "udevd"],
+      "title": { "en": "Device manager (udev)", "pt-BR": "Gerenciador de dispositivos (udev)" },
+      "subtitle": { "en": "Sets up USB drives, keyboards and other hardware as you plug them in", "pt-BR": "Prepara pen drives, teclados e outros dispositivos quando você os conecta" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "systemd-helpers",
+      "names": ["systemd-resolved", "systemd-resolve", "systemd-timesyn", "systemd-timesyncd", "systemd-networkd", "systemd-networkd-wait", "systemd-oomd", "systemd-machine", "systemd-machined", "systemd-homed", "systemd-userdbd", "systemd-userwor", "systemd-userwork", "systemd-hostnamed", "systemd-localed", "systemd-timedated", "(sd-pam)"],
+      "title": { "en": "systemd helpers", "pt-BR": "Auxiliares do systemd" },
+      "subtitle": { "en": "Name lookups, clock, user sessions", "pt-BR": "Consulta de nomes, relógio, sessões de usuário" },
+      "note": {
+        "en": "Small parts of systemd, each with one job. They are tiny and can't be closed.",
+        "pt-BR": "Pequenas partes do systemd, cada uma com uma tarefa. São minúsculas e não podem ser fechadas."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "message-bus",
+      "names": ["dbus-daemon", "dbus-broker", "dbus-broker-lau", "dbus-broker-launch", "dbus"],
+      "title": { "en": "Message bus (D-Bus)", "pt-BR": "Barramento de mensagens (D-Bus)" },
+      "subtitle": { "en": "Lets programs talk to each other", "pt-BR": "Permite que os programas conversem entre si" },
+      "note": {
+        "en": "Almost everything on the desktop uses it. Closing it would end your session.",
+        "pt-BR": "Quase tudo no desktop usa isso. Fechá-lo encerraria a sua sessão."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "display-server",
+      "names": ["Xorg", "X", "Xwayland", "Xvnc"],
+      "title": { "en": "Display server", "pt-BR": "Servidor gráfico" },
+      "subtitle": { "en": "Draws windows on your screen", "pt-BR": "Desenha as janelas na tela" },
+      "note": {
+        "en": "Xorg and Xwayland show your windows. Closing them closes every open app window.",
+        "pt-BR": "Xorg e Xwayland exibem as suas janelas. Fechá-los fecha todas as janelas abertas."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "window-manager",
+      "names": ["kwin_wayland", "kwin_wayland_wr", "kwin_wayland_wrapper", "kwin_x11", "mutter", "xfwm4", "openbox", "sway", "Hyprland", "picom"],
+      "title": { "en": "Window manager", "pt-BR": "Gerenciador de janelas" },
+      "subtitle": { "en": "Moves, resizes and draws every window", "pt-BR": "Move, redimensiona e desenha todas as janelas" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "desktop-shell",
+      "names": ["plasmashell", "gnome-shell", "xfdesktop", "xfce4-panel", "cinnamon", "budgie-wm", "lxqt-panel", "cosmic-panel"],
+      "title": { "en": "Desktop and panel", "pt-BR": "Área de trabalho e painel" },
+      "subtitle": { "en": "The taskbar, menu and desktop", "pt-BR": "A barra de tarefas, o menu e a área de trabalho" },
+      "note": {
+        "en": "Plasma, GNOME, Cinnamon and others draw your panel and menu. If one is closed it usually restarts, but your windows may flicker.",
+        "pt-BR": "Plasma, GNOME, Cinnamon e outros desenham seu painel e menu. Se um for fechado ele costuma reiniciar, mas as janelas podem piscar."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "desktop-services",
+      "names": ["kded6", "kded5", "kded4", "kglobalaccel", "kglobalacceld", "kactivitymanage", "kactivitymanagerd", "kaccess", "ksmserver", "kiod6", "kiod5", "ksystemstats", "ksystemstats_xe", "org_kde_powerde", "xembedsniproxy", "knighttimed", "kdeconnectd", "gsd-media-keys", "gsd-power", "gsd-xsettings", "gsd-color", "gsd-keyboard", "gsd-wacom", "gsd-sound", "gsd-housekeepin", "gsd-sharing", "gsd-smartcard", "gsd-print-notif", "gsd-rfkill", "gsd-datetime", "gsd-a11y-settin", "gsd-screensaver", "gsd-usb-protect", "gsd-wwan", "gnome-session-b", "gnome-session-binary", "gnome-session-ctl", "at-spi2-registr", "at-spi-bus-laun", "dconf-service", "ibus-daemon", "ibus-x11", "ibus-portal", "ibus-engine-simp", "gvfsd", "gvfsd-fuse", "gvfsd-metadata", "gvfs-udisks2-vo", "gvfs-afc-volume", "gvfs-gphoto2-vo", "gvfs-goa-volume", "gvfs-mtp-volume", "gvfs-mtp-volume-monitor"],
+      "title": { "en": "Desktop helpers", "pt-BR": "Auxiliares da área de trabalho" },
+      "subtitle": { "en": "Small background parts of KDE, GNOME and the desktop", "pt-BR": "Pequenas partes em segundo plano do KDE, do GNOME e da área de trabalho" },
+      "note": {
+        "en": "Settings, shortcuts, accessibility, input methods and file-system helpers. Each is small and the desktop restarts them when needed.",
+        "pt-BR": "Configurações, atalhos, acessibilidade, métodos de entrada e auxiliares do sistema de arquivos. Cada um é pequeno e a área de trabalho os reinicia quando preciso."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "login-screen",
+      "names": ["sddm", "sddm-helper", "sddm-greeter", "sddm-greeter-qt6", "gdm", "gdm3", "gdm-session-wor", "gdm-wayland-ses", "gdm-x-session", "lightdm", "greetd", "ly"],
+      "title": { "en": "Login screen", "pt-BR": "Tela de login" },
+      "subtitle": { "en": "Starts your session after you sign in", "pt-BR": "Inicia a sua sessão depois que você entra" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "sound-system",
+      "names": ["pipewire", "pipewire-pulse", "wireplumber", "pulseaudio", "pipewire-media-session", "rtkit-daemon", "jackd"],
+      "title": { "en": "Sound system", "pt-BR": "Sistema de som" },
+      "subtitle": { "en": "Plays and records every sound", "pt-BR": "Toca e grava todos os sons" },
+      "note": {
+        "en": "PipeWire, WirePlumber and PulseAudio mix the sound of every app. Without them there is no audio.",
+        "pt-BR": "PipeWire, WirePlumber e PulseAudio misturam o som de todos os apps. Sem eles não há áudio."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "network",
+      "names": ["NetworkManager", "nm-dispatcher", "nm-applet", "nm-openvpn-serv", "wpa_supplicant", "iwd", "dhclient", "dhcpcd", "ModemManager", "avahi-daemon", "dnsmasq", "tailscaled", "mullvad-daemon"],
+      "title": { "en": "Network connection", "pt-BR": "Conexão de rede" },
+      "subtitle": { "en": "Wi-Fi, cable and VPN", "pt-BR": "Wi-Fi, cabo e VPN" },
+      "note": {
+        "en": "Closing these cuts your internet connection.",
+        "pt-BR": "Fechar estes corta a sua conexão com a internet."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "bluetooth",
+      "names": ["bluetoothd", "obexd", "krfcommd", "bluetooth"],
+      "title": { "en": "Bluetooth", "pt-BR": "Bluetooth" },
+      "subtitle": { "en": "Headphones, mice and other wireless devices", "pt-BR": "Fones, mouses e outros dispositivos sem fio" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "remote-login",
+      "names": ["sshd", "sshd-session", "sshd-auth", "xrdp"],
+      "title": { "en": "Remote access", "pt-BR": "Acesso remoto" },
+      "subtitle": { "en": "Lets another computer connect to this one", "pt-BR": "Permite que outro computador se conecte a este" },
+      "note": {
+        "en": "Only runs if remote login or screen sharing is on. It belongs to the system, so it can't be closed from here. Turn it off in the system settings.",
+        "pt-BR": "Só roda se o login remoto ou o compartilhamento de tela estiver ligado. Pertence ao sistema, então não pode ser fechado daqui. Desligue nas configurações do sistema."
+      },
+      "isProtected": false,
+      "canClose": false
+    },
+    {
+      "id": "printing",
+      "names": ["cupsd", "cups-browsed", "cupsd-browsed", "ipp-usb", "saned"],
+      "title": { "en": "Printing", "pt-BR": "Impressão" },
+      "subtitle": { "en": "Prints documents and finds printers", "pt-BR": "Imprime documentos e encontra impressoras" },
+      "isProtected": false,
+      "canClose": false
+    },
+    {
+      "id": "permissions",
+      "names": ["polkitd", "polkit-kde-auth", "polkit-gnome-au", "polkit-mate-aut", "lxqt-policykit", "pkttyagent"],
+      "title": { "en": "Permission checker (polkit)", "pt-BR": "Verificador de permissões (polkit)" },
+      "subtitle": { "en": "Decides what you may do and asks for your password", "pt-BR": "Decide o que você pode fazer e pede a sua senha" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "hardware-services",
+      "names": ["udisksd", "upowerd", "power-profiles-", "power-profiles-daemon", "thermald", "tlp", "acpid", "irqbalance", "fwupd", "smartd", "gpm", "switcheroo-cont", "switcheroo-control", "geoclue", "colord", "accounts-daemon", "mcelog", "lvmetad", "multipathd"],
+      "title": { "en": "Hardware and power services", "pt-BR": "Serviços de hardware e energia" },
+      "subtitle": { "en": "Disks, battery, temperature and updates for hardware", "pt-BR": "Discos, bateria, temperatura e atualizações de hardware" },
+      "note": {
+        "en": "Small services that the system uses to manage drives, battery, fans and device updates.",
+        "pt-BR": "Pequenos serviços que o sistema usa para gerenciar discos, bateria, ventoinhas e atualizações de dispositivos."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "package-manager",
+      "names": ["zypper", "packagekitd", "packagekit", "apt", "apt-get", "aptd", "dpkg", "dnf", "dnf5", "pacman", "rpm", "yum", "snapd", "flatpak", "flatpak-session", "flatpak-system-", "flatpak-system-helper", "flatpak-portal", "appstreamcli", "transactional-upd"],
+      "title": { "en": "Installing and updating software", "pt-BR": "Instalação e atualização de programas" },
+      "subtitle": { "en": "Package manager and software installer services", "pt-BR": "Gerenciador de pacotes e serviços de instalação de programas" },
+      "note": {
+        "en": "Closing these in the middle of an update can leave installed software broken, so Pennyworth never offers to.",
+        "pt-BR": "Fechar estes no meio de uma atualização pode deixar programas instalados quebrados, por isso o Pennyworth nunca oferece isso."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "containers",
+      "names": ["dockerd", "containerd", "containerd-shim", "containerd-shim-runc-v2", "podman", "conmon", "crun", "runc", "libvirtd", "virtqemud", "qemu-system-x86_64"],
+      "title": { "en": "Containers and virtual machines", "pt-BR": "Contêineres e máquinas virtuais" },
+      "subtitle": { "en": "Docker, Podman and virtual machines", "pt-BR": "Docker, Podman e máquinas virtuais" },
+      "note": {
+        "en": "Their memory is used by the containers and machines running inside. It comes back when you stop them from Docker, Podman or your virtual machine program.",
+        "pt-BR": "A memória deles é usada pelos contêineres e máquinas que rodam dentro. Ela volta quando você os para pelo Docker, Podman ou pelo programa de máquinas virtuais."
+      },
+      "isProtected": false,
+      "canClose": false
+    },
+    {
+      "id": "kernel",
+      "names": ["kthreadd", "kswapd0", "kswapd1", "khugepaged", "kcompactd0", "kcompactd1", "ksmd", "kdevtmpfs", "kauditd", "khungtaskd", "oom_reaper", "rcu_preempt", "rcu_sched", "rcu_gp", "rcu_par_gp", "kblockd", "kintegrityd", "writeback", "kpsmoused", "netns", "kthrotld", "ecryptfs-kthrea", "mm_percpu_wq", "edac-poller"],
+      "title": { "en": "Linux kernel", "pt-BR": "Kernel Linux" },
+      "subtitle": { "en": "The core of the operating system", "pt-BR": "O núcleo do sistema operacional" },
+      "note": {
+        "en": "Internal threads of the kernel, such as memory management and disk writing. They are not programs you can close.",
+        "pt-BR": "Threads internas do kernel, como o gerenciamento de memória e a escrita em disco. Não são programas que se possa fechar."
+      },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "security-services",
+      "names": ["auditd", "sedispatch", "setroubleshootd", "firewalld", "ufw", "fail2ban-server", "apparmor", "audit_prune_tree", "clamd", "freshclam"],
+      "title": { "en": "Security services", "pt-BR": "Serviços de segurança" },
+      "subtitle": { "en": "Firewall and security logs", "pt-BR": "Firewall e registros de segurança" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "keyring",
+      "names": ["gnome-keyring-d", "gnome-keyring-daemon", "ksecretd", "kwalletd6", "kwalletd5", "kwalletd", "gcr-ssh-agent", "ssh-agent", "gpg-agent", "dirmngr"],
+      "title": { "en": "Passwords and keys", "pt-BR": "Senhas e chaves" },
+      "subtitle": { "en": "Keeps your saved passwords unlocked for apps", "pt-BR": "Mantém suas senhas salvas disponíveis para os apps" },
+      "isProtected": true,
+      "canClose": false
+    },
+    {
+      "id": "desktop-portals",
+      "names": ["xdg-desktop-por", "xdg-desktop-portal", "xdg-document-po", "xdg-permission-", "xdg-dbus-proxy", "flatpak-spawn", "bwrap"],
+      "title": { "en": "App sandboxes and portals", "pt-BR": "Sandboxes e portais dos apps" },
+      "subtitle": { "en": "Lets sandboxed apps open files and share the screen", "pt-BR": "Permite que apps isolados abram arquivos e compartilhem a tela" },
+      "note": {
+        "en": "Flatpak and Snap apps ask these for file choosers and screen sharing. Closing them breaks those dialogs until the apps restart.",
+        "pt-BR": "Apps Flatpak e Snap pedem a estes seletores de arquivos e compartilhamento de tela. Fechá-los quebra essas janelas até os apps reiniciarem."
+      },
+      "isProtected": false,
+      "canClose": false
+    },
+    {
+      "id": "file-indexer",
+      "names": ["baloo_file", "baloo_file_extr", "baloorunner", "tracker-miner-f", "tracker-miner-fs-3", "tracker-extract", "tracker-extract-3", "tracker-store", "localsearch-3", "localsearch-extractor-3"],
+      "title": { "en": "File search indexer", "pt-BR": "Indexador de pesquisa de arquivos" },
+      "subtitle": { "en": "Keeps your files quick to find", "pt-BR": "Deixa seus arquivos rápidos de encontrar" },
+      "note": {
+        "en": "Reads your files in the background to build a search index. It can be busy for a while after a lot of files change; closing it only pauses indexing until you sign in again.",
+        "pt-BR": "Lê seus arquivos em segundo plano para montar um índice de pesquisa. Pode ficar ocupado por um tempo depois que muitos arquivos mudam; fechá-lo só pausa a indexação até você entrar de novo."
+      },
+      "isProtected": false,
+      "canClose": true
+    },
+    {
+      "id": "background-services",
+      "names": ["agetty", "login", "cron", "crond", "atd", "anacron", "systemd-coredump"],
+      "title": { "en": "Background services", "pt-BR": "Serviços em segundo plano" },
+      "subtitle": { "en": "Small services the system runs for you", "pt-BR": "Pequenos serviços que o sistema executa para você" },
+      "note": {
+        "en": "Expand to see which service each one belongs to.",
+        "pt-BR": "Expanda para ver a qual serviço cada um pertence."
+      },
+      "isProtected": true,
+      "canClose": false,
+      "listServices": true
+    },
+    {
+      "id": "pennyworth",
+      "names": ["Pennyworth"],
+      "title": { "en": "Pennyworth", "pt-BR": "Pennyworth" },
+      "subtitle": { "en": "That's me, at your service", "pt-BR": "Sou eu, ao seu dispor" },
+      "isProtected": false,
+      "canClose": false
+    }
+  ]
+}

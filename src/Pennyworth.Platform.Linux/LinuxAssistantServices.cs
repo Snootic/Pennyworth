@@ -9,7 +9,7 @@ namespace Pennyworth.Platform.Linux;
 /// </summary>
 public static class LinuxAssistantServices
 {
-    public static AssistantServices Create(XdgPaths paths, ICredentialStore keys, Func<long> availableMemory) =>
+    public static AssistantServices Create(XdgPaths paths, ICredentialStore keys, Func<long> availableMemory, string platformName) =>
         AssistantServicesFactory.Create(
             keys,
             paths.ConversationFolder,
@@ -17,7 +17,8 @@ public static class LinuxAssistantServices
             paths.ModelRoot,
             availableMemory,
             folder => FreeSpace(folder, Directory.Exists, DriveFreeSpace),
-            canRunLocally: false);
+            canRunLocally: false,
+            platformName: platformName);
 
     /// <summary>
     /// Free bytes for the user on the file system that holds <paramref name="folder"/>, which need not exist yet:

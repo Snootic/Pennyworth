@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "disk-system-critical",
+      "severity": "Problem",
+      "group": "Storage",
+      "when": [ { "fact": "disk.system.used_percent", "op": "gte", "value": 90 } ],
+      "finding": {
+        "en": "The system disk (where Linux is installed) is {disk.system.used_percent} full ({disk.system.free} free). Updates can fail and programs may be unable to save files when it is this full.",
+        "pt-BR": "O disco do sistema (onde o Linux está instalado) está {disk.system.used_percent} ocupado ({disk.system.free} livres). As atualizações podem falhar e programas podem não conseguir salvar arquivos quando ele está tão cheio."
+      },
+      "action": "cleanup"
+    },
+    {
+      "id": "disk-system-high",
+      "severity": "Warning",
+      "group": "Storage",
+      "when": [
+        { "fact": "disk.system.used_percent", "op": "gte", "value": 80 },
+        { "fact": "disk.system.used_percent", "op": "lt", "value": 90 }
+      ],
+      "finding": {
+        "en": "The system disk is {disk.system.used_percent} full ({disk.system.free} free). It is worth keeping some room before it gets tight.",
+        "pt-BR": "O disco do sistema está {disk.system.used_percent} ocupado ({disk.system.free} livres). Vale manter uma folga antes que aperte."
+      },
+      "action": "storage"
+    },
+    {
+      "id": "disk-home-critical",
+      "severity": "Problem",
+      "group": "Storage",
+      "when": [ { "fact": "disk.home.used_percent", "op": "gte", "value": 90 } ],
+      "finding": {
+        "en": "The drive that holds your home folder (/home) is {disk.home.used_percent} full ({disk.home.free} free). Your files, downloads and app settings all live there.",
+        "pt-BR": "O disco que guarda sua pasta pessoal (/home) está {disk.home.used_percent} ocupado ({disk.home.free} livres). Seus arquivos, downloads e configurações dos apps ficam todos lá."
+      },
+      "action": "storage"
+    },
+    {
+      "id": "cleanup-worthwhile",
+      "severity": "Info",
+      "group": "Storage",
+      "when": [ { "fact": "cleanup.safe_bytes", "op": "gte", "value": 5368709120 } ],
+      "finding": {
+        "en": "Cleanup can free {cleanup.safe_bytes} safely: caches and previews that the apps rebuild on their own.",
+        "pt-BR": "A limpeza pode liberar {cleanup.safe_bytes} com segurança: caches e prévias que os próprios apps recriam."
+      },
+      "action": "cleanup"
+    },
+    {
+      "id": "ram-pressure",
+      "severity": "Problem",
+      "group": "Memory",
+      "when": [ { "fact": "ram.sustained_percent", "op": "gte", "value": 85 } ],
+      "finding": {
+        "en": "Memory has been {ram.sustained_percent} used on average over the last minute. Linux is likely moving data to swap on the disk, which feels slow, and may end an app if memory runs out.",
+        "pt-BR": "A memória ficou {ram.sustained_percent} ocupada, em média, no último minuto. O Linux provavelmente está passando dados para a área de troca no disco, o que deixa tudo lento, e pode encerrar um app se a memória acabar."
+      },
+      "action": "memory"
+    },
+    {
+      "id": "ram-hungry-app",
+      "severity": "Warning",
+      "group": "Memory",
+      "when": [ { "fact": "ram.top_app.share_percent", "op": "gte", "value": 25 } ],
+      "finding": {
+        "en": "One app is using {ram.top_app.share_percent} of the memory ({ram.top_app.bytes}). Apps using the most: {ram.top_apps}.",
+        "pt-BR": "Um app está usando {ram.top_app.share_percent} da memória ({ram.top_app.bytes}). Os que mais usam: {ram.top_apps}."
+      },
+      "action": "memory"
+    },
+    {
+      "id": "cpu-busy",
+      "severity": "Warning",
+      "group": "Processor",
+      "when": [
+        { "fact": "cpu.sustained_percent", "op": "gte", "value": 90 },
+        { "fact": "cpu.top_apps", "op": "exists" }
+      ],
+      "finding": {
+        "en": "The processor has been {cpu.sustained_percent} busy on average over the last minute. Apps using it most: {cpu.top_apps}. A program stuck in a loop looks exactly like this.",
+        "pt-BR": "O processador ficou {cpu.sustained_percent} ocupado, em média, no último minuto. Apps que mais o usam: {cpu.top_apps}. Um programa preso em loop tem exatamente essa aparência."
+      },
+      "action": "memory"
+    },
+    {
+      "id": "linux-on-hdd",
+      "severity": "Warning",
+      "group": "Storage",
+      "when": [ { "fact": "disk.system.is_hdd", "op": "eq", "value": 1 } ],
+      "finding": {
+        "en": "Linux runs from a hard disk (HDD). Starting the system and opening apps is much slower than from an SSD.",
+        "pt-BR": "O Linux roda de um disco rígido (HDD). Ligar o sistema e abrir apps é bem mais lento do que num SSD."
+      },
+      "action": "specs"
+    },
+    {
+      "id": "unused-ssd",
+      "severity": "Info",
+      "group": "Storage",
+      "when": [ { "fact": "disk.unused_ssd_count", "op": "gte", "value": 1 } ],
+      "finding": {
+        "en": "There is an SSD in this computer with no folder mounted from it, so it may be unused (or used some other way, such as for swap or a RAID): {disk.unused_ssd}.",
+        "pt-BR": "Há um SSD neste computador sem nenhuma pasta montada a partir dele, então ele pode estar sem uso (ou usado de outra forma, como troca ou RAID): {disk.unused_ssd}."
+      },
+      "action": "specs"
+    },
+    {
+      "id": "ram-upgrade-possible",
+      "severity": "Info",
+      "group": "Memory",
+      "when": [
+        { "fact": "ram.slots_free", "op": "gte", "value": 1 },
+        { "fact": "ram.sustained_percent", "op": "gte", "value": 85 }
+      ],
+      "finding": {
+        "en": "A memory slot is free, so more RAM could be added. Installed now: {ram.modules}.",
+        "pt-BR": "Há um slot de memória livre, então dá para adicionar mais RAM. Instalado agora: {ram.modules}."
+      },
+      "action": "specs"
+    },
+    {
+      "id": "battery-low",
+      "severity": "Warning",
+      "group": "Power",
+      "when": [
+        { "fact": "pc.is_laptop", "op": "eq", "value": 1 },
+        { "fact": "battery.percent", "op": "lte", "value": 20 },
+        { "fact": "battery.on_ac", "op": "eq", "value": 0 }
+      ],
+      "finding": {
+        "en": "The battery is at {battery.percent} and the laptop is not plugged in. The system usually lowers performance to make the battery last.",
+        "pt-BR": "A bateria está em {battery.percent} e o notebook está fora da tomada. O sistema costuma reduzir o desempenho para a bateria durar mais."
+      }
+    },
+    {
+      "id": "long-uptime",
+      "severity": "Info",
+      "group": "Overview",
+      "when": [ { "fact": "os.uptime_hours", "op": "gte", "value": 168 } ],
+      "finding": {
+        "en": "The computer hasn't been restarted for {os.uptime_hours} hours. A restart clears leftovers and applies updates that need one, such as a new kernel.",
+        "pt-BR": "O computador não é reiniciado há {os.uptime_hours} horas. Reiniciar limpa sobras e aplica atualizações que exigem isso, como um kernel novo."
+      }
+    },
+    {
+      "id": "low-video-memory",
+      "severity": "Info",
+      "group": "Graphics",
+      "when": [ { "fact": "gpu.memory", "op": "lte", "value": 4294967296 } ],
+      "finding": {
+        "en": "The graphics card has {gpu.memory} of video memory. Many recent games ask for 6 GB or more.",
+        "pt-BR": "A placa de vídeo tem {gpu.memory} de memória de vídeo. Muitos jogos recentes pedem 6 GB ou mais."
+      },
+      "action": "specs"
+    }
+  ]
+}

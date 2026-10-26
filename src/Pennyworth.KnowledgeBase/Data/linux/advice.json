@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "replacement": {
+    "en": "That is not something I would recommend: it can leave Linux unable to start, unstable or unprotected, and some of it cannot be undone. A safer way is to use the cleanup screen here, or your software center or package manager. If it truly needs doing, a trusted person who knows Linux should look at it.",
+    "pt-BR": "Isso não é algo que eu recomendaria: pode deixar o Linux sem conseguir iniciar, instável ou desprotegido, e parte disso não pode ser desfeita. Um caminho mais seguro é usar a tela de limpeza daqui, ou a central de programas ou o gerenciador de pacotes. Se for mesmo necessário, peça a uma pessoa de confiança que entenda de Linux."
+  },
+  "negations": [
+    "can't", "cannot", "can not", "won't", "wouldn't", "would not", "shouldn't", "should not",
+    "never", "don't", "do not", "avoid", "not recommend", "not advisable", "not a good idea", "please don't",
+    "advise against", "recommend against", "unable", "no need", "no pressing need", "não", "nunca", "evite",
+    "jamais", "nem pense", "desaconselho", "sem necessidade"
+  ],
+  "warnings": [ "risky", "dangerous", "not recommended", "arriscado", "perigoso", "não é recomendado" ],
+  "topics": [
+    {
+      "id": "delete-system-tree",
+      "patterns": [
+        "\\brm\\s+(-{1,2}[a-z-]+\\s+)+(--no-preserve-root\\s+)?(/|~|\\$HOME|/home|/etc|/usr|/var|/boot|/bin|/sbin|/lib(64)?|/opt|/root)/?\\*?(?=[\\s;|&)\"\\'`.,]|$)",
+        "\b(delet|remov|eras|wip)\\w*\b.{0,40}(/boot|/etc|/usr|/lib(64)?|/bin|/sbin|/var/lib/(rpm|dpkg|pacman|zypp)|vmlinuz|initramfs|initrd)\b",
+        "\\b(apag|exclu|remov|delet)\\w*\\b.{0,40}(/boot|/etc|/usr|/lib(64)?|/bin|/sbin|/var/lib/(rpm|dpkg|pacman|zypp)|vmlinuz|initramfs|initrd)\\b"
+      ]
+    },
+    {
+      "id": "permissions-everywhere",
+      "patterns": [
+        "\\bchmod\\s+(-[a-z]*R[a-z]*|--recursive)\\s+(0?777|a\\+rwx|ugo\\+rwx|o\\+w)\\b",
+        "\\bchmod\\s+(0?777|a\\+rwx)\\s+-R\\b",
+        "\\bchown\\s+(-[a-z]*R[a-z]*|--recursive)\\s+\\S+\\s+(/|/\\*|/etc|/usr|/var|/boot|/bin|/sbin|/lib(64)?|/opt|/home|/root|~|\\$HOME)/?\\*?(?=[\\s;|&)\"\\'`.,]|$)",
+        "\\b(make|set|give|grant)\\w*\\b.{0,30}\\b(everything|all files|the whole (disk|system))\\b.{0,30}\\b(777|world-writable|writable by everyone|read(able)?/writ(e|able) for everyone)\\b"
+      ]
+    },
+    {
+      "id": "write-to-disks",
+      "patterns": [
+        "\\bdd\\b[^\\n]{0,80}\\bof=/dev/(sd|nvme|vd|hd|mmcblk|xvd|disk|dm-|mapper)\\w*",
+        ">\\s*/dev/(sd|nvme|vd|hd|mmcblk)\\w*",
+        "\\b(mkfs(\\.\\w+)?|wipefs|blkdiscard|sgdisk\\s+--zap|mke2fs|mkntfs)\\s+(-\\S+\\s+)*/dev/\\w+",
+        "\\b(shred|badblocks\\s+-w)\\b[^\\n]{0,40}/dev/\\w+",
+        "\\b(format|reformat|wipe|erase|overwrit)\\w*\\b.{0,30}\\b(/dev/(sd|nvme|vd|mmcblk)\\w*|the (whole |entire )?(disk|drive|ssd|partition))",
+        "\\b(formate|reformate|apague|limp|sobrescrev)\\w*\\b.{0,30}(/dev/(sd|nvme|vd|mmcblk)\\w*|o (disco|ssd|hd) (inteiro|todo)|a parti[cç][aã]o)"
+      ]
+    },
+    {
+      "id": "partitioning",
+      "patterns": [
+        "\\b(fdisk|cfdisk|sfdisk|parted|gparted|sgdisk|resize2fs)\\b[^\\n]{0,60}/dev/\\w+",
+        "\\b(resiz|repartition|delet\\w+\\s+(a\\s+|the\\s+)?partition)\\w*\\b.{0,30}\\b(partition|disk|drive|ssd)s?\\b",
+        "\\b(redimension|reparticion|apag\\w+\\s+(a\\s+)?parti[cç][aã]o)\\w*\\b.{0,30}\\b(parti[cç][aãoõ]\\w*|disco|ssd|hd)\\b"
+      ]
+    },
+    {
+      "id": "critical-packages",
+      "patterns": [
+        "\\bzypper\\s+(\\S+\\s+)*(rm|remove)\\s+(-\\S+\\s+)*(-t\\s+(pattern|patterns)\\b|patterns?[-:]\\S+)",
+        "\\b(zypper|apt|apt-get|aptitude|dnf|yum|pacman|rpm|dpkg)\\s+(\\S+\\s+)*(rm|remove|purge|erase|del|autoremove|-R\\w*|-e|-P)\\b[^\\n]{0,80}\\b(systemd\\S*|glibc|libc6|libc-bin|kernel(-default|-core|-desktop)?|linux-image\\S*|linux-generic\\S*|linux-base|linux|linux-lts|grub\\S*|dracut|shim\\S*|bash|coreutils|sudo|polkit\\S*|dbus\\S*|networkmanager|pipewire\\S*|pulseaudio|sddm|gdm3?|lightdm|kde-plasma-desktop|kde-standard|plasma-desktop|plasma-workspace|gnome-shell|gnome-session|gnome-desktop\\S*|xorg\\S*|wayland|ubuntu-desktop|kubuntu-desktop|xubuntu-desktop|task-\\w+-desktop|base|base-devel|zypper|rpm|apt|dpkg|libzypp|pam|openssh-server)\\b",
+        "\\b(rpm\\s+-e|dpkg\\s+(--purge|-P|--remove))\\s+(\\S+\\s+)*--(nodeps|force-depends|force-remove-essential)\\b",
+        "\\bpacman\\s+-R(dd|sdd|nsdd?)\\b",
+        "\\b(uninstall|remov|purg)\\w*\\s+(the\\s+|your\\s+|all\\s+)?(kernel|systemd|glibc|desktop environment|display manager|package manager|every package|all packages)\\b",
+        "\\b(desinstal|remov|apag)\\w*\\s+(o\\s+|todos os\\s+)?(kernel|systemd|glibc|ambiente (gr[aá]fico|de desktop)|gerenciador de pacotes|pacotes)\\b"
+      ]
+    },
+    {
+      "id": "boot-and-account-files",
+      "patterns": [
+        "\\b(edit|alter|modif|chang|overwrit|rewrit|delet|remov|comment\\w*\\s+out|truncat)\\w*\\b.{0,40}/etc/(fstab|passwd|shadow|sudoers|crypttab|grub|default/grub|pam\\.d)\\b",
+        "\\b(sed\\s+-i|tee|echo)\\b[^\\n]{0,80}/etc/(fstab|passwd|shadow|sudoers|crypttab)\\b",
+        ">\\s*/etc/(fstab|passwd|shadow|sudoers|crypttab)\\b",
+        "\\b(grub-install|grub2-install|efibootmgr|bootctl\\s+install|dracut\\s+--force|mkinitcpio\\s+-P|update-initramfs\\s+-u\\s+-k\\s+all)\\b",
+        "\\b(edit|alter|mex|mud|apag|remov|modific|sobrescrev)\\w*\\b.{0,40}/etc/(fstab|passwd|shadow|sudoers|crypttab|grub|default/grub|pam\\.d)\\b",
+        "\\b(edit|chang|alter|mex|mud|modific)\\w*\\b.{0,30}\\b(bootloader|boot loader|gerenciador de boot|initramfs|initrd|grub)\\b"
+      ]
+    },
+    {
+      "id": "security-off",
+      "patterns": [
+        "\\b(disabl|turn\\w*\\s+off|switch\\w*\\s+off|stop|uninstall|remov|bypass)\\w*\\s+(the\\s+|your\\s+)?(firewall|firewalld|ufw|selinux|apparmor|antivirus|anti-virus|clamav|fail2ban|auditd|polkit|secure boot|sudo password|password prompt)\\b",
+        "\\b(setenforce\\s+0|ufw\\s+disable|iptables\\s+-F|nft\\s+flush\\s+ruleset|aa-teardown|apparmor_parser\\s+-R)\\b",
+        "\\bSELINUX=(disabled|permissive)\\b",
+        "\\bsystemctl\\s+(disable|stop|mask)\\s+(--now\\s+)?(firewalld|ufw|apparmor|auditd|fail2ban|polkit)\\b",
+        "\\b(security=none|selinux=0|apparmor=0|enforcing=0|mitigations=off)\\b",
+        "\\bNOPASSWD:\\s*ALL\\b",
+        "\\b(desativ|deslig|desabilit|par|remov|contorn)\\w*\\s+(o\\s+|a\\s+|as\\s+|os\\s+)?(firewall|firewalld|ufw|selinux|apparmor|antiv[ií]rus|clamav|fail2ban|polkit|secure boot|senha do sudo)\\b"
+      ]
+    },
+    {
+      "id": "pipe-to-shell",
+      "patterns": [
+        "\\b(curl|wget|fetch)\\b[^\\n|]{0,200}\\|\\s*(sudo\\s+(-\\S+\\s+)*)?(ba|z|da|k|c)?sh\\b",
+        "\\b(ba|z)?sh\\s+<\\(\\s*(curl|wget)\\b",
+        "\\bsudo\\s+(-\\S+\\s+)*(ba|z)?sh\\s+-c\\s+[\"\\']?\\$\\(\\s*(curl|wget)\\b"
+      ]
+    },
+    {
+      "id": "system-services",
+      "patterns": [
+        "\\bsystemctl\\s+(disable|stop|mask|kill)\\s+(--now\\s+)?(systemd-\\w+|dbus\\S*|NetworkManager\\S*|sddm\\S*|gdm\\S*|lightdm\\S*|display-manager\\S*|udisks2?\\S*|wpa_supplicant\\S*|pipewire\\S*|wireplumber\\S*|getty\\S*|user@\\S*|multi-user\\.target|graphical\\.target)",
+        "\\bsystemctl\\s+(set-default|isolate)\\s+(rescue|emergency|poweroff|halt)\\b",
+        "\\b(kill|killall|pkill)\\s+(-\\S+\\s+)*(-9|-KILL|-SIGKILL)\\s+(-\\S+\\s+)*(1|systemd|dbus\\S*|Xorg|Xwayland|kwin\\S*|plasmashell|gnome-shell|NetworkManager|pipewire|sddm|gdm\\S*)\\b",
+        "\\bkill\\s+(-\\S+\\s+)*-1(?!\\d)",
+        "\\b(disabl|stop|mask|kill|desativ|par|mat)\\w*\\s+(the\\s+|o\\s+|os\\s+)?(systemd|dbus|display manager|NetworkManager|gerenciador de login|servi[cç]os? do sistema)\\b"
+      ]
+    },
+    {
+      "id": "memory-and-kernel-tweaks",
+      "patterns": [
+        "\\bdrop_caches\\b",
+        "\\bsysctl\\s+-w\\s+\\S+",
+        "\\becho\\s+\\S+\\s*>\\s*/(proc|sys)/\\S+",
+        "\\b(modprobe\\s+-r|rmmod)\\s+(-\\S+\\s+)*\\S+",
+        "\\b(blacklist|remov)\\w*\\b.{0,30}\\b(kernel module|driver)s?\\b",
+        "\\b(overclock|undervolt|overvolt)\\w*\\b"
+      ]
+    },
+    {
+      "id": "firmware",
+      "patterns": [
+        "\\b(change|enter|updat|flash|open|go\\w*\\s+into|access|configur|tweak|set|reset)\\w*\\b.{0,30}\\b(bios|uefi|firmware)\\b",
+        "\\b(alter|entr|atualiz|configur|acess|mex|mud|reset|abr)\\w*\\b.{0,30}\\b(bios|uefi|firmware)\\b",
+        "\\b(flashrom|fwupdmgr\\s+(update|install|downgrade)\\s+\\S*--force)\\b"
+      ]
+    },
+    {
+      "id": "system-cleaners",
+      "patterns": [
+        "\\b(sudo\\s+bleachbit|bleachbit\\s+--clean\\s+system\\.\\w+|stacer|ccleaner|ram cleaner|memory cleaner|pc optimi[sz]er|optimi[sz]ers?)\\b",
+        "\\b(limpador(es)? de (ram|mem[oó]ria)|otimizador(es)?|acelerador(es)? de (pc|jogos))\\b",
+        "\\bfind\\s+/\\s[^\\n]{0,80}(-delete|-exec\\s+rm)\\b"
+      ]
+    },
+    {
+      "id": "destructive-oneliners",
+      "patterns": [
+        ":\\(\\)\\s*\\{\\s*:\\s*\\|\\s*:\\s*&\\s*\\}\\s*;\\s*:",
+        "\\bmv\\s+(-\\S+\\s+)*(/|~|/home|/etc|/usr|/var|/boot|/bin|/lib(64)?)/?\\*?\\s+/dev/null\\b",
+        "\\b(mv|cp)\\s+(-\\S+\\s+)*\\S+\\s+/dev/(sd|nvme|vd)\\w*"
+      ]
+    }
+  ]
+}

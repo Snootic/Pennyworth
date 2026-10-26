@@ -25,6 +25,8 @@ public sealed class LinuxPlatform : IPlatform
         _scope = new EnvironmentScope(_paths);
     }
 
+    public string Name => KnowledgeBaseLoader.Linux;
+
     public IDriveService Drives { get; } = new MountDriveService();
 
     public IStorageScanner Scanner { get; } = new PosixDirectoryScanner();
@@ -50,5 +52,5 @@ public sealed class LinuxPlatform : IPlatform
     public ISystemMonitor? CreateMonitor(IEnumerable<ProcessExplanation> explanations) => new LinuxMonitor(explanations);
 
     public AssistantServices CreateAssistant(Func<long> availableMemory) =>
-        LinuxAssistantServices.Create(_paths, new SecretServiceStore(), availableMemory);
+        LinuxAssistantServices.Create(_paths, new SecretServiceStore(), availableMemory, Name);
 }

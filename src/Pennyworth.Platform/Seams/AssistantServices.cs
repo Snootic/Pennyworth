@@ -2,6 +2,7 @@ using Microsoft.Extensions.AI;
 using Pennyworth.Assistant;
 using Pennyworth.Assistant.Local;
 using Pennyworth.Assistant.Providers;
+using Pennyworth.KnowledgeBase;
 
 namespace Pennyworth.Platform;
 
@@ -14,6 +15,7 @@ namespace Pennyworth.Platform;
 /// Whether this platform can run the on-PC model. When false the Ask screen does not offer it at all:
 /// better than offering a download that cannot work.
 /// </param>
+/// <param name="PlatformName">Which knowledge base the assistant's diagnosis rules and blocked advice come from.</param>
 public sealed record AssistantServices(
     ICredentialStore Keys,
     ConversationStore Conversations,
@@ -25,4 +27,5 @@ public sealed record AssistantServices(
     Anonymizer Anonymizer,
     Func<long> AvailableMemory,
     Func<string, long> FreeSpace,
-    bool CanRunLocally = true);
+    bool CanRunLocally = true,
+    string PlatformName = KnowledgeBaseLoader.Windows);

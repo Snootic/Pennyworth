@@ -29,7 +29,8 @@ public sealed partial class AdviceFilter
         _replacement = catalog.Replacement.Get(culture);
     }
 
-    public static AdviceFilter FromKnowledgeBase(CultureInfo culture) => new(KnowledgeBaseLoader.LoadBlockedAdvice(), culture);
+    public static AdviceFilter FromKnowledgeBase(CultureInfo culture, string platform = KnowledgeBaseLoader.Windows) =>
+        new(KnowledgeBaseLoader.LoadBlockedAdvice(platform), culture);
 
     /// <summary>Sentences replaced so far.</summary>
     public int BlockedCount { get; private set; }

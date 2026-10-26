@@ -2,6 +2,7 @@ using Microsoft.Extensions.AI;
 using Pennyworth.Assistant;
 using Pennyworth.Assistant.Local;
 using Pennyworth.Assistant.Providers;
+using Pennyworth.KnowledgeBase;
 
 namespace Pennyworth.Platform;
 
@@ -18,7 +19,8 @@ public static class AssistantServicesFactory
         string modelRoot,
         Func<long> availableMemory,
         Func<string, long> freeSpace,
-        bool canRunLocally = true)
+        bool canRunLocally = true,
+        string platformName = KnowledgeBaseLoader.Windows)
     {
         var catalog = ModelCatalog.Load();
         var models = new LocalModelStore(modelRoot);
@@ -55,7 +57,8 @@ public static class AssistantServicesFactory
             Anonymizer.ForCurrentUser(),
             availableMemory,
             freeSpace,
-            canRunLocally);
+            canRunLocally,
+            platformName);
     }
 
     /// <summary>Lets the screen dispose what it was given without unloading a shared local model.</summary>

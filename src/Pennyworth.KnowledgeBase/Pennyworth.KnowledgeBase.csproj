@@ -8,6 +8,11 @@
     <EmbeddedResource Include="Data\cleanup.json" LogicalName="Pennyworth.KnowledgeBase.cleanup.json" />
     <EmbeddedResource Include="Data\diagnosis.json" LogicalName="Pennyworth.KnowledgeBase.diagnosis.json" />
     <EmbeddedResource Include="Data\advice.json" LogicalName="Pennyworth.KnowledgeBase.advice.json" />
+    <EmbeddedResource Include="Data\linux\locations.json" LogicalName="Pennyworth.KnowledgeBase.linux.locations.json" />
+    <EmbeddedResource Include="Data\linux\processes.json" LogicalName="Pennyworth.KnowledgeBase.linux.processes.json" />
+    <EmbeddedResource Include="Data\linux\cleanup.json" LogicalName="Pennyworth.KnowledgeBase.linux.cleanup.json" />
+    <EmbeddedResource Include="Data\linux\diagnosis.json" LogicalName="Pennyworth.KnowledgeBase.linux.diagnosis.json" />
+    <EmbeddedResource Include="Data\linux\advice.json" LogicalName="Pennyworth.KnowledgeBase.linux.advice.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pennyworth.Core\Pennyworth.Core.csproj" />

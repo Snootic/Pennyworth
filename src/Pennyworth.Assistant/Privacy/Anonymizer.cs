@@ -21,6 +21,11 @@ public sealed partial class Anonymizer
         "Brave-Browser", "User Data", "Default", "Cache", "Code Cache", "GPUCache", "cache2", "Steam", "NVIDIA",
         "NVIDIA Corporation", "AMD", "Intel", "Discord", "Spotify", "Adobe", "D3DSCache", "CrashDumps", "INetCache",
         "Explorer", "Recent", "Start Menu", "Fonts", "Application Data", "Teams", "Slack", "Zoom", "WhatsApp", "Telegram Desktop",
+        // Linux: the XDG folders, packaged-app folders and the stock folders of a Linux home.
+        ".cache", ".config", ".local", "share", "state", "Public", "Templates", "snap", "flatpak", ".var", "app", "Trash",
+        "applications", "icons", "fonts", "mesa_shader_cache", "thumbnails", "mozilla", "chromium", "google-chrome", "microsoft-edge",
+        "vivaldi", "zen", "librewolf", "Games", "Applications", "AppImages", ".mozilla", ".steam", ".npm", ".cargo", ".rustup",
+        ".gradle", ".nuget", ".dotnet", ".docker", ".vscode", ".wine", ".android", ".java", ".bun",
     };
 
     private readonly string _profile;

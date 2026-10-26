@@ -13,7 +13,7 @@ public sealed record Finding(string RuleId, DiagnosisSeverity Severity, TopicKin
 /// </summary>
 public sealed partial class DiagnosisEngine(IReadOnlyList<DiagnosisRule> rules)
 {
-    public static DiagnosisEngine FromKnowledgeBase() => new(KnowledgeBaseLoader.LoadDiagnosisRules().Rules);
+    public static DiagnosisEngine FromKnowledgeBase(string platform = KnowledgeBaseLoader.Windows) => new(KnowledgeBaseLoader.LoadDiagnosisRules(platform).Rules);
 
     public IReadOnlyList<DiagnosisRule> Rules { get; } = rules;
 

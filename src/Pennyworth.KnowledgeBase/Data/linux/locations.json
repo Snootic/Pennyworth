@@ -1,0 +1,655 @@
+{
+  "version": 1,
+  "locations": [
+    {
+      "id": "system-config",
+      "path": "/etc",
+      "category": "Windows",
+      "title": { "en": "System settings", "pt-BR": "Configurações do sistema" },
+      "description": {
+        "en": "Settings that every program and service on this computer reads at startup. Never delete or edit anything here without knowing exactly what it does.",
+        "pt-BR": "Configurações que todos os programas e serviços deste computador leem ao iniciar. Nunca apague nem edite nada aqui sem saber exatamente o que faz."
+      }
+    },
+    {
+      "id": "boot",
+      "path": "/boot",
+      "category": "Windows",
+      "title": { "en": "Boot files", "pt-BR": "Arquivos de inicialização" },
+      "description": {
+        "en": "The files that start the computer: the bootloader and the kernels it can start. Removing them can leave the computer unable to start.",
+        "pt-BR": "Os arquivos que iniciam o computador: o gerenciador de boot e os kernels que ele pode iniciar. Removê-los pode deixar o computador sem conseguir ligar."
+      }
+    },
+    {
+      "id": "system-logs",
+      "path": "/var/log",
+      "category": "Windows",
+      "title": { "en": "System logs", "pt-BR": "Registros do sistema" },
+      "description": {
+        "en": "Records of what the system and its services did, kept to help find problems.",
+        "pt-BR": "Registros do que o sistema e seus serviços fizeram, guardados para ajudar a achar problemas."
+      }
+    },
+    {
+      "id": "system-state",
+      "path": "/var/lib",
+      "category": "Windows",
+      "title": { "en": "System data", "pt-BR": "Dados do sistema" },
+      "description": {
+        "en": "Data that the system and installed services keep between runs: package databases, service state and more.",
+        "pt-BR": "Dados que o sistema e os serviços instalados guardam entre execuções: bancos de dados de pacotes, estado dos serviços e mais."
+      }
+    },
+    {
+      "id": "system-libraries",
+      "path": "/usr/lib",
+      "category": "Windows",
+      "title": { "en": "System libraries", "pt-BR": "Bibliotecas do sistema" },
+      "description": {
+        "en": "Shared code that programs and the system load when they run. Managed by the package manager.",
+        "pt-BR": "Código compartilhado que programas e o sistema carregam ao rodar. Gerenciado pelo gerenciador de pacotes."
+      }
+    },
+    {
+      "id": "system-libraries-64",
+      "path": "/usr/lib64",
+      "category": "Windows",
+      "title": { "en": "System libraries (64-bit)", "pt-BR": "Bibliotecas do sistema (64 bits)" },
+      "description": {
+        "en": "Shared code that programs and the system load when they run. Managed by the package manager.",
+        "pt-BR": "Código compartilhado que programas e o sistema carregam ao rodar. Gerenciado pelo gerenciador de pacotes."
+      }
+    },
+    {
+      "id": "kernel-modules",
+      "path": "/usr/lib/modules",
+      "category": "Windows",
+      "title": { "en": "Kernel and drivers", "pt-BR": "Kernel e drivers" },
+      "description": {
+        "en": "The Linux kernel versions installed and the drivers that go with them. Old kernels are removed with the package manager, not by deleting folders.",
+        "pt-BR": "As versões instaladas do kernel Linux e os drivers de cada uma. Kernels antigos são removidos pelo gerenciador de pacotes, não apagando pastas."
+      }
+    },
+    {
+      "id": "firmware",
+      "path": "/usr/lib/firmware",
+      "category": "Windows",
+      "title": { "en": "Device firmware", "pt-BR": "Firmware de dispositivos" },
+      "description": {
+        "en": "Small programs that Wi-Fi cards, graphics cards and other hardware need to work.",
+        "pt-BR": "Pequenos programas que placas de Wi-Fi, placas de vídeo e outros dispositivos precisam para funcionar."
+      }
+    },
+    {
+      "id": "programs",
+      "path": "/usr",
+      "category": "Apps",
+      "title": { "en": "Installed programs", "pt-BR": "Programas instalados" },
+      "description": {
+        "en": "Where most programs installed by the package manager live. Remove programs with the package manager or the software center, not by deleting folders.",
+        "pt-BR": "Onde fica a maioria dos programas instalados pelo gerenciador de pacotes. Remova programas pelo gerenciador de pacotes ou pela central de programas, não apagando pastas."
+      }
+    },
+    {
+      "id": "opt-programs",
+      "path": "/opt",
+      "category": "Apps",
+      "title": { "en": "Optional programs", "pt-BR": "Programas opcionais" },
+      "description": {
+        "en": "Programs that bring their own files, such as some browsers, editors and drivers.",
+        "pt-BR": "Programas que trazem seus próprios arquivos, como alguns navegadores, editores e drivers."
+      }
+    },
+    {
+      "id": "snap-programs",
+      "path": "/snap",
+      "category": "Apps",
+      "title": { "en": "Snap apps", "pt-BR": "Apps Snap" },
+      "description": {
+        "en": "Apps installed as snaps. Remove them with the software center or the snap command.",
+        "pt-BR": "Apps instalados como snaps. Remova pela central de programas ou pelo comando snap."
+      }
+    },
+    {
+      "id": "snap-data",
+      "path": "/var/lib/snapd",
+      "category": "Apps",
+      "title": { "en": "Snap data", "pt-BR": "Dados do Snap" },
+      "description": {
+        "en": "Snap packages and their older versions, kept by snapd.",
+        "pt-BR": "Pacotes Snap e suas versões antigas, guardados pelo snapd."
+      }
+    },
+    {
+      "id": "flatpak-system",
+      "path": "/var/lib/flatpak",
+      "category": "Apps",
+      "title": { "en": "Flatpak apps (all users)", "pt-BR": "Apps Flatpak (todos os usuários)" },
+      "description": {
+        "en": "Flatpak apps and runtimes installed for every user of this computer. Remove them with the software center or flatpak.",
+        "pt-BR": "Apps e runtimes Flatpak instalados para todos os usuários deste computador. Remova pela central de programas ou pelo flatpak."
+      }
+    },
+    {
+      "id": "flatpak-user",
+      "path": "%XDG_DATA_HOME%/flatpak",
+      "category": "Apps",
+      "title": { "en": "Flatpak apps (your user)", "pt-BR": "Apps Flatpak (seu usuário)" },
+      "description": {
+        "en": "Flatpak apps and runtimes installed only for you.",
+        "pt-BR": "Apps e runtimes Flatpak instalados só para você."
+      }
+    },
+    {
+      "id": "container-images",
+      "path": "/var/lib/docker",
+      "category": "Apps",
+      "title": { "en": "Docker images and containers", "pt-BR": "Imagens e contêineres do Docker" },
+      "description": {
+        "en": "Images, containers and volumes that Docker keeps. Volumes can hold real data, so clean them with docker, not by hand.",
+        "pt-BR": "Imagens, contêineres e volumes que o Docker guarda. Volumes podem conter dados reais, então limpe pelo docker, não manualmente."
+      }
+    },
+    {
+      "id": "container-images-podman",
+      "path": "/var/lib/containers",
+      "category": "Apps",
+      "title": { "en": "Container images", "pt-BR": "Imagens de contêineres" },
+      "description": {
+        "en": "Images and containers kept by Podman and similar tools.",
+        "pt-BR": "Imagens e contêineres guardados pelo Podman e ferramentas parecidas."
+      }
+    },
+    {
+      "id": "appimages",
+      "path": "%HOME%/Applications",
+      "category": "Apps",
+      "title": { "en": "AppImage programs", "pt-BR": "Programas AppImage" },
+      "description": {
+        "en": "Programs you downloaded as single AppImage files.",
+        "pt-BR": "Programas que você baixou como arquivos AppImage."
+      }
+    },
+    {
+      "id": "appimages-alt",
+      "path": "%HOME%/AppImages",
+      "category": "Apps",
+      "title": { "en": "AppImage programs", "pt-BR": "Programas AppImage" },
+      "description": {
+        "en": "Programs you downloaded as single AppImage files.",
+        "pt-BR": "Programas que você baixou como arquivos AppImage."
+      }
+    },
+    {
+      "id": "snap-user",
+      "path": "%HOME%/snap",
+      "category": "Apps",
+      "title": { "en": "Snap app data", "pt-BR": "Dados dos apps Snap" },
+      "description": {
+        "en": "Settings and data of the snap apps you use.",
+        "pt-BR": "Configurações e dados dos apps Snap que você usa."
+      }
+    },
+    {
+      "id": "flatpak-app-data",
+      "path": "%HOME%/.var",
+      "category": "Apps",
+      "title": { "en": "Flatpak app data", "pt-BR": "Dados dos apps Flatpak" },
+      "description": {
+        "en": "A folder per Flatpak app with its settings, caches and data. Often much bigger than people expect.",
+        "pt-BR": "Uma pasta por app Flatpak com configurações, caches e dados. Muitas vezes bem maior do que se imagina."
+      }
+    },
+    {
+      "id": "app-cache",
+      "path": "%XDG_CACHE_HOME%",
+      "category": "Apps",
+      "title": { "en": "App caches (.cache)", "pt-BR": "Caches dos apps (.cache)" },
+      "description": {
+        "en": "A hidden folder where apps keep copies they can download or build again. Most of it can be cleaned safely.",
+        "pt-BR": "Uma pasta oculta onde os apps guardam cópias que podem baixar ou gerar de novo. Quase tudo pode ser limpo com segurança."
+      }
+    },
+    {
+      "id": "app-config",
+      "path": "%XDG_CONFIG_HOME%",
+      "category": "Apps",
+      "title": { "en": "App settings (.config)", "pt-BR": "Configurações dos apps (.config)" },
+      "description": {
+        "en": "A hidden folder with the settings of the apps you use. Small, but deleting it resets those apps.",
+        "pt-BR": "Uma pasta oculta com as configurações dos apps que você usa. Pequena, mas apagá-la restaura esses apps ao padrão."
+      }
+    },
+    {
+      "id": "app-data",
+      "path": "%XDG_DATA_HOME%",
+      "category": "Apps",
+      "title": { "en": "App data (.local/share)", "pt-BR": "Dados dos apps (.local/share)" },
+      "description": {
+        "en": "A hidden folder where apps keep their data: game launchers, databases, icons and more.",
+        "pt-BR": "Uma pasta oculta onde os apps guardam seus dados: lançadores de jogos, bancos de dados, ícones e mais."
+      }
+    },
+    {
+      "id": "app-state",
+      "path": "%XDG_STATE_HOME%",
+      "category": "Apps",
+      "title": { "en": "App state (.local/state)", "pt-BR": "Estado dos apps (.local/state)" },
+      "description": {
+        "en": "A hidden folder where apps keep logs and history of what they were doing.",
+        "pt-BR": "Uma pasta oculta onde os apps guardam registros e histórico do que estavam fazendo."
+      }
+    },
+    {
+      "id": "local-folder",
+      "path": "%HOME%/.local",
+      "category": "Apps",
+      "title": { "en": "Local app files (.local)", "pt-BR": "Arquivos locais dos apps (.local)" },
+      "description": {
+        "en": "A hidden folder with your user's app data, state and programs.",
+        "pt-BR": "Uma pasta oculta com os dados, o estado e os programas dos apps do seu usuário."
+      }
+    },
+    {
+      "id": "home-mozilla",
+      "path": "%HOME%/.mozilla",
+      "category": "Apps",
+      "title": { "en": "Firefox profile (.mozilla)", "pt-BR": "Perfil do Firefox (.mozilla)" },
+      "description": {
+        "en": "Your Firefox bookmarks, passwords and settings.",
+        "pt-BR": "Seus favoritos, senhas e configurações do Firefox."
+      }
+    },
+    {
+      "id": "home-thunderbird",
+      "path": "%HOME%/.thunderbird",
+      "category": "Apps",
+      "title": { "en": "Thunderbird profile", "pt-BR": "Perfil do Thunderbird" },
+      "description": {
+        "en": "Mail and settings of Thunderbird. Mail kept only here is not backed up anywhere else.",
+        "pt-BR": "E-mails e configurações do Thunderbird. E-mails guardados só aqui não têm cópia em outro lugar."
+      }
+    },
+    {
+      "id": "home-npm",
+      "path": "%HOME%/.npm",
+      "category": "Apps",
+      "title": { "en": "npm cache (.npm)", "pt-BR": "Cache do npm (.npm)" },
+      "description": {
+        "en": "Packages npm downloaded. Downloaded again when needed.",
+        "pt-BR": "Pacotes que o npm baixou. São baixados de novo quando necessário."
+      }
+    },
+    {
+      "id": "home-cargo",
+      "path": "%HOME%/.cargo",
+      "category": "Apps",
+      "title": { "en": "Rust tools and packages (.cargo)", "pt-BR": "Ferramentas e pacotes do Rust (.cargo)" },
+      "description": {
+        "en": "Rust programs and the packages cargo downloaded.",
+        "pt-BR": "Programas Rust e os pacotes que o cargo baixou."
+      }
+    },
+    {
+      "id": "home-rustup",
+      "path": "%HOME%/.rustup",
+      "category": "Apps",
+      "title": { "en": "Rust toolchains (.rustup)", "pt-BR": "Toolchains do Rust (.rustup)" },
+      "description": {
+        "en": "The Rust compilers installed with rustup.",
+        "pt-BR": "Os compiladores Rust instalados com o rustup."
+      }
+    },
+    {
+      "id": "home-gradle",
+      "path": "%HOME%/.gradle",
+      "category": "Apps",
+      "title": { "en": "Gradle files (.gradle)", "pt-BR": "Arquivos do Gradle (.gradle)" },
+      "description": {
+        "en": "Downloaded libraries and build data of Gradle and Android projects.",
+        "pt-BR": "Bibliotecas baixadas e dados de build do Gradle e de projetos Android."
+      }
+    },
+    {
+      "id": "home-nuget",
+      "path": "%HOME%/.nuget",
+      "category": "Apps",
+      "title": { "en": "NuGet packages (.nuget)", "pt-BR": "Pacotes do NuGet (.nuget)" },
+      "description": {
+        "en": "Packages that .NET projects downloaded.",
+        "pt-BR": "Pacotes que projetos .NET baixaram."
+      }
+    },
+    {
+      "id": "home-dotnet",
+      "path": "%HOME%/.dotnet",
+      "category": "Apps",
+      "title": { "en": ".NET tools (.dotnet)", "pt-BR": "Ferramentas .NET (.dotnet)" },
+      "description": {
+        "en": "Tools and runtimes installed for .NET.",
+        "pt-BR": "Ferramentas e runtimes instalados para o .NET."
+      }
+    },
+    {
+      "id": "home-docker",
+      "path": "%HOME%/.docker",
+      "category": "Apps",
+      "title": { "en": "Docker settings (.docker)", "pt-BR": "Configurações do Docker (.docker)" },
+      "description": {
+        "en": "Your Docker settings and sign-ins.",
+        "pt-BR": "Suas configurações e logins do Docker."
+      }
+    },
+    {
+      "id": "home-vscode",
+      "path": "%HOME%/.vscode",
+      "category": "Apps",
+      "title": { "en": "Visual Studio Code extensions (.vscode)", "pt-BR": "Extensões do Visual Studio Code (.vscode)" },
+      "description": {
+        "en": "Extensions and settings of Visual Studio Code.",
+        "pt-BR": "Extensões e configurações do Visual Studio Code."
+      }
+    },
+    {
+      "id": "home-wine",
+      "path": "%HOME%/.wine",
+      "category": "Apps",
+      "title": { "en": "Wine programs (.wine)", "pt-BR": "Programas do Wine (.wine)" },
+      "description": {
+        "en": "A compatibility layer used to run programs made for other systems. It can hold their saved data.",
+        "pt-BR": "Uma camada de compatibilidade usada para rodar programas feitos para outros sistemas. Pode conter os dados salvos deles."
+      }
+    },
+    {
+      "id": "home-android",
+      "path": "%HOME%/.android",
+      "category": "Apps",
+      "title": { "en": "Android tools (.android)", "pt-BR": "Ferramentas Android (.android)" },
+      "description": {
+        "en": "Android emulators and developer settings.",
+        "pt-BR": "Emuladores Android e configurações de desenvolvedor."
+      }
+    },
+    {
+      "id": "home-steam",
+      "path": "%HOME%/.steam",
+      "category": "Apps",
+      "title": { "en": "Steam files (.steam)", "pt-BR": "Arquivos da Steam (.steam)" },
+      "description": {
+        "en": "Links and settings the Steam client keeps in your home folder.",
+        "pt-BR": "Atalhos e configurações que o cliente da Steam guarda na sua pasta pessoal."
+      }
+    },
+    {
+      "id": "home-java",
+      "path": "%HOME%/.java",
+      "category": "Apps",
+      "title": { "en": "Java settings (.java)", "pt-BR": "Configurações do Java (.java)" },
+      "description": {
+        "en": "Settings and caches that Java programs keep.",
+        "pt-BR": "Configurações e caches que programas Java guardam."
+      }
+    },
+    {
+      "id": "home-bun",
+      "path": "%HOME%/.bun",
+      "category": "Apps",
+      "title": { "en": "Bun tools (.bun)", "pt-BR": "Ferramentas do Bun (.bun)" },
+      "description": {
+        "en": "The Bun JavaScript runtime and its package cache.",
+        "pt-BR": "O runtime JavaScript Bun e seu cache de pacotes."
+      }
+    },
+    {
+      "id": "steam-library",
+      "path": "**/steamapps",
+      "category": "Games",
+      "title": { "en": "Steam games", "pt-BR": "Jogos da Steam" },
+      "description": {
+        "en": "Games, mods and downloads from Steam, including their saved Wine prefixes and shader caches.",
+        "pt-BR": "Jogos, mods e downloads da Steam, incluindo os prefixos Wine salvos e caches de shaders."
+      }
+    },
+    {
+      "id": "games-folder",
+      "path": "%HOME%/Games",
+      "category": "Games",
+      "title": { "en": "Games folder", "pt-BR": "Pasta de jogos" },
+      "description": {
+        "en": "The usual place for games installed by Lutris, Heroic and similar launchers.",
+        "pt-BR": "O lugar comum para jogos instalados por Lutris, Heroic e lançadores parecidos."
+      }
+    },
+    {
+      "id": "minecraft",
+      "path": "%HOME%/.minecraft",
+      "category": "Games",
+      "title": { "en": "Minecraft", "pt-BR": "Minecraft" },
+      "description": {
+        "en": "Minecraft worlds, mods and downloaded versions.",
+        "pt-BR": "Mundos, mods e versões baixadas do Minecraft."
+      }
+    },
+    {
+      "id": "prism-launcher",
+      "path": "%XDG_DATA_HOME%/PrismLauncher",
+      "category": "Games",
+      "title": { "en": "Prism Launcher", "pt-BR": "Prism Launcher" },
+      "description": {
+        "en": "Minecraft instances, mods and worlds kept by Prism Launcher.",
+        "pt-BR": "Instâncias, mods e mundos do Minecraft guardados pelo Prism Launcher."
+      }
+    },
+    {
+      "id": "lutris-data",
+      "path": "%XDG_DATA_HOME%/lutris",
+      "category": "Games",
+      "title": { "en": "Lutris", "pt-BR": "Lutris" },
+      "description": {
+        "en": "Game runners, banners and the library kept by Lutris.",
+        "pt-BR": "Executores de jogos, banners e a biblioteca guardados pelo Lutris."
+      }
+    },
+    {
+      "id": "home-folder",
+      "path": "%HOME%",
+      "category": "YourFiles",
+      "title": { "en": "Your home folder", "pt-BR": "Sua pasta pessoal" },
+      "description": {
+        "en": "Your documents, pictures, downloads and other personal files.",
+        "pt-BR": "Seus documentos, imagens, downloads e outros arquivos pessoais."
+      }
+    },
+    {
+      "id": "home-folders",
+      "path": "/home/*",
+      "category": "YourFiles",
+      "title": { "en": "User folder", "pt-BR": "Pasta do usuário" },
+      "description": {
+        "en": "Documents, pictures, downloads, desktop and other personal files of one user.",
+        "pt-BR": "Documentos, imagens, downloads, área de trabalho e outros arquivos pessoais de um usuário."
+      }
+    },
+    {
+      "id": "documents",
+      "path": "%HOME%/Documents",
+      "category": "YourFiles",
+      "title": { "en": "Documents", "pt-BR": "Documentos" },
+      "description": {
+        "en": "Your documents.",
+        "pt-BR": "Seus documentos."
+      }
+    },
+    {
+      "id": "downloads",
+      "path": "%HOME%/Downloads",
+      "category": "YourFiles",
+      "title": { "en": "Downloads", "pt-BR": "Downloads" },
+      "description": {
+        "en": "Everything you downloaded.",
+        "pt-BR": "Tudo o que você baixou."
+      }
+    },
+    {
+      "id": "pictures",
+      "path": "%HOME%/Pictures",
+      "category": "YourFiles",
+      "title": { "en": "Pictures", "pt-BR": "Imagens" },
+      "description": {
+        "en": "Your photos and pictures.",
+        "pt-BR": "Suas fotos e imagens."
+      }
+    },
+    {
+      "id": "videos",
+      "path": "%HOME%/Videos",
+      "category": "YourFiles",
+      "title": { "en": "Videos", "pt-BR": "Vídeos" },
+      "description": {
+        "en": "Your videos.",
+        "pt-BR": "Seus vídeos."
+      }
+    },
+    {
+      "id": "music",
+      "path": "%HOME%/Music",
+      "category": "YourFiles",
+      "title": { "en": "Music", "pt-BR": "Músicas" },
+      "description": {
+        "en": "Your music.",
+        "pt-BR": "Suas músicas."
+      }
+    },
+    {
+      "id": "desktop",
+      "path": "%HOME%/Desktop",
+      "category": "YourFiles",
+      "title": { "en": "Desktop", "pt-BR": "Área de trabalho" },
+      "description": {
+        "en": "What is on your desktop.",
+        "pt-BR": "O que está na sua área de trabalho."
+      }
+    },
+    {
+      "id": "public",
+      "path": "%HOME%/Public",
+      "category": "YourFiles",
+      "title": { "en": "Public", "pt-BR": "Público" },
+      "description": {
+        "en": "Files you share with other users of this computer.",
+        "pt-BR": "Arquivos que você compartilha com outros usuários deste computador."
+      }
+    },
+    {
+      "id": "templates",
+      "path": "%HOME%/Templates",
+      "category": "YourFiles",
+      "title": { "en": "Templates", "pt-BR": "Modelos" },
+      "description": {
+        "en": "Document templates for the New menu.",
+        "pt-BR": "Modelos de documentos para o menu Novo."
+      }
+    },
+    {
+      "id": "trash",
+      "path": "%XDG_DATA_HOME%/Trash",
+      "category": "YourFiles",
+      "title": { "en": "Trash", "pt-BR": "Lixeira" },
+      "description": {
+        "en": "Files you deleted. They still use space until the trash is emptied.",
+        "pt-BR": "Arquivos que você apagou. Eles continuam ocupando espaço até a lixeira ser esvaziada."
+      }
+    },
+    {
+      "id": "swap-file",
+      "path": "/swapfile",
+      "category": "HiddenSystem",
+      "title": { "en": "Swap file", "pt-BR": "Arquivo de troca" },
+      "description": {
+        "en": "Memory on disk the system uses when RAM is full. Also holds the saved session when the computer hibernates.",
+        "pt-BR": "Memória no disco que o sistema usa quando a RAM está cheia. Também guarda a sessão salva quando o computador hiberna."
+      }
+    },
+    {
+      "id": "swap-image",
+      "path": "/swap.img",
+      "category": "HiddenSystem",
+      "title": { "en": "Swap file", "pt-BR": "Arquivo de troca" },
+      "description": {
+        "en": "Memory on disk the system uses when RAM is full. Also holds the saved session when the computer hibernates.",
+        "pt-BR": "Memória no disco que o sistema usa quando a RAM está cheia. Também guarda a sessão salva quando o computador hiberna."
+      }
+    },
+    {
+      "id": "swap-folder",
+      "path": "/swap",
+      "category": "HiddenSystem",
+      "title": { "en": "Swap space", "pt-BR": "Espaço de troca" },
+      "description": {
+        "en": "Memory on disk the system uses when RAM is full.",
+        "pt-BR": "Memória no disco que o sistema usa quando a RAM está cheia."
+      }
+    },
+    {
+      "id": "swap-var",
+      "path": "/var/swap",
+      "category": "HiddenSystem",
+      "title": { "en": "Swap space", "pt-BR": "Espaço de troca" },
+      "description": {
+        "en": "Memory on disk the system uses when RAM is full.",
+        "pt-BR": "Memória no disco que o sistema usa quando a RAM está cheia."
+      }
+    },
+    {
+      "id": "snapshots",
+      "path": "/.snapshots",
+      "category": "HiddenSystem",
+      "title": { "en": "System snapshots", "pt-BR": "Snapshots do sistema" },
+      "description": {
+        "en": "Copies of the system taken before updates, so it can be rolled back. They only use the space of what changed since.",
+        "pt-BR": "Cópias do sistema feitas antes de atualizações, para poder voltar atrás. Elas só ocupam o espaço do que mudou desde então."
+      }
+    },
+    {
+      "id": "lost-found",
+      "path": "/lost+found",
+      "category": "HiddenSystem",
+      "title": { "en": "Recovered file pieces", "pt-BR": "Pedaços de arquivos recuperados" },
+      "description": {
+        "en": "Where the file system puts pieces it recovered after a crash. Usually empty.",
+        "pt-BR": "Onde o sistema de arquivos coloca pedaços recuperados depois de uma falha. Normalmente vazio."
+      }
+    },
+    {
+      "id": "system-cache",
+      "path": "/var/cache",
+      "category": "HiddenSystem",
+      "title": { "en": "System caches", "pt-BR": "Caches do sistema" },
+      "description": {
+        "en": "Downloaded packages and data the system and package manager can fetch or build again.",
+        "pt-BR": "Pacotes baixados e dados que o sistema e o gerenciador de pacotes podem baixar ou gerar de novo."
+      }
+    },
+    {
+      "id": "crash-reports",
+      "path": "/var/crash",
+      "category": "HiddenSystem",
+      "title": { "en": "Crash reports", "pt-BR": "Relatórios de falhas" },
+      "description": {
+        "en": "Reports saved when a program crashed in the past.",
+        "pt-BR": "Relatórios salvos quando algum programa travou no passado."
+      }
+    },
+    {
+      "id": "core-dumps",
+      "path": "/var/lib/systemd/coredump",
+      "category": "HiddenSystem",
+      "title": { "en": "Crash dumps", "pt-BR": "Despejos de falhas" },
+      "description": {
+        "en": "Memory copies saved when a program crashed. Only useful to someone investigating the crash.",
+        "pt-BR": "Cópias da memória salvas quando um programa travou. Só úteis para quem investiga a falha."
+      }
+    }
+  ]
+}

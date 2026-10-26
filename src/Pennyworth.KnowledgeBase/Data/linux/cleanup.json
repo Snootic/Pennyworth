@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "thumbnails",
+      "safety": "Safe",
+      "kind": "FolderContents",
+      "paths": [
+        "%XDG_CACHE_HOME%/thumbnails",
+        "%HOME%/.thumbnails"
+      ],
+      "requiresAdmin": false,
+      "title": { "en": "Picture previews", "pt-BR": "Prévias de imagens" },
+      "description": { "en": "Small previews your file manager saved to show pictures and videos faster.", "pt-BR": "Pequenas prévias que o gerenciador de arquivos guardou para mostrar imagens e vídeos mais rápido." },
+      "consequence": { "en": "Folders with many pictures take a moment to show previews again.", "pt-BR": "Pastas com muitas imagens demoram um pouco para mostrar as prévias de novo." }
+    },
+    {
+      "id": "browser",
+      "safety": "Safe",
+      "kind": "FolderContents",
+      "paths": [
+        "%XDG_CACHE_HOME%/mozilla/firefox/*/cache2",
+        "%XDG_CACHE_HOME%/zen/*/cache2",
+        "%XDG_CACHE_HOME%/librewolf/*/cache2",
+        "%XDG_CACHE_HOME%/waterfox/*/cache2",
+        "%XDG_CACHE_HOME%/chromium/*/Cache",
+        "%XDG_CACHE_HOME%/chromium/*/Code Cache",
+        "%XDG_CACHE_HOME%/chromium/*/GPUCache",
+        "%XDG_CACHE_HOME%/google-chrome/*/Cache",
+        "%XDG_CACHE_HOME%/google-chrome/*/Code Cache",
+        "%XDG_CACHE_HOME%/google-chrome/*/GPUCache",
+        "%XDG_CACHE_HOME%/BraveSoftware/Brave-Browser/*/Cache",
+        "%XDG_CACHE_HOME%/BraveSoftware/Brave-Browser/*/Code Cache",
+        "%XDG_CACHE_HOME%/BraveSoftware/Brave-Browser/*/GPUCache",
+        "%XDG_CACHE_HOME%/microsoft-edge/*/Cache",
+        "%XDG_CACHE_HOME%/microsoft-edge/*/Code Cache",
+        "%XDG_CACHE_HOME%/microsoft-edge/*/GPUCache",
+        "%XDG_CACHE_HOME%/vivaldi/*/Cache",
+        "%XDG_CACHE_HOME%/vivaldi/*/Code Cache",
+        "%XDG_CACHE_HOME%/vivaldi/*/GPUCache"
+      ],
+      "requiresAdmin": false,
+      "title": { "en": "Browser caches", "pt-BR": "Caches do navegador" },
+      "description": { "en": "Saved copies of websites, kept by Firefox-based and Chromium-based browsers. Your bookmarks, passwords and history are not touched.", "pt-BR": "Cópias salvas de sites, guardadas por navegadores baseados em Firefox e em Chromium. Seus favoritos, senhas e histórico não são tocados." },
+      "consequence": { "en": "Sites load a little slower the first time. Close the browser first for the best result.", "pt-BR": "Os sites carregam um pouco mais devagar na primeira vez. Feche o navegador antes para um resultado melhor." }
+    },
+    {
+      "id": "shader",
+      "safety": "Safe",
+      "kind": "FolderContents",
+      "paths": [
+        "%XDG_CACHE_HOME%/mesa_shader_cache",
+        "%XDG_CACHE_HOME%/mesa_shader_cache_db",
+        "%XDG_CACHE_HOME%/radv_builtin_shaders",
+        "%XDG_CACHE_HOME%/nvidia/GLCache",
+        "%XDG_CACHE_HOME%/nvidia/ComputeCache",
+        "%HOME%/.nv/GLCache",
+        "%HOME%/.nv/ComputeCache"
+      ],
+      "requiresAdmin": false,
+      "title": { "en": "Game graphics files", "pt-BR": "Arquivos de gráficos dos jogos" },
+      "description": { "en": "Graphics data that games and apps prepare in advance (shader cache) so they start smoothly.", "pt-BR": "Dados gráficos que jogos e apps preparam antes (cache de shader) para abrir sem engasgos." },
+      "consequence": { "en": "Games may stutter briefly the first time you play after cleaning; the graphics driver rebuilds the files.", "pt-BR": "Jogos podem engasgar um pouco na primeira vez depois da limpeza; o driver de vídeo recria os arquivos." }
+    },
+    {
+      "id": "steam-shader",
+      "safety": "Safe",
+      "kind": "FolderContents",
+      "paths": [
+        "%XDG_DATA_HOME%/Steam/steamapps/shadercache",
+        "%HOME%/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/shadercache"
+      ],
+      "requiresAdmin": false,
+      "title": { "en": "Steam shader caches", "pt-BR": "Caches de shader da Steam" },
+      "description": { "en": "Graphics data Steam prepares for each game it runs. Your games and saves are not touched.", "pt-BR": "Dados gráficos que a Steam prepara para cada jogo que roda. Seus jogos e saves não são tocados." },
+      "consequence": { "en": "Steam rebuilds or downloads these again, so a game may take longer to start the next time.", "pt-BR": "A Steam recria ou baixa esses dados de novo, então um jogo pode demorar mais para abrir na próxima vez." }
+    },
+    {
+      "id": "flatpak-caches",
+      "safety": "UsuallySafe",
+      "kind": "FolderContents",
+      "paths": ["%HOME%/.var/app/*/cache"],
+      "requiresAdmin": false,
+      "title": { "en": "Flatpak app caches", "pt-BR": "Caches dos apps Flatpak" },
+      "description": { "en": "The temporary folder each Flatpak app keeps for copies it can download or build again. Their settings and data are in other folders and stay.", "pt-BR": "A pasta temporária que cada app Flatpak guarda para cópias que ele pode baixar ou gerar de novo. As configurações e os dados ficam em outras pastas e permanecem." },
+      "consequence": { "en": "Each app rebuilds what it needs the next time it runs, so it may start slower. Close the apps first.", "pt-BR": "Cada app recria o que precisa na próxima vez que rodar, então pode abrir mais devagar. Feche os apps antes." }
+    },
+    {
+      "id": "developer-caches",
+      "safety": "UsuallySafe",
+      "kind": "FolderContents",
+      "paths": [
+        "%XDG_CACHE_HOME%/pip",
+        "%XDG_CACHE_HOME%/uv",
+        "%XDG_CACHE_HOME%/yarn",
+        "%XDG_CACHE_HOME%/pnpm",
+        "%XDG_CACHE_HOME%/go-build",
+        "%XDG_CACHE_HOME%/ccache",
+        "%HOME%/.npm/_cacache",
+        "%HOME%/.cargo/registry/cache",
+        "%HOME%/.gradle/caches"
+      ],
+      "requiresAdmin": false,
+      "title": { "en": "Programming tool caches", "pt-BR": "Caches de ferramentas de programação" },
+      "description": { "en": "Packages and build results that pip, uv, npm, yarn, pnpm, cargo, Go, ccache and Gradle downloaded or built. Your own projects are not touched.", "pt-BR": "Pacotes e resultados de compilação que pip, uv, npm, yarn, pnpm, cargo, Go, ccache e Gradle baixaram ou geraram. Seus projetos não são tocados." },
+      "consequence": { "en": "The next build downloads or rebuilds what it needs, which takes longer, and needs an internet connection.", "pt-BR": "A próxima compilação baixa ou refaz o que precisa, o que demora mais e exige conexão com a internet." }
+    },
+    {
+      "id": "trash",
+      "safety": "UsuallySafe",
+      "kind": "RecycleBin",
+      "paths": [],
+      "requiresAdmin": false,
+      "title": { "en": "Trash", "pt-BR": "Lixeira" },
+      "description": { "en": "Files you deleted, waiting to be emptied.", "pt-BR": "Arquivos que você apagou, esperando para sair de vez." },
+      "consequence": { "en": "The files are gone for good.", "pt-BR": "Os arquivos somem de vez." }
+    },
+    {
+      "id": "system-package-cache",
+      "safety": "UsuallySafe",
+      "kind": "FolderContents",
+      "paths": [
+        "/var/cache/zypp/packages",
+        "/var/cache/apt/archives",
+        "/var/cache/pacman/pkg",
+        "/var/cache/dnf",
+        "/var/cache/libdnf5"
+      ],
+      "requiresAdmin": true,
+      "title": { "en": "Downloaded installation packages", "pt-BR": "Pacotes de instalação baixados" },
+      "description": { "en": "Copies of the packages your package manager (zypper, apt, pacman or dnf) downloaded when installing and updating programs.", "pt-BR": "Cópias dos pacotes que o gerenciador de pacotes (zypper, apt, pacman ou dnf) baixou ao instalar e atualizar programas." },
+      "consequence": { "en": "Reinstalling a program downloads it again. Needs administrator rights, which Pennyworth never asks for: clean this one with your package manager.", "pt-BR": "Reinstalar um programa baixa o pacote de novo. Exige direitos de administrador, que o Pennyworth nunca pede: limpe esta pelo seu gerenciador de pacotes." }
+    },
+    {
+      "id": "system-crash-reports",
+      "safety": "UsuallySafe",
+      "kind": "FolderContents",
+      "paths": ["/var/crash"],
+      "requiresAdmin": true,
+      "title": { "en": "Old crash reports", "pt-BR": "Relatórios de falhas antigos" },
+      "description": { "en": "Reports saved when a program crashed in the past.", "pt-BR": "Relatórios salvos quando algum programa travou no passado." },
+      "consequence": { "en": "Only matters if you are investigating a crash. Needs administrator rights, which Pennyworth never asks for.", "pt-BR": "Só importa se você estiver investigando uma falha. Exige direitos de administrador, que o Pennyworth nunca pede." }
+    }
+  ]
+}
