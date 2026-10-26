@@ -5,15 +5,22 @@ namespace Pennyworth.Insights.Classification;
 /// segment, <c>*</c> (any one folder name) and a leading <c>**</c> (any prefix).
 /// Matching is case-insensitive. Environment variables must already be expanded.
 /// </summary>
+/// <remarks>
+/// A pattern that starts with a separator (<c>/var/cache</c>) is rooted: it only matches rooted paths,
+/// never the same names written relative to some folder, and a drive-letter pattern never matches a
+/// rooted path. A drive letter is not a separator, so <c>C:\Windows</c> carries its root in its first segment.
+/// </remarks>
 public sealed class PathPattern
 {
     private readonly string[] _segments;
     private readonly bool _anyPrefix;
+    private readonly bool _rooted;
 
-    private PathPattern(string[] segments, bool anyPrefix)
+    private PathPattern(string[] segments, bool anyPrefix, bool rooted)
     {
         _segments = segments;
         _anyPrefix = anyPrefix;
+        _rooted = rooted;
     }
 
     /// <summary>Higher wins when several patterns match the same path.</summary>
@@ -22,6 +29,12 @@ public sealed class PathPattern
     public static PathPattern Parse(string pattern)
     {
         string[] segments = SplitPath(pattern);
+        bool rooted = segments.Length > 0 && segments[0].Length == 0;
+        if (rooted)
+        {
+            segments = segments[1..];
+        }
+
         bool anyPrefix = segments.Length > 0 && segments[0] == "**";
         if (anyPrefix)
         {
@@ -33,20 +46,37 @@ public sealed class PathPattern
             throw new FormatException($"Invalid path pattern '{pattern}'.");
         }
 
-        return new PathPattern(segments, anyPrefix);
+        return new PathPattern(segments, anyPrefix, rooted);
     }
 
-    public static string[] SplitPath(string path) =>
-        path.Split(['\\', '/'], StringSplitOptions.RemoveEmptyEntries);
+    /// <summary>
+    /// Splits a path into folder names. A path that starts with a separator gets an empty first
+    /// segment standing for its root, which keeps <c>/var/cache</c> apart from <c>var/cache</c>.
+    /// </summary>
+    public static string[] SplitPath(string path)
+    {
+        string[] names = path.Split(['\\', '/'], StringSplitOptions.RemoveEmptyEntries);
+        return path.Length > 0 && path[0] is '\\' or '/' ? ["", .. names] : names;
+    }
 
     public bool IsMatch(string[] pathSegments)
     {
-        if (_anyPrefix ? pathSegments.Length < _segments.Length : pathSegments.Length != _segments.Length)
+        bool pathRooted = pathSegments.Length > 0 && pathSegments[0].Length == 0;
+        if (_rooted != pathRooted && (_rooted || !_anyPrefix))
+        {
+            // A rooted pattern needs a rooted path. A rooted path only matches a pattern that
+            // does not start at any root of its own, i.e. one that begins with "**".
+            return false;
+        }
+
+        int first = pathRooted ? 1 : 0;
+        int count = pathSegments.Length - first;
+        if (_anyPrefix ? count < _segments.Length : count != _segments.Length)
         {
             return false;
         }
 
-        int offset = pathSegments.Length - _segments.Length;
+        int offset = first + count - _segments.Length;
         for (int i = 0; i < _segments.Length; i++)
         {
             if (!SegmentMatches(_segments[i], pathSegments[offset + i]))
