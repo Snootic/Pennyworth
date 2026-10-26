@@ -44,6 +44,7 @@ public class LinuxClassificationTests
     [InlineData("/usr/lib/modules", StorageCategory.Windows)]
     [InlineData("/usr", StorageCategory.Apps)]
     [InlineData("/opt", StorageCategory.Apps)]
+    [InlineData("/usr/local", StorageCategory.Apps)]
     [InlineData("/var/lib/flatpak", StorageCategory.Apps)]
     [InlineData("/var/lib/docker", StorageCategory.Apps)]
     [InlineData("/home/ana/.local/share/flatpak", StorageCategory.Apps)]

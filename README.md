@@ -58,7 +58,7 @@ dotnet publish src/Pennyworth.App -c Release -r win-x64 -p:PublishAot=true -o pu
 | Project | Responsibility |
 |---|---|
 | `Pennyworth.Core` | Storage tree, categories, formatting |
-| `Pennyworth.KnowledgeBase` | Bilingual data: known locations, processes, cleanup rules, diagnosis rules, blocked advice |
+| `Pennyworth.KnowledgeBase` | Bilingual data, one set per operating system (`Data/` for Windows, `Data/linux/` for Linux, picked by `IPlatform.Name`): known locations, processes, cleanup rules, diagnosis rules, blocked advice |
 | `Pennyworth.Insights` | Path classification |
 | `Pennyworth.Scanning` | Drive scanning |
 | `Pennyworth.Cleanup` | Measuring and cleaning, Recycle Bin |

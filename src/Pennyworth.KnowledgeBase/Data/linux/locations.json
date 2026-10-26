@@ -92,6 +92,16 @@
       }
     },
     {
+      "id": "local-programs",
+      "path": "/usr/local",
+      "category": "Apps",
+      "title": { "en": "Programs installed by hand", "pt-BR": "Programas instalados manualmente" },
+      "description": {
+        "en": "Programs you compiled or installed yourself, outside the package manager.",
+        "pt-BR": "Programas que você compilou ou instalou por conta própria, fora do gerenciador de pacotes."
+      }
+    },
+    {
       "id": "opt-programs",
       "path": "/opt",
       "category": "Apps",
