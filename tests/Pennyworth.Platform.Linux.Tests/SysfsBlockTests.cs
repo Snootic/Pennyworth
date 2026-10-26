@@ -34,32 +34,9 @@ public class SysfsBlockTests
     };
 
     [Fact]
-    public void Parses_mountinfo_whatever_the_number_of_optional_fields()
-    {
-        var mounts = SysfsBlock.ParseMountInfo(MountInfo + "\n100 43 8:1 / /data rw shared:1 master:2 propagate_from:3 - ext4 /dev/sdd1 rw\n101 43 8:2 / /plain rw - ext4 /dev/sde1 rw\n");
-
-        Assert.Equal(new SysfsBlock.Mount("/", "btrfs", "/dev/nvme0n1p2"), mounts[0]);
-        Assert.Contains(new SysfsBlock.Mount("/data", "ext4", "/dev/sdd1"), mounts);
-        Assert.Contains(new SysfsBlock.Mount("/plain", "ext4", "/dev/sde1"), mounts);
-        Assert.Contains(new SysfsBlock.Mount("/mnt/wd-blue", "xfs", "/dev/sdb"), mounts);
-    }
-
-    [Fact]
-    public void Unescapes_octal_sequences_in_mount_points_and_skips_malformed_lines()
-    {
-        var mounts = SysfsBlock.ParseMountInfo("""
-            80 43 8:49 / /mnt/My\040Disk\134A rw - ext4 /dev/sdd1 rw
-            garbage
-            81 43 8:50 / /short rw
-            """);
-
-        Assert.Equal(new SysfsBlock.Mount("/mnt/My Disk\\A", "ext4", "/dev/sdd1"), Assert.Single(mounts));
-    }
-
-    [Fact]
     public void Seven_subvolume_mounts_of_one_partition_are_one_volume_shown_at_the_shortest_mount_point()
     {
-        var byDisk = SysfsBlock.MountPointsByDisk(SysfsBlock.ParseMountInfo(MountInfo), DiskOfPartition);
+        var byDisk = SysfsBlock.MountPointsByDisk(MountTable.Parse(MountInfo), DiskOfPartition);
 
         Assert.Equal(["/", "/boot/efi", "/home"], byDisk["nvme0n1"]);
         Assert.Equal(["/mnt/exram"], byDisk["sda"]);
@@ -72,7 +49,7 @@ public class SysfsBlockTests
     public void A_volume_spanning_two_disks_is_listed_on_both()
     {
         var byDisk = SysfsBlock.MountPointsByDisk(
-            SysfsBlock.ParseMountInfo("1 0 253:0 / /data rw - xfs /dev/mapper/vg-data rw"),
+            MountTable.Parse("1 0 253:0 / /data rw - xfs /dev/mapper/vg-data rw"),
             _ => ["sda", "sdb"]);
 
         Assert.Equal(["/data"], byDisk["sda"]);

@@ -39,7 +39,7 @@ public sealed class LinuxSpecsReader : ISpecsReader
             Safe(() => Dmi.ReadSystem(_fs), new SystemSpecs(Environment.MachineName, Environment.UserName, null, null)),
             Safe(() => OsRelease.Read(_fs, _probe), new OsSpecs("Linux", null, "?", architecture, null, TimeSpan.Zero)),
             Safe(() => ProcCpu.Read(_fs), new CpuSpecs("?", null, Environment.ProcessorCount, Environment.ProcessorCount, 1, null, 0, 0, 0, RuntimeInformation.ProcessArchitecture.ToString(), null)),
-            Safe(() => MemInfo.Read(_fs), new MemorySpecs(0, null, [])),
+            Safe(() => MemorySection.Read(_fs), new MemorySpecs(0, null, [])),
             cards.Select(c => c.Gpu).ToArray(),
             Safe(() => DrmDisplay.Read(_fs, cards), []),
             Safe(() => SysfsBlock.Read(_fs), []),

@@ -82,35 +82,16 @@ public class LinuxSystemSpaceTests
     [Fact]
     public void Btrfs_subvolume_mounts_differ_in_device_number_but_share_their_source()
     {
-        List<MountEntry> mounts = SystemSpaceParsers.ParseMountInfo(MountInfo);
+        IReadOnlyList<MountEntry> mounts = MountTable.Parse(MountInfo);
 
         MountEntry root = Assert.Single(mounts, m => m.MountPoint == "/");
         MountEntry snapshots = Assert.Single(mounts, m => m.MountPoint == "/.snapshots");
         Assert.NotEqual(root.MajorMinor, snapshots.MajorMinor);
         Assert.Equal("/dev/nvme0n1p2", root.Source);
         Assert.Equal(root.Source, snapshots.Source);
-        Assert.Equal("btrfs", root.FsType);
-        Assert.Equal(new MountEntry("259:1", "/home", "ext4", "/dev/nvme0n1p1"), Assert.Single(mounts, m => m.MountPoint == "/home"));
-    }
-
-    [Fact]
-    public void Mount_points_are_unescaped_and_optional_fields_are_skipped()
-    {
-        const string line = @"36 35 98:0 /mnt1 /mnt/My\040Disk\011x rw,noatime master:1 shared:7 - ext3 /dev/root rw,errors=continue";
-
-        MountEntry entry = Assert.Single(SystemSpaceParsers.ParseMountInfo(line));
-
-        Assert.Equal(new MountEntry("98:0", "/mnt/My Disk\tx", "ext3", "/dev/root"), entry);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("garbage")]
-    [InlineData("1 2 3:4 / /x rw - ext4")]
-    [InlineData("1 2 nocolon / /x rw - ext4 /dev/sda1 rw")]
-    public void Lines_that_are_not_mountinfo_are_skipped(string text)
-    {
-        Assert.Empty(SystemSpaceParsers.ParseMountInfo(text));
+        Assert.Equal("btrfs", root.FileSystemType);
+        MountEntry home = Assert.Single(mounts, m => m.MountPoint == "/home");
+        Assert.Equal(("259:1", "ext4", "/dev/nvme0n1p1"), (home.MajorMinor, home.FileSystemType, home.Source));
     }
 
     [Theory]
@@ -124,7 +105,7 @@ public class LinuxSystemSpaceTests
     [InlineData("/mnt/wd-blue-segundo", "/")]
     public void The_longest_mount_point_that_contains_the_path_wins(string path, string expectedMountPoint)
     {
-        MountEntry? mount = SystemSpaceParsers.FindMount(SystemSpaceParsers.ParseMountInfo(MountInfo), path);
+        MountEntry? mount = SystemSpaceParsers.FindMount(MountTable.Parse(MountInfo), path);
 
         Assert.Equal(expectedMountPoint, mount?.MountPoint);
     }
@@ -134,11 +115,11 @@ public class LinuxSystemSpaceTests
     {
         var mounts = new List<MountEntry>
         {
-            new("8:1", "/data", "ext4", "/dev/sda1"),
-            new("8:2", "/data", "xfs", "/dev/sda2"),
+            new("/data", "ext4", "/dev/sda1", "8:1", "/", "rw"),
+            new("/data", "xfs", "/dev/sda2", "8:2", "/", "rw"),
         };
 
-        Assert.Equal("xfs", SystemSpaceParsers.FindMount(mounts, "/data/x")?.FsType);
+        Assert.Equal("xfs", SystemSpaceParsers.FindMount(mounts, "/data/x")?.FileSystemType);
     }
 
     // ---- btrfs filesystem usage ----
@@ -608,7 +589,7 @@ public class LinuxSystemSpaceTests
     [LinuxFact]
     public void The_real_mountinfo_parses_and_holds_the_root()
     {
-        List<MountEntry> mounts = SystemSpaceParsers.ParseMountInfo(File.ReadAllText("/proc/self/mountinfo"));
+        IReadOnlyList<MountEntry> mounts = MountTable.Parse(File.ReadAllText("/proc/self/mountinfo"));
 
         Assert.NotNull(SystemSpaceParsers.FindMount(mounts, "/"));
     }

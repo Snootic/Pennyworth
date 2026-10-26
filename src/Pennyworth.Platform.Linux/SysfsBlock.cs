@@ -23,59 +23,6 @@ internal static class SysfsBlock
 
     private static readonly string[] VirtualPrefixes = ["loop", "ram", "zram", "dm-", "md", "sr", "fd", "nbd"];
 
-    /// <param name="Source">The device a filesystem is mounted from ("/dev/nvme0n1p2").</param>
-    internal sealed record Mount(string MountPoint, string FsType, string Source);
-
-    /// <summary>
-    /// Parses <c>/proc/self/mountinfo</c>: <c>id parent maj:min root mountpoint options [optional...] - fstype source superoptions</c>.
-    /// The number of optional fields varies, so the fields after the <c>-</c> separator are found by
-    /// looking for it. Paths escape space, tab, newline and backslash as octal (<c>\040</c>).
-    /// </summary>
-    public static IReadOnlyList<Mount> ParseMountInfo(string text)
-    {
-        var mounts = new List<Mount>();
-        foreach (string line in text.Split('\n'))
-        {
-            string[] fields = line.Split(' ');
-            if (fields.Length < 10)
-            {
-                continue; // A blank or truncated line: the shortest real one has ten fields.
-            }
-
-            int separator = Array.IndexOf(fields, "-", 6);
-            if (separator >= 6 && separator + 2 < fields.Length)
-            {
-                mounts.Add(new Mount(UnescapeOctal(fields[4]), fields[separator + 1], UnescapeOctal(fields[separator + 2])));
-            }
-        }
-
-        return mounts;
-    }
-
-    private static string UnescapeOctal(string text)
-    {
-        if (!text.Contains('\\'))
-        {
-            return text;
-        }
-
-        var result = new StringBuilder(text.Length);
-        for (int i = 0; i < text.Length; i++)
-        {
-            if (text[i] == '\\' && i + 3 < text.Length && text.Substring(i + 1, 3).All(c => c is >= '0' and <= '7'))
-            {
-                result.Append((char)Convert.ToInt32(text.Substring(i + 1, 3), 8));
-                i += 3;
-            }
-            else
-            {
-                result.Append(text[i]);
-            }
-        }
-
-        return result.ToString();
-    }
-
     /// <summary>The <c>E:KEY=value</c> lines of a udev database file (<c>/run/udev/data/b8:16</c>).</summary>
     public static IReadOnlyDictionary<string, string> ParseUdev(string? text)
     {
@@ -192,10 +139,10 @@ internal static class SysfsBlock
     /// that are not block devices (tmpfs, overlay, fuse) are ignored.
     /// </summary>
     /// <param name="disksOf">The disks a source device lives on: a partition has one, an LVM volume may span several.</param>
-    public static IReadOnlyDictionary<string, IReadOnlyList<string>> MountPointsByDisk(IEnumerable<Mount> mounts, Func<string, IEnumerable<string>> disksOf)
+    public static IReadOnlyDictionary<string, IReadOnlyList<string>> MountPointsByDisk(IEnumerable<MountEntry> mounts, Func<string, IEnumerable<string>> disksOf)
     {
         var byDisk = new Dictionary<string, List<string>>(StringComparer.Ordinal);
-        foreach (IGrouping<string, Mount> volume in mounts.Where(m => m.Source.StartsWith("/dev/", StringComparison.Ordinal)).GroupBy(m => m.Source, StringComparer.Ordinal))
+        foreach (IGrouping<string, MountEntry> volume in mounts.Where(m => m.Source.StartsWith("/dev/", StringComparison.Ordinal)).GroupBy(m => m.Source, StringComparer.Ordinal))
         {
             string mountPoint = volume.Select(m => m.MountPoint).OrderBy(p => p.Length).ThenBy(p => p, StringComparer.Ordinal).First();
             foreach (string disk in disksOf(volume.Key))
@@ -232,7 +179,7 @@ internal static class SysfsBlock
         }
 
         IReadOnlyDictionary<string, IReadOnlyList<string>> mountPoints = MountPointsByDisk(
-            ParseMountInfo(fs.ReadText("/proc/self/mountinfo") ?? ""),
+            MountTable.Parse(fs.ReadText("/proc/self/mountinfo") ?? ""),
             source => DisksOf(fs, fs.TargetName(source) ?? Path.GetFileName(source), owner, 0));
 
         return disks.Select((name, number) => ReadDisk(fs, name, number, mountPoints.TryGetValue(name, out IReadOnlyList<string>? points) ? points : [])).ToList();

@@ -1,14 +1,7 @@
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Pennyworth.Platform.Linux;
-
-/// <summary>One line of <c>/proc/self/mountinfo</c>, reduced to what system-space measuring uses.</summary>
-/// <param name="MajorMinor">The <c>maj:min</c> of the backing device. Btrfs gives every subvolume mount its own anonymous one.</param>
-/// <param name="MountPoint">Unescaped mount point.</param>
-/// <param name="Source">The mount source (<c>/dev/nvme0n1p2</c>), the same for every subvolume of one btrfs filesystem.</param>
-internal sealed record MountEntry(string MajorMinor, string MountPoint, string FsType, string Source);
 
 /// <summary>The two keys of a snapper config that say where its snapshots' space is accounted.</summary>
 /// <param name="Subvolume">The mounted subvolume the config snapshots (<c>/</c>).</param>
@@ -19,27 +12,6 @@ internal sealed record SnapperConfig(string Subvolume, string Qgroup);
 internal static partial class SystemSpaceParsers
 {
     private const long SectorBytes = 512;
-
-    /// <summary>Entries of <c>/proc/self/mountinfo</c>; lines that do not parse are skipped.</summary>
-    internal static List<MountEntry> ParseMountInfo(string text)
-    {
-        var entries = new List<MountEntry>();
-        foreach (string line in text.Split('\n'))
-        {
-            // "36 35 98:0 /root /mnt rw,noatime master:1 - ext3 /dev/root rw,errors=continue"
-            // Optional fields sit between the mount options and a lone "-"; the filesystem follows it.
-            string[] fields = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            int separator = fields.Length < 9 ? -1 : Array.IndexOf(fields, "-", 6);
-            if (separator < 0 || separator + 2 >= fields.Length || !fields[2].Contains(':'))
-            {
-                continue;
-            }
-
-            entries.Add(new MountEntry(fields[2], Unescape(fields[4]), fields[separator + 1], Unescape(fields[separator + 2])));
-        }
-
-        return entries;
-    }
 
     /// <summary>
     /// The mount that holds <paramref name="path"/>: the longest mount point that is the path or one of
@@ -182,33 +154,6 @@ internal static partial class SystemSpaceParsers
         "RAID1C4" => 4,
         _ => null,
     };
-
-    /// <summary>mountinfo writes space, tab, newline and backslash as three-digit octal escapes.</summary>
-    private static string Unescape(string field)
-    {
-        if (!field.Contains('\\'))
-        {
-            return field;
-        }
-
-        var text = new StringBuilder(field.Length);
-        for (int i = 0; i < field.Length; i++)
-        {
-            if (field[i] == '\\' && i + 3 < field.Length && IsOctal(field[i + 1]) && IsOctal(field[i + 2]) && IsOctal(field[i + 3]))
-            {
-                text.Append((char)Convert.ToInt32(field.Substring(i + 1, 3), 8));
-                i += 3;
-            }
-            else
-            {
-                text.Append(field[i]);
-            }
-        }
-
-        return text.ToString();
-    }
-
-    private static bool IsOctal(char c) => c is >= '0' and <= '7';
 
     [GeneratedRegex(@"^(?:Metadata|System),(?<profile>[A-Za-z0-9]+): Size:\d+, Used:(?<used>\d+)", RegexOptions.Multiline)]
     private static partial Regex ChunkLine();

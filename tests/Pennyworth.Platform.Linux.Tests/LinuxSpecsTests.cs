@@ -362,7 +362,7 @@ public class LinuxSpecsTests
     [InlineData("MemTotal: lots kB\n", 0)]
     [InlineData("MemTotal: 99999999999999999 kB\n", 0)]
     [InlineData("", 0)]
-    public void Reads_total_memory_from_meminfo(string text, long bytes) => Assert.Equal(bytes, MemInfo.ParseTotal(text));
+    public void Reads_total_memory_from_meminfo(string text, long bytes) => Assert.Equal(bytes, MemorySection.ParseTotal(text));
 
     [Fact]
     public void Memory_slots_and_modules_stay_unknown_because_they_need_root()
@@ -370,7 +370,7 @@ public class LinuxSpecsTests
         using var tree = new SpecsTree();
         tree.File("/proc/meminfo", "MemTotal:       32681548 kB\n");
 
-        MemorySpecs memory = MemInfo.Read(new SpecsRoot(tree.Root));
+        MemorySpecs memory = MemorySection.Read(new SpecsRoot(tree.Root));
 
         Assert.Equal(32681548L * 1024, memory.Total);
         Assert.Null(memory.Slots);

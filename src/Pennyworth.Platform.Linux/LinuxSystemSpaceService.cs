@@ -63,14 +63,14 @@ internal sealed class LinuxSystemSpaceService : IHiddenSpaceService
             return new HiddenSpaceReport(null, null); // Not a path, or not one that exists: nothing to measure.
         }
 
-        List<MountEntry> mounts = SystemSpaceParsers.ParseMountInfo(_sources.ReadText(MountInfo) ?? "");
+        IReadOnlyList<MountEntry> mounts = MountTable.Parse(_sources.ReadText(MountInfo) ?? "");
         MountEntry? mount = SystemSpaceParsers.FindMount(mounts, root);
 
         cancellationToken.ThrowIfCancellationRequested();
         long? overhead = MeasureOverhead(root, mount, counters);
 
         cancellationToken.ThrowIfCancellationRequested();
-        long? snapshots = mount?.FsType == Btrfs ? MeasureSnapshots(mount, mounts) : null;
+        long? snapshots = mount?.FileSystemType == Btrfs ? MeasureSnapshots(mount, mounts) : null;
 
         return new HiddenSpaceReport(snapshots, overhead);
     }
@@ -79,7 +79,7 @@ internal sealed class LinuxSystemSpaceService : IHiddenSpaceService
     {
         long? total = SystemSpaceParsers.ReservedBytes(counters);
 
-        if (mount is { FsType: not Btrfs })
+        if (mount is { FileSystemType: not Btrfs })
         {
             // A btrfs mount has an anonymous device number with no entry here, and its size is not a
             // single device's anyway; every other filesystem reports its own device.
@@ -98,7 +98,7 @@ internal sealed class LinuxSystemSpaceService : IHiddenSpaceService
     /// Sum of the exclusive bytes of the snapshot qgroups of every snapper config whose subvolume lives on
     /// the same btrfs filesystem as <paramref name="mount"/>.
     /// </summary>
-    private long? MeasureSnapshots(MountEntry mount, List<MountEntry> mounts)
+    private long? MeasureSnapshots(MountEntry mount, IReadOnlyList<MountEntry> mounts)
     {
         var qgroups = new HashSet<string>(StringComparer.Ordinal);
         foreach (string name in _sources.ListNames(SnapperConfigs))
@@ -107,7 +107,7 @@ internal sealed class LinuxSystemSpaceService : IHiddenSpaceService
                 || SystemSpaceParsers.ParseSnapperConfig(text) is not { } config
                 || SystemSpaceParsers.QgroupDirectory(config.Qgroup) is not { } qgroup
                 || Normalize(config.Subvolume) is not { } subvolume
-                || SystemSpaceParsers.FindMount(mounts, subvolume) is not { FsType: Btrfs } configMount
+                || SystemSpaceParsers.FindMount(mounts, subvolume) is not { FileSystemType: Btrfs } configMount
                 || configMount.Source != mount.Source)
             {
                 continue;

@@ -9,7 +9,7 @@ namespace Pennyworth.Platform.Linux;
 /// figure. Slots and modules are only in the SMBIOS tables, which need root (<c>dmidecode</c>), so
 /// they stay unknown rather than asking for privileges.
 /// </summary>
-internal static class MemInfo
+internal static class MemorySection
 {
     /// <summary><c>MemTotal:   32681548 kB</c> in bytes (the kernel's "kB" is 1024 bytes); 0 when absent.</summary>
     public static long ParseTotal(string text)
