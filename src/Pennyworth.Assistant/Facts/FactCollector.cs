@@ -34,7 +34,7 @@ public static class FactCollector
 
         if (snapshot.Specs is { } specs)
         {
-            Add("os.name", TopicKind.Overview, T("Windows", "Windows"), FactKind.Text, 0,
+            Add("os.name", TopicKind.Overview, IsWindows(snapshot) ? "Windows" : T("Operating system", "Sistema operacional"), FactKind.Text, 0,
                 string.Join(" ", new[] { specs.Os.Name, specs.Os.Version }.Where(s => !string.IsNullOrEmpty(s))));
             Add("os.uptime_hours", TopicKind.Overview, T("Hours since the PC was last restarted", "Horas desde que o PC foi reiniciado"), FactKind.Count, Math.Floor(specs.Os.Uptime.TotalHours));
         }
@@ -45,10 +45,14 @@ public static class FactCollector
 
     private static void Storage(PcSnapshot snapshot, CultureInfo culture, Action<string, TopicKind, string, FactKind, double, string?> add, Func<string, string, string> t)
     {
+        // Only a measured OS gets a name. Without specs the facts say "system" rather than guess one.
+        bool windows = IsWindows(snapshot);
+        string os = windows ? "Windows" : "system";
+        string osPt = windows ? "Windows" : "sistema";
         if (snapshot.Drives.FirstOrDefault(d => d.IsSystem) is { } system)
         {
             string name = DriveName(system.Root);
-            add("disk.system.total", TopicKind.Storage, t($"Drive {name} (Windows) size", $"Tamanho do disco {name} (Windows)"), FactKind.Bytes, system.TotalBytes, null);
+            add("disk.system.total", TopicKind.Storage, t($"Drive {name} ({os}) size", $"Tamanho do disco {name} ({osPt})"), FactKind.Bytes, system.TotalBytes, null);
             add("disk.system.used", TopicKind.Storage, t($"Drive {name} used", $"Disco {name} usado"), FactKind.Bytes, system.UsedBytes, null);
             add("disk.system.free", TopicKind.Storage, t($"Drive {name} free", $"Disco {name} livre"), FactKind.Bytes, system.FreeBytes, null);
             add("disk.system.used_percent", TopicKind.Storage, t($"Drive {name} full", $"Disco {name} ocupado"), FactKind.Percent, Math.Round(system.UsedPercent), null);
@@ -61,8 +65,8 @@ public static class FactCollector
                     false => t("hard disk (HDD)", "disco rígido (HDD)"),
                     null => t("unknown", "desconhecido"),
                 };
-                add("disk.system.kind", TopicKind.Storage, t("Windows is installed on", "O Windows está instalado em"), FactKind.Text, 0, $"{kind}, {disk.Model}, {disk.Bus}");
-                add("disk.system.is_hdd", TopicKind.Storage, t("Windows drive is a hard disk (1 = yes)", "Disco do Windows é HDD (1 = sim)"), FactKind.Count, disk.IsSsd == false ? 1 : 0, null);
+                add("disk.system.kind", TopicKind.Storage, windows ? t("Windows is installed on", "O Windows está instalado em") : t("The operating system is installed on", "O sistema operacional está instalado em"), FactKind.Text, 0, $"{kind}, {disk.Model}, {disk.Bus}");
+                add("disk.system.is_hdd", TopicKind.Storage, t($"{(windows ? "Windows" : "System")} drive is a hard disk (1 = yes)", $"Disco do {osPt} é HDD (1 = sim)"), FactKind.Count, disk.IsSsd == false ? 1 : 0, null);
             }
         }
 
@@ -80,15 +84,16 @@ public static class FactCollector
         foreach (DriveFact drive in snapshot.Drives.Where(d => !d.IsSystem))
         {
             string name = DriveName(drive.Root);
-            add($"disk.{name.TrimEnd(':').ToLowerInvariant()}.used_percent", TopicKind.Storage, t($"Drive {name} full", $"Disco {name} ocupado"), FactKind.Percent, Math.Round(drive.UsedPercent), null);
-            add($"disk.{name.TrimEnd(':').ToLowerInvariant()}.free", TopicKind.Storage, t($"Drive {name} free", $"Disco {name} livre"), FactKind.Bytes, drive.FreeBytes, null);
+            string id = DriveId(name);
+            add($"disk.{id}.used_percent", TopicKind.Storage, t($"Drive {name} full", $"Disco {name} ocupado"), FactKind.Percent, Math.Round(drive.UsedPercent), null);
+            add($"disk.{id}.free", TopicKind.Storage, t($"Drive {name} free", $"Disco {name} livre"), FactKind.Bytes, drive.FreeBytes, null);
         }
 
         if (snapshot.SystemDriveCategories is { } categories)
         {
             foreach (var (category, bytes) in categories.Where(c => c.Value > 0).OrderByDescending(c => c.Value))
             {
-                add($"storage.{category.ToString().ToLowerInvariant()}", TopicKind.Storage, t($"On the Windows drive: {CategoryName(category, false)}", $"No disco do Windows: {CategoryName(category, true)}"), FactKind.Bytes, bytes, null);
+                add($"storage.{category.ToString().ToLowerInvariant()}", TopicKind.Storage, t($"On the {os} drive: {CategoryName(category, false)}", $"No disco do {osPt}: {CategoryName(category, true)}"), FactKind.Bytes, bytes, null);
             }
         }
     }
@@ -219,7 +224,22 @@ public static class FactCollector
     private static IEnumerable<MonitorSample> Recent(PcSnapshot snapshot) =>
         snapshot.RecentSamples.Skip(Math.Max(snapshot.RecentSamples.Count - SustainedSamples, 0));
 
-    private static string DriveName(string root) => root.TrimEnd('\\', '/');
+    /// <summary>"C:" for <c>C:\</c>, "/home" for <c>/home/</c>; a root that is only separators stays as it is ("/").</summary>
+    private static string DriveName(string root) => root.TrimEnd('\\', '/') is { Length: > 0 } trimmed ? trimmed : root;
+
+    /// <summary>A fact id for a drive: "c" for "C:", "home" for "/home", "root" for "/".</summary>
+    private static string DriveId(string name)
+    {
+        string id = string.Concat(name.Select(c => char.IsLetterOrDigit(c) ? char.ToLowerInvariant(c) : '_')).Trim('_');
+        return id.Length > 0 ? id : "root";
+    }
+
+    /// <summary>
+    /// Whether the measured OS is Windows. Without specs nothing is known, and the facts then use the
+    /// neutral word "system" instead of asserting an OS that was not measured.
+    /// </summary>
+    private static bool IsWindows(PcSnapshot snapshot) =>
+        snapshot.Specs?.Os.Name.StartsWith("Windows", StringComparison.OrdinalIgnoreCase) == true;
 
     private static string AppName(AppGroup app, CultureInfo culture) =>
         app.Explanation?.Title.Get(culture) ?? app.Description ?? app.Key;

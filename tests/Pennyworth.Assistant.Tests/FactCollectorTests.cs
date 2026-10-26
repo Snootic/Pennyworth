@@ -22,6 +22,58 @@ public class FactCollectorTests
     }
 
     [Fact]
+    public void Names_Windows_when_the_specs_say_it_is_Windows()
+    {
+        var facts = FactCollector.Collect(Snapshot(), En);
+
+        Assert.Equal("Windows", facts.Get("os.name").Label);
+        Assert.Equal("Drive C: (Windows) size", facts.Get("disk.system.total").Label);
+        Assert.Equal("Windows is installed on", facts.Get("disk.system.kind").Label);
+        Assert.Equal("On the Windows drive: games", facts.Get("storage.games").Label);
+        Assert.Equal("No disco do Windows: jogos", FactCollector.Collect(Snapshot(), Pt).Get("storage.games").Label);
+    }
+
+    [Fact]
+    public void Never_calls_another_system_Windows()
+    {
+        PcSpecs linux = Specs() with
+        {
+            Os = new OsSpecs("openSUSE Tumbleweed", "20261024", "7.2.11", "X64", null, TimeSpan.FromHours(5)),
+            Disks = [new DiskSpecs(0, "WD Blue", 500 * Gb, "NVMe", true, ["/"]), new DiskSpecs(1, "Seagate", 1000 * Gb, "SATA", false, ["/home"])],
+        };
+        var snapshot = Snapshot(specs: linux) with
+        {
+            Drives = [new DriveFact("/", "/", 953 * Gb, 400 * Gb, true), new DriveFact("/home", "/home", 1000 * Gb, 100 * Gb, false)],
+        };
+
+        foreach (var culture in new[] { En, Pt })
+        {
+            var facts = FactCollector.Collect(snapshot, culture);
+
+            Assert.DoesNotContain(facts, f => f.Label.Contains("Windows") || (f.Text ?? "").Contains("Windows"));
+        }
+
+        var english = FactCollector.Collect(snapshot, En);
+        Assert.Equal("Operating system", english.Get("os.name").Label);
+        Assert.Equal("openSUSE Tumbleweed 20261024", english.Get("os.name").Text);
+        Assert.Equal("Drive / (system) size", english.Get("disk.system.total").Label);
+        Assert.Equal("NVMe", english.Get("disk.system.kind").Text!.Split(", ")[^1]);
+        Assert.Equal("The operating system is installed on", english.Get("disk.system.kind").Label);
+        Assert.Equal("On the system drive: games", english.Get("storage.games").Label);
+        Assert.Equal("Drive /home full", english.Get("disk.home.used_percent").Label);
+        Assert.Equal("No disco do sistema: jogos", FactCollector.Collect(snapshot, Pt).Get("storage.games").Label);
+    }
+
+    [Fact]
+    public void Without_specs_no_operating_system_is_assumed()
+    {
+        var facts = FactCollector.Collect(Snapshot() with { Specs = null }, En);
+
+        Assert.DoesNotContain(facts, f => f.Label.Contains("Windows"));
+        Assert.Equal("Drive C: (system) size", facts.Get("disk.system.total").Label);
+    }
+
+    [Fact]
     public void Averages_memory_and_processor_over_the_last_minute_only()
     {
         var snapshot = Snapshot() with
