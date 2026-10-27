@@ -1,5 +1,6 @@
 using System.Globalization;
 using Pennyworth.App.Resources;
+using Pennyworth.Core.Wording;
 
 namespace Pennyworth.App.Localization;
 
@@ -12,7 +13,9 @@ public enum LanguagePreference
 
 /// <summary>
 /// The app's current language. Views bind through <see cref="Tr"/>; view models listen to
-/// <see cref="LanguageChanged"/> and refresh their formatted text.
+/// <see cref="LanguageChanged"/> and refresh their formatted text. Strings that name the operating
+/// system's things carry <c>{@Name}</c> tokens, and every read replaces them with the words of the
+/// platform in <see cref="Wording"/>: read those through <see cref="this[string]"/> or <see cref="Resolve"/>.
 /// </summary>
 public sealed class Localizer
 {
@@ -32,7 +35,23 @@ public sealed class Localizer
 
     public event EventHandler? LanguageChanged;
 
-    public string this[string key] => Strings.ResourceManager.GetString(key, Culture) ?? key;
+    /// <summary>Windows' wording until the composition root says otherwise.</summary>
+    public IPlatformText Wording { get; private set; } = WindowsText.Instance;
+
+    public string this[string key] => Strings.ResourceManager.GetString(key, Culture) is { } raw ? Resolve(raw) : key;
+
+    /// <summary>The operating system whose words the strings use.</summary>
+    public void UseWording(IPlatformText wording)
+    {
+        Wording = wording;
+        LanguageChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>One of the platform's words in the current language.</summary>
+    public string Text(PlatformText text) => Wording.Text(text, IsPortuguese);
+
+    /// <summary>A <c>Strings.*</c> value with its <c>{@Name}</c> tokens replaced; leaves <c>{0}</c> placeholders alone.</summary>
+    public string Resolve(string raw) => PlatformTokens.Resolve(raw, Wording, IsPortuguese);
 
     public void SetLanguage(LanguagePreference preference)
     {

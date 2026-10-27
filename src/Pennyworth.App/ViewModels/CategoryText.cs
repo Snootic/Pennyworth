@@ -1,3 +1,4 @@
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.Core.Storage;
 
@@ -13,8 +14,8 @@ internal static class CategoryText
         StorageCategory.Games => Strings.Category_Games,
         StorageCategory.Apps => Strings.Category_Apps,
         StorageCategory.YourFiles => Strings.Category_YourFiles,
-        StorageCategory.Windows => Strings.Category_Windows,
-        StorageCategory.HiddenSystem => Strings.Category_HiddenSystem,
+        StorageCategory.Windows => Localizer.Instance.Resolve(Strings.Category_Windows),
+        StorageCategory.HiddenSystem => Localizer.Instance.Resolve(Strings.Category_HiddenSystem),
         _ => Strings.Category_Other,
     };
 
@@ -24,8 +25,8 @@ internal static class CategoryText
         StorageCategory.Games => Strings.CategoryHint_Games,
         StorageCategory.Apps => Strings.CategoryHint_Apps,
         StorageCategory.YourFiles => Strings.CategoryHint_YourFiles,
-        StorageCategory.Windows => Strings.CategoryHint_Windows,
-        StorageCategory.HiddenSystem => Strings.CategoryHint_HiddenSystem,
+        StorageCategory.Windows => Localizer.Instance.Resolve(Strings.CategoryHint_Windows),
+        StorageCategory.HiddenSystem => Localizer.Instance.Resolve(Strings.CategoryHint_HiddenSystem),
         _ => Strings.CategoryHint_Other,
     };
 

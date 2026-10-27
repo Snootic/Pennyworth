@@ -42,7 +42,8 @@ public class StringsTests
             var info = CultureInfo.GetCultureInfo(culture);
             foreach (DictionaryEntry entry in Strings.ResourceManager.GetResourceSet(info, createIfNotExists: true, tryParents: true)!)
             {
-                _ = string.Format(info, (string)entry.Value!, "1 GB", 1234L);
+                string text = Pennyworth.Core.Wording.PlatformTokens.Resolve((string)entry.Value!, Pennyworth.Core.Wording.WindowsText.Instance, culture == "pt-BR");
+                _ = string.Format(info, text, "1 GB", 1234L);
             }
         }
     }

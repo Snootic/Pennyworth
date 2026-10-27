@@ -1,8 +1,10 @@
 using System.Globalization;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.Assistant;
 using Pennyworth.Core.Formatting;
 using Pennyworth.Core.Storage;
+using Pennyworth.Core.Wording;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -80,11 +82,11 @@ public sealed partial class PcViewModel(MainWindowViewModel shell) : ObservableO
 
     public string PartIndexText => $"0{(int)Part + 1} / 06 · {Label(Part)}";
 
-    public string PartName => Strings.ResourceManager.GetString($"PartName_{Part}", Strings.Culture) ?? "";
+    public string PartName => Localizer.Instance[$"PartName_{Part}"];
 
-    public string PartHint => Strings.ResourceManager.GetString($"PartHint_{Part}", Strings.Culture) ?? "";
+    public string PartHint => Localizer.Instance[$"PartHint_{Part}"];
 
-    public string MachineText => string.Format(Strings.Machine, shell.SystemDrive?.Letter ?? "C:", Live.HasSample ? Live.MemoryTotalText : "—");
+    public string MachineText => string.Format(Strings.Machine, shell.SystemDriveToken, Live.HasSample ? Live.MemoryTotalText : "—");
 
     // Drive
     public string DriveUsedText => shell.SystemDrive is { } d ? ByteSize.Format(d.Summary.UsedBytes) : "—";
@@ -102,7 +104,7 @@ public sealed partial class PcViewModel(MainWindowViewModel shell) : ObservableO
             var parts = summary is null ? [] : summary.Categories
                 .Select(row => (CategoryChars[row.Category!.Value], (double)row.Bytes / total))
                 .Append(('-', (double)summary.Unaccounted.Bytes / total));
-            return Ascii.DriveArt(parts, DriveArtProgress, (shell.SystemDrive?.Letter ?? "C:") + "\\");
+            return Ascii.DriveArt(parts, DriveArtProgress, shell.SystemDriveRoot);
         }
     }
 
@@ -176,11 +178,14 @@ public sealed partial class PcViewModel(MainWindowViewModel shell) : ObservableO
 
     // Power
     public long HibernationBytes => shell.SystemSummary?.Tree?.Root.GetChildren()
-        .Where(n => string.Equals(n.Name, "hiberfil.sys", StringComparison.OrdinalIgnoreCase))
+        .Where(n => string.Equals(n.Name, Localizer.Instance.Text(PlatformText.HibernationFile), StringComparison.OrdinalIgnoreCase))
         .Select(n => n.SizeOnDisk)
         .FirstOrDefault() ?? 0;
 
     public bool HasHibernation => HibernationBytes > 0;
+
+    /// <summary>The file the power panel names: the hibernation file on Windows, the swap file on Linux.</summary>
+    public string HibernationFileName => Localizer.Instance.Text(PlatformText.HibernationFile);
 
     public string HibernationText => ByteSize.Format(HibernationBytes);
 
@@ -192,7 +197,7 @@ public sealed partial class PcViewModel(MainWindowViewModel shell) : ObservableO
         "  | > ON   > SLEEP |--+\n" +
         "  | > HIBERNATE    |  | RAM -> DISK\n" +
         "  +----------------+  v\n" +
-        $"       hiberfil.sys  [{HibernationBar}]";
+        $"       {Localizer.Instance.Text(PlatformText.HibernationFile)}  [{HibernationBar}]";
 
     // Trash
     public string CleanupTotalText => ByteSize.Format(shell.Cleanup.TotalBytes);
@@ -271,7 +276,7 @@ public sealed partial class PcViewModel(MainWindowViewModel shell) : ObservableO
     private void OpenSpecs() => shell.GoSpecsCommand.Execute(null);
 
     private static string Label(PcPart part) =>
-        (Strings.ResourceManager.GetString($"PartLabel_{part}", Strings.Culture) ?? part.ToString()).ToUpper(CultureInfo.CurrentCulture);
+        Localizer.Instance[$"PartLabel_{part}"].ToUpper(CultureInfo.CurrentCulture);
 }
 
 public sealed record PartChipViewModel(PcPart Part, string Index, string Label, bool IsSelected);

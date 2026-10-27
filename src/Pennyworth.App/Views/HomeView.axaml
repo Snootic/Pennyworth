@@ -57,8 +57,8 @@
                           CommandParameter="{Binding}">
                     <StackPanel Spacing="12">
                       <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="12">
-                        <TextBlock Classes="number" FontSize="32" Text="{Binding Letter}" />
-                        <TextBlock Grid.Column="1" FontSize="14" VerticalAlignment="Bottom" Margin="0,0,0,4" Text="{Binding Label}" />
+                        <TextBlock Classes="number" FontSize="32" Text="{Binding Token}" />
+                        <TextBlock Grid.Column="1" FontSize="14" VerticalAlignment="Bottom" Margin="0,0,0,4" Text="{Binding Caption}" />
                         <TextBlock Grid.Column="3" Classes="label" Foreground="{DynamicResource Brush.Accent}" VerticalAlignment="Bottom" Margin="0,0,0,4" Text="{Binding WarningText}" />
                       </Grid>
                       <ProgressBar Classes.warn="{Binding IsAlmostFull}" Minimum="0" Maximum="1" Value="{Binding Fraction}" />

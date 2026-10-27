@@ -9,7 +9,8 @@
         Icon="/Assets/pennyworth.ico"
         Width="1100" Height="760" MinWidth="720" MinHeight="520"
         WindowStartupLocation="CenterScreen"
-        ExtendClientAreaToDecorationsHint="True">
+        ExtendClientAreaToDecorationsHint="{Binding ExtendsIntoTitleBar}"
+        Classes.extended="{Binding ExtendsIntoTitleBar}">
   <Window.Styles>
     <!-- Sidebar entries: index, label and a one-line hint. -->
     <Style Selector="Button.nav">
@@ -50,6 +51,11 @@
       <Setter Property="LetterSpacing" Value="0.6" />
       <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
       <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Windows draws its caption buttons over the right 148 px of the title bar row. -->
+    <Style Selector="Window.extended Grid#TitleBarContent">
+      <Setter Property="Margin" Value="0,0,148,0" />
     </Style>
 
     <!-- At narrow widths the content gets the whole window. -->
@@ -177,10 +183,10 @@
     <!--
       Title bar. Only the left part (logo and empty space) is the drag area: buttons inside a
       TitleBar element don't reliably get clicks on Windows, so they sit beside it, not in it.
-      Windows' caption buttons are drawn over the right 148 px.
+      Where the window draws into the title bar, the system's caption buttons are drawn over the right 148 px.
     -->
     <Border Classes="rule" BorderThickness="0,0,0,1" Background="{DynamicResource Brush.Background}">
-      <Grid ColumnDefinitions="*,Auto" Margin="0,0,148,0">
+      <Grid x:Name="TitleBarContent" ColumnDefinitions="*,Auto">
         <Border Background="Transparent" WindowDecorationProperties.ElementRole="TitleBar">
           <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="16,0,0,0">
             <Image Source="/Assets/logo.png" Width="26" Height="26" RenderOptions.BitmapInterpolationMode="HighQuality" />

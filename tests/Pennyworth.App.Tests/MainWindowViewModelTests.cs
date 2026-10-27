@@ -223,6 +223,22 @@ public class MainWindowViewModelTests
         Assert.Same(viewModel.Memory, viewModel.MainContent);
     }
 
+    [Theory]
+    [InlineData(false, "Light")]
+    [InlineData(true, "Dark")]
+    public void The_system_theme_is_used_until_one_is_chosen(bool systemIsDark, string label)
+    {
+        var settings = new MemorySettings();
+        var (viewModel, _) = Create(settings);
+        Assert.Null(viewModel.IsDarkTheme);
+
+        viewModel.SyncSystemTheme(systemIsDark);
+
+        Assert.Equal(systemIsDark, viewModel.IsDarkTheme);
+        Assert.Equal(label, viewModel.ThemeLabel);
+        Assert.Equal(ThemePreference.System, settings.Current.Theme);
+    }
+
     [Fact]
     public void Theme_choice_is_saved()
     {
@@ -304,12 +320,33 @@ public class MainWindowViewModelTests
         Assert.Equal(0.5, new DriveViewModel(TestApp.DriveC).UsedFraction, 3);
     }
 
+    [Theory]
+    [InlineData(@"C:\", "", "C:", "Local Disk (C:)", "Local Disk")]
+    [InlineData("/", "/", "/", "/", "")]
+    [InlineData("/home", "/home", "/home", "/home", "")]
+    [InlineData("/data", "Backups", "/data", "Backups (/data)", "Backups")]
+    public void Drives_are_named_by_their_root_without_repeating_it(string root, string label, string token, string name, string caption)
+    {
+        var drive = new DriveViewModel(new DriveSummary(root, label, 100, 50));
+
+        Assert.Equal(token, drive.Token);
+        Assert.Equal(name, drive.Name);
+        Assert.Equal(caption, drive.Caption);
+    }
+
+    [Fact]
+    public void The_window_extends_into_the_title_bar_unless_the_platform_says_not_to()
+    {
+        Assert.True(new MainWindowViewModel(TestApp.Services()).ExtendsIntoTitleBar);
+        Assert.False(new MainWindowViewModel(TestApp.Services() with { ExtendsIntoTitleBar = false }).ExtendsIntoTitleBar);
+    }
+
     [Fact]
     public void Drives_show_letter_label_and_percent_used()
     {
         var drive = new DriveViewModel(TestApp.DriveD);
 
-        Assert.Equal("D:", drive.Letter);
+        Assert.Equal("D:", drive.Token);
         Assert.Equal("Games", drive.Label);
         Assert.Equal(new DriveViewModel(TestApp.DriveC).UsedFraction.ToString("P0"), new DriveViewModel(TestApp.DriveC).UsedPercentText);
     }

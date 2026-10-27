@@ -2,6 +2,7 @@ using System.Runtime.Versioning;
 using Pennyworth.Assistant;
 using Pennyworth.Cleanup;
 using Pennyworth.Core.Storage;
+using Pennyworth.Core.Wording;
 using Pennyworth.KnowledgeBase;
 using Pennyworth.Monitoring;
 using Pennyworth.Monitoring.Hardware;
@@ -44,6 +45,14 @@ public sealed class LinuxPlatform : IPlatform
     public string CleanupHistoryPath => _paths.CleanupHistoryPath;
 
     public string? ResolveVariable(string name) => _scope.Resolve(name);
+
+    /// <summary>
+    /// Avalonia 12 on X11 keeps the window manager's own title bar whatever the hint says (seen under icewm), so
+    /// extending would only reserve 148 px for caption buttons that are never drawn over the toolbar.
+    /// </summary>
+    public bool ExtendsIntoTitleBar => false;
+
+    public string Text(PlatformText text, bool portuguese) => LinuxText.Instance.Text(text, portuguese);
 
     public ICleanupService CreateCleanup(IReadOnlyList<CleanupRule> rules) => new CleanupService(
         rules,

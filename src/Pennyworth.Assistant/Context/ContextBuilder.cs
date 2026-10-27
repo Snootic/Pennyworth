@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Pennyworth.Cleanup;
 using Pennyworth.Core.Formatting;
+using Pennyworth.Core.Wording;
 using Pennyworth.Monitoring;
 
 namespace Pennyworth.Assistant;
@@ -17,7 +18,8 @@ public sealed record ContextBundle(
     CultureInfo Culture,
     IReadOnlyList<ContextLine> Facts,
     IReadOnlyList<string> Findings,
-    IReadOnlyList<AssistantAction> AllowedActions)
+    IReadOnlyList<AssistantAction> AllowedActions,
+    IPlatformText Wording)
 {
     public bool IsPortuguese => Culture.Name.StartsWith("pt", StringComparison.OrdinalIgnoreCase);
 
@@ -33,8 +35,8 @@ public sealed record ContextBundle(
         // Phase 1 evaluation: without this line small models "answered" these from general knowledge.
         sb.AppendLine();
         sb.AppendLine(IsPortuguese
-            ? "NÃO MEDIDO pelo Pennyworth (diga que não consegue ver): temperaturas, ventoinhas, velocidade da internet, requisitos de jogos ou do Windows, preços."
-            : "NOT MEASURED by Pennyworth (say you can't see these): temperatures, fans, internet speed, game or Windows requirements, prices.");
+            ? $"NÃO MEDIDO pelo Pennyworth (diga que não consegue ver): temperaturas, ventoinhas, velocidade da internet, {Wording.Text(PlatformText.RequirementsNotMeasured, true)}, preços."
+            : $"NOT MEASURED by Pennyworth (say you can't see these): temperatures, fans, internet speed, {Wording.Text(PlatformText.RequirementsNotMeasured, false)}, prices.");
 
         if (Findings.Count > 0)
         {
@@ -62,7 +64,7 @@ public static class ContextBuilder
     public const int MaxCharacters = 6_000;
 
     private const int MaxActions = 5;
-    private const int MaxRecycleBinItems = 5;
+    private const int MaxTrashItems = 5;
 
     /// <summary>The facts every answer may need, in this order, after the topic's own facts.</summary>
     private static readonly string[] KeyFacts =
@@ -77,7 +79,8 @@ public static class ContextBuilder
         IReadOnlyList<Fact> facts,
         IReadOnlyList<Finding> findings,
         PcSnapshot snapshot,
-        CultureInfo culture)
+        CultureInfo culture,
+        IPlatformText wording)
     {
         TopicKind group = GroupOf(topic);
         var lines = new List<ContextLine>();
@@ -97,7 +100,7 @@ public static class ContextBuilder
                 AddFact(fact);
             }
 
-            lines.AddRange(CleanupItemLines(snapshot, ruleId, culture));
+            lines.AddRange(CleanupItemLines(snapshot, ruleId, culture, wording));
         }
         else if (group != TopicKind.Overview)
         {
@@ -121,7 +124,7 @@ public static class ContextBuilder
             .ThenByDescending(f => f.Severity)
             .ToList();
 
-        var bundle = new ContextBundle(topic, culture, lines, [.. ordered.Select(f => f.Text)], AllowedActions(topic, group, ordered, snapshot));
+        var bundle = new ContextBundle(topic, culture, lines, [.. ordered.Select(f => f.Text)], AllowedActions(topic, group, ordered, snapshot), wording);
         return Trim(bundle);
     }
 
@@ -141,7 +144,7 @@ public static class ContextBuilder
         _ => topic.Kind,
     };
 
-    private static List<ContextLine> CleanupItemLines(PcSnapshot snapshot, string ruleId, CultureInfo culture)
+    private static List<ContextLine> CleanupItemLines(PcSnapshot snapshot, string ruleId, CultureInfo culture, IPlatformText wording)
     {
         var lines = new List<ContextLine>();
         bool pt = culture.Name.StartsWith("pt", StringComparison.OrdinalIgnoreCase);
@@ -152,10 +155,10 @@ public static class ContextBuilder
 
         lines.Add(new ContextLine(pt ? "O que é" : "What it is", estimate.Rule.Description.Get(culture)));
         lines.Add(new ContextLine(pt ? "Se for removido" : "If removed", estimate.Rule.Consequence.Get(culture)));
-        foreach (CleanupFile item in (estimate.Files ?? []).Where(f => f.OriginalPath is not null).Take(MaxRecycleBinItems))
+        foreach (CleanupFile item in (estimate.Files ?? []).Where(f => f.OriginalPath is not null).Take(MaxTrashItems))
         {
             // The full path in one piece, so the anonymiser hides personal file names too (phase 6 privacy review).
-            lines.Add(new ContextLine(pt ? "Item na Lixeira" : "Item in the Recycle Bin", $"{item.OriginalPath} ({ByteSize.Format(item.Size, culture)})"));
+            lines.Add(new ContextLine(pt ? $"Item na {wording.Text(PlatformText.Trash, true)}" : $"Item in the {wording.Text(PlatformText.Trash, false)}", $"{item.OriginalPath} ({ByteSize.Format(item.Size, culture)})"));
         }
 
         return lines;

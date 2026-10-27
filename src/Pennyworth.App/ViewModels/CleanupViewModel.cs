@@ -1,4 +1,5 @@
 using System.Globalization;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.App.Services;
 using Pennyworth.Assistant;
@@ -345,7 +346,7 @@ public sealed record CleanupGroupViewModel(SafetyLevel Safety, IReadOnlyList<Cle
 
     public string Hint => Safety switch
     {
-        SafetyLevel.Safe => Strings.SafetyHint_Safe,
+        SafetyLevel.Safe => Localizer.Instance.Resolve(Strings.SafetyHint_Safe),
         SafetyLevel.UsuallySafe => Strings.SafetyHint_UsuallySafe,
         _ => Strings.SafetyHint_ThinkFirst,
     };
@@ -369,7 +370,7 @@ public sealed partial class CleanConfirmDialogViewModel(CleanupViewModel cleanup
 
     public bool ShowBinNote => Rows.Any(row => row.Rule.Kind == CleanupKind.RecycleBin);
 
-    public string BinNote => string.Format(Strings.BinNote, Rows.FirstOrDefault(row => row.Rule.Kind == CleanupKind.RecycleBin)?.Items ?? 0);
+    public string BinNote => string.Format(Localizer.Instance.Resolve(Strings.BinNote), Rows.FirstOrDefault(row => row.Rule.Kind == CleanupKind.RecycleBin)?.Items ?? 0);
 
     /// <summary>"18.2 GB in 2,310 files", above the reminder that only the listed files go.</summary>
     public string CountLine => string.Format(Strings.ConfirmCount, ByteSize.Format(cleanup.SelectedBytes), Rows.Sum(row => row.Items));

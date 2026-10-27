@@ -15,7 +15,7 @@
   <data name="NavMemory" xml:space="preserve"><value>Memory &amp; CPU</value></data>
   <data name="NavMemoryHint" xml:space="preserve"><value>What is running now</value></data>
   <data name="NavFolders" xml:space="preserve"><value>Folders</value></data>
-  <data name="NavFoldersHint" xml:space="preserve"><value>Browse like in Explorer</value></data>
+  <data name="NavFoldersHint" xml:space="preserve"><value>Browse like in {@FileManager}</value></data>
   <data name="ModeTip" xml:space="preserve"><value>Simple: lists and numbers. 3D: explore the PC part by part.</value></data>
   <data name="ModeSimple" xml:space="preserve"><value>Simple</value></data>
   <data name="Mode3d" xml:space="preserve"><value>3D</value></data>
@@ -24,7 +24,7 @@
   <data name="StatusReady" xml:space="preserve"><value>Ready</value></data>
   <data name="StatusScanning" xml:space="preserve"><value>Scanning…</value></data>
   <data name="Ok" xml:space="preserve"><value>OK</value></data>
-  <data name="ExplorerToast" xml:space="preserve"><value>Opening in Windows Explorer: {0}</value></data>
+  <data name="ExplorerToast" xml:space="preserve"><value>Opening in {@FileManagerFull}: {0}</value></data>
   <data name="GreetMorning" xml:space="preserve"><value>Good morning.</value></data>
   <data name="GreetAfternoon" xml:space="preserve"><value>Good afternoon.</value></data>
   <data name="GreetEvening" xml:space="preserve"><value>Good evening.</value></data>
@@ -52,16 +52,16 @@
   <data name="SeeStorage" xml:space="preserve"><value>See storage</value></data>
   <data name="CanFree" xml:space="preserve"><value>I can safely free</value></data>
   <data name="Safely" xml:space="preserve"><value>for you.</value></data>
-  <data name="FreeSafelySub" xml:space="preserve"><value>Caches and temporary files. Windows rebuilds them on its own; you won't miss them.</value></data>
+  <data name="FreeSafelySub" xml:space="preserve"><value>Caches and temporary files. {@SystemInitial} rebuilds them on its own; you won't miss them.</value></data>
   <data name="ReviewCleanup" xml:space="preserve"><value>Review cleanup</value></data>
   <data name="Memory" xml:space="preserve"><value>Memory</value></data>
   <data name="TopApp" xml:space="preserve"><value>top</value></data>
   <data name="SeeMemory" xml:space="preserve"><value>See Memory &amp; CPU</value></data>
-  <data name="UnlockBanner" xml:space="preserve"><value>There's a corner of your drive I'm not yet permitted to see. With your leave, I can measure it in seconds.</value></data>
-  <data name="UnlockCta" xml:space="preserve"><value>Unlock full scan</value></data>
+  <data name="UnlockBanner" xml:space="preserve"><value>{@UnlockBanner}</value></data>
+  <data name="UnlockCta" xml:space="preserve"><value>{@UnlockCta}</value></data>
   <data name="StorageTitle" xml:space="preserve"><value>Where your space has gone</value></data>
   <data name="StorageHelp" xml:space="preserve"><value>Each block of the bar is one kind of content. Select a category and I'll show you where it lives.</value></data>
-  <data name="LocalDisk" xml:space="preserve"><value>Local Disk</value></data>
+  <data name="LocalDisk" xml:space="preserve"><value>{@LocalDisk}</value></data>
   <data name="DriveUsed" xml:space="preserve"><value>{0} used of {1}</value></data>
   <data name="DriveFree" xml:space="preserve"><value>{0} free</value></data>
   <data name="ScanningFiles" xml:space="preserve"><value>Scanning… {0:N0} files found</value></data>
@@ -75,29 +75,29 @@
   <data name="Category_Games" xml:space="preserve"><value>Games</value></data>
   <data name="Category_Apps" xml:space="preserve"><value>Apps</value></data>
   <data name="Category_YourFiles" xml:space="preserve"><value>Your files</value></data>
-  <data name="Category_Windows" xml:space="preserve"><value>Windows</value></data>
-  <data name="Category_HiddenSystem" xml:space="preserve"><value>Hidden system</value></data>
+  <data name="Category_Windows" xml:space="preserve"><value>{@SystemCategory}</value></data>
+  <data name="Category_HiddenSystem" xml:space="preserve"><value>{@HiddenSystemCategory}</value></data>
   <data name="Category_Other" xml:space="preserve"><value>Other</value></data>
   <data name="Category_Unaccounted" xml:space="preserve"><value>Not measured yet</value></data>
   <data name="Category_UnaccountedMeasured" xml:space="preserve"><value>Unaccounted</value></data>
   <data name="CategoryHint_Games" xml:space="preserve"><value>Games and their data</value></data>
   <data name="CategoryHint_Apps" xml:space="preserve"><value>Installed programs and their data</value></data>
   <data name="CategoryHint_YourFiles" xml:space="preserve"><value>Your personal files</value></data>
-  <data name="CategoryHint_Windows" xml:space="preserve"><value>Windows itself</value></data>
-  <data name="CategoryHint_HiddenSystem" xml:space="preserve"><value>Space Windows uses behind the scenes</value></data>
+  <data name="CategoryHint_Windows" xml:space="preserve"><value>{@SystemItself}</value></data>
+  <data name="CategoryHint_HiddenSystem" xml:space="preserve"><value>Space {@System} uses behind the scenes</value></data>
   <data name="CategoryHint_Other" xml:space="preserve"><value>Everything else</value></data>
   <data name="CategoryHint_Unaccounted" xml:space="preserve"><value>Used space the scan can't see yet</value></data>
   <data name="CategoryHint_UnaccountedMeasured" xml:space="preserve"><value>Small gaps between measurements</value></data>
-  <data name="UnaccountedHint" xml:space="preserve"><value>Windows keeps a few rooms locked, restore points among them. With your permission, the full scan will measure them precisely.</value></data>
-  <data name="OvercountHint" xml:space="preserve"><value>A small confession: some files were counted twice (hard links), so these totals run a touch high. The full scan will set it straight.</value></data>
+  <data name="UnaccountedHint" xml:space="preserve"><value>{@UnaccountedHint}</value></data>
+  <data name="OvercountHint" xml:space="preserve"><value>{@OvercountHint}</value></data>
   <data name="BiggestPlaces" xml:space="preserve"><value>Biggest places</value></data>
   <data name="PlacesIn" xml:space="preserve"><value>Where the space in {0} is</value></data>
   <data name="BiggestPlacesPending" xml:space="preserve"><value>One moment. I'll list them as soon as I've finished.</value></data>
   <data name="BrowseAllFolders" xml:space="preserve"><value>Browse all folders</value></data>
-  <data name="Place_RestorePoints" xml:space="preserve"><value>Restore points</value></data>
-  <data name="Place_RestorePointsHint" xml:space="preserve"><value>Snapshots that can undo system changes</value></data>
-  <data name="Place_Ntfs" xml:space="preserve"><value>NTFS file system data</value></data>
-  <data name="Place_NtfsHint" xml:space="preserve"><value>The drive's own index of files</value></data>
+  <data name="Place_RestorePoints" xml:space="preserve"><value>{@RestorePointsPlace}</value></data>
+  <data name="Place_RestorePointsHint" xml:space="preserve"><value>{@RestorePointsHint}</value></data>
+  <data name="Place_Ntfs" xml:space="preserve"><value>{@MetadataPlace}</value></data>
+  <data name="Place_NtfsHint" xml:space="preserve"><value>{@MetadataHint}</value></data>
   <data name="ThisPc" xml:space="preserve"><value>This PC</value></data>
   <data name="FoldersHelp" xml:space="preserve"><value>Select a folder to open it. I've put the largest at the top.</value></data>
   <data name="FolderSummary" xml:space="preserve"><value>{0} · {1:N0} items</value></data>
@@ -108,11 +108,11 @@
   <data name="ColumnSize" xml:space="preserve"><value>Size</value></data>
   <data name="Back" xml:space="preserve"><value>Back</value></data>
   <data name="Up" xml:space="preserve"><value>Up</value></data>
-  <data name="ShowInExplorer" xml:space="preserve"><value>Show in Explorer</value></data>
+  <data name="ShowInExplorer" xml:space="preserve"><value>Show in {@FileManager}</value></data>
   <data name="Locked" xml:space="preserve"><value>Locked</value></data>
-  <data name="LockedHint" xml:space="preserve"><value>Windows keeps this folder locked. Quite normal for system folders.</value></data>
-  <data name="LockedTitle" xml:space="preserve"><value>Windows wouldn't let me in here.</value></data>
-  <data name="LockedBody" xml:space="preserve"><value>Quite normal for system folders; nothing is amiss. With your permission, the full scan can measure it.</value></data>
+  <data name="LockedHint" xml:space="preserve"><value>{@SystemInitial} keeps this folder locked. Quite normal for system folders.</value></data>
+  <data name="LockedTitle" xml:space="preserve"><value>{@SystemInitial} wouldn't let me in here.</value></data>
+  <data name="LockedBody" xml:space="preserve"><value>{@LockedBody}</value></data>
   <data name="EmptyFolder" xml:space="preserve"><value>This folder is empty.</value></data>
   <data name="EmptyFolderHint" xml:space="preserve"><value>Nothing here is taking up space.</value></data>
   <data name="CanFreeTitle" xml:space="preserve"><value>I can safely free {0}</value></data>
@@ -122,15 +122,15 @@
   <data name="Safety_Safe" xml:space="preserve"><value>Safe</value></data>
   <data name="Safety_UsuallySafe" xml:space="preserve"><value>Usually safe</value></data>
   <data name="Safety_ThinkFirst" xml:space="preserve"><value>Think first</value></data>
-  <data name="SafetyHint_Safe" xml:space="preserve"><value>Safe to clear. Windows rebuilds these on its own. Already ticked for you.</value></data>
+  <data name="SafetyHint_Safe" xml:space="preserve"><value>Safe to clear. {@SystemInitial} rebuilds these on its own. Already ticked for you.</value></data>
   <data name="SafetyHint_UsuallySafe" xml:space="preserve"><value>Fine for most. Do read the note on each one.</value></data>
   <data name="SafetyHint_ThinkFirst" xml:space="preserve"><value>I would think twice. This one has a real consequence.</value></data>
-  <data name="NeedsFullScan" xml:space="preserve"><value>Needs the full-scan permission, coming in a later version.</value></data>
+  <data name="NeedsFullScan" xml:space="preserve"><value>{@NeedsFullScan}</value></data>
   <data name="SelectedOf" xml:space="preserve"><value>Selected: {0} of {1}</value></data>
   <data name="CleanButton" xml:space="preserve"><value>Clean {0}</value></data>
   <data name="CleanConfirmTitle" xml:space="preserve"><value>Clean {0}?</value></data>
   <data name="ConfirmSub" xml:space="preserve"><value>Shall I proceed? Once removed, these can't be brought back.</value></data>
-  <data name="BinNote" xml:space="preserve"><value>The Recycle Bin holds {0:N0} items. They'll be gone for good, I'm afraid.</value></data>
+  <data name="BinNote" xml:space="preserve"><value>The {@Trash} holds {0:N0} items. They'll be gone for good, I'm afraid.</value></data>
   <data name="Cancel" xml:space="preserve"><value>Not just yet</value></data>
   <data name="ConfirmClean" xml:space="preserve"><value>Yes, clean</value></data>
   <data name="Cleaning" xml:space="preserve"><value>Cleaning…</value></data>
@@ -145,14 +145,14 @@
   <data name="CountBin" xml:space="preserve"><value>{0:N0} items</value></data>
   <data name="PreviewLabel" xml:space="preserve"><value>What will be deleted</value></data>
   <data name="PreviewSub" xml:space="preserve"><value>{0} in {1:N0} files. Only these files will be deleted: anything created or changed after this list stays where it is.</value></data>
-  <data name="PreviewSubBin" xml:space="preserve"><value>{0} in {1:N0} items. Emptying the Recycle Bin deletes them for good, so it's worth a look first.</value></data>
+  <data name="PreviewSubBin" xml:space="preserve"><value>{0} in {1:N0} items. Emptying the {@Trash} deletes them for good, so it's worth a look first.</value></data>
   <data name="PreviewFolders" xml:space="preserve"><value>Cleaned inside these folders (the folders themselves stay)</value></data>
   <data name="PreviewFolderLine" xml:space="preserve"><value>{0} · {1:N0} files</value></data>
   <data name="PreviewFolderLineBin" xml:space="preserve"><value>{0} · {1:N0} items</value></data>
   <data name="PreviewAllFolders" xml:space="preserve"><value>All folders</value></data>
-  <data name="PreviewShowFolder" xml:space="preserve"><value>Show this folder in Explorer</value></data>
+  <data name="PreviewShowFolder" xml:space="preserve"><value>Show this folder in {@FileManager}</value></data>
   <data name="PreviewFiles" xml:space="preserve"><value>Folders and files, largest first</value></data>
-  <data name="PreviewItemsBin" xml:space="preserve"><value>Items in the Recycle Bin, largest first</value></data>
+  <data name="PreviewItemsBin" xml:space="preserve"><value>Items in the {@Trash}, largest first</value></data>
   <data name="PreviewSearch" xml:space="preserve"><value>Search by name</value></data>
   <data name="PreviewMatches" xml:space="preserve"><value>{0:N0} matching</value></data>
   <data name="PreviewNoMatch" xml:space="preserve"><value>No file has that name.</value></data>
@@ -175,7 +175,7 @@
   <data name="Compressed" xml:space="preserve"><value>Compressed</value></data>
   <data name="Cached" xml:space="preserve"><value>Cached</value></data>
   <data name="MemFree" xml:space="preserve"><value>Free</value></data>
-  <data name="CachedNote" xml:space="preserve"><value>Cached memory isn't wasted, I assure you. Windows hands it back the instant an app asks.</value></data>
+  <data name="CachedNote" xml:space="preserve"><value>Cached memory isn't wasted, I assure you. {@SystemInitial} hands it back the instant an app asks.</value></data>
   <data name="Last60" xml:space="preserve"><value>Last 60 seconds</value></data>
   <data name="AppsColumn" xml:space="preserve"><value>Apps</value></data>
   <data name="MemoryColumn" xml:space="preserve"><value>Memory used</value></data>
@@ -184,7 +184,7 @@
   <data name="ProcessCount" xml:space="preserve"><value>{0:N0} processes</value></data>
   <data name="CloseApp" xml:space="preserve"><value>Close</value></data>
   <data name="Protected" xml:space="preserve"><value>Protected</value></data>
-  <data name="ProtectedTip" xml:space="preserve"><value>Windows needs this to run, so it can’t be closed.</value></data>
+  <data name="ProtectedTip" xml:space="preserve"><value>{@SystemInitial} needs this to run, so it can’t be closed.</value></data>
   <data name="StorageShort" xml:space="preserve"><value>Storage</value></data>
   <data name="CloseTitle" xml:space="preserve"><value>Close {0}?</value></data>
   <data name="CloseSub" xml:space="preserve"><value>Do save your work first. I'll close it the proper way.</value></data>
@@ -193,19 +193,19 @@
   <data name="ForceTitle" xml:space="preserve"><value>{0} didn't close</value></data>
   <data name="ForceSub" xml:space="preserve"><value>It may be waiting for you to save something. Forcing it closed loses any unsaved work.</value></data>
   <data name="ForceClose" xml:space="preserve"><value>Force close</value></data>
-  <data name="UnlockTitle" xml:space="preserve"><value>May I see the rest of the drive?</value></data>
-  <data name="UnlockWhy" xml:space="preserve"><value>To measure the hidden system space, and to do it in seconds, I need to read the drive directly. Windows will ask for your permission; it's only proper.</value></data>
+  <data name="UnlockTitle" xml:space="preserve"><value>{@UnlockTitle}</value></data>
+  <data name="UnlockWhy" xml:space="preserve"><value>{@UnlockWhy}</value></data>
   <data name="CanSee" xml:space="preserve"><value>What I will see</value></data>
-  <data name="SeeList" xml:space="preserve"><value>Restore points, protected folders and the exact hidden system space.</value></data>
+  <data name="SeeList" xml:space="preserve"><value>{@UnlockSees}</value></data>
   <data name="Wont" xml:space="preserve"><value>What I will not do</value></data>
   <data name="WontList" xml:space="preserve"><value>Delete anything without showing you first. You have my word.</value></data>
-  <data name="Unlock" xml:space="preserve"><value>Unlock</value></data>
+  <data name="Unlock" xml:space="preserve"><value>{@UnlockButton}</value></data>
   <data name="NotNow" xml:space="preserve"><value>Not now</value></data>
-  <data name="Waiting" xml:space="preserve"><value>Awaiting Windows' permission…</value></data>
+  <data name="Waiting" xml:space="preserve"><value>{@UnlockWaiting}</value></data>
   <data name="DeclinedTitle" xml:space="preserve"><value>Of course.</value></data>
   <data name="DeclinedSub" xml:space="preserve"><value>I'll carry on in normal mode. Should you change your mind, it's in Storage.</value></data>
-  <data name="UnlockedToast" xml:space="preserve"><value>Thank you. I can now see everything, hidden system space included.</value></data>
-  <data name="UnlockFailed" xml:space="preserve"><value>I couldn't measure the hidden space this time. Normal mode carries on.</value></data>
+  <data name="UnlockedToast" xml:space="preserve"><value>{@UnlockedToast}</value></data>
+  <data name="UnlockFailed" xml:space="preserve"><value>{@UnlockFailed}</value></data>
   <data name="ScanFailed" xml:space="preserve"><value>I couldn't finish reading {0}. Try again, or pick another drive.</value></data>
   <data name="NavSpecs" xml:space="preserve"><value>Specs</value></data>
   <data name="NavSpecsHint" xml:space="preserve"><value>Every part of your PC</value></data>
@@ -246,7 +246,7 @@
   <data name="SpecMainDisplay" xml:space="preserve"><value>main</value></data>
   <data name="SpecDisk" xml:space="preserve"><value>Disk {0}</value></data>
   <data name="SpecDisksHeadline" xml:space="preserve"><value>{0} · {1:N0} disks</value></data>
-  <data name="SpecNoLetter" xml:space="preserve"><value>no drive letter</value></data>
+  <data name="SpecNoLetter" xml:space="preserve"><value>{@NoDriveLetter}</value></data>
   <data name="SpecBios" xml:space="preserve"><value>BIOS</value></data>
   <data name="SpecBiosDate" xml:space="preserve"><value>BIOS date</value></data>
   <data name="SpecNoNetwork" xml:space="preserve"><value>Not connected right now.</value></data>
@@ -267,12 +267,12 @@
   <data name="TopMemory" xml:space="preserve"><value>Using memory</value></data>
   <data name="TopCpu" xml:space="preserve"><value>Using the processor</value></data>
   <data name="GpuNow" xml:space="preserve"><value>Usage now</value></data>
-  <data name="GpuUnavailable" xml:space="preserve"><value>Windows isn't sharing graphics card usage right now.</value></data>
+  <data name="GpuUnavailable" xml:space="preserve"><value>{@SystemInitial} isn't sharing graphics card usage right now.</value></data>
   <data name="ShaderNote" xml:space="preserve"><value>Game graphics files take {0}. Safe to clear; games rebuild them on first launch.</value></data>
   <data name="ShaderCleaned" xml:space="preserve"><value>Game graphics caches are already clean.</value></data>
-  <data name="PsuHiber" xml:space="preserve"><value>Hibernation file</value></data>
-  <data name="PsuHiberNote" xml:space="preserve"><value>Switching hibernation off would free this space, though the PC could no longer hibernate. I'll leave it as is unless you ask.</value></data>
-  <data name="PsuNoHiber" xml:space="preserve"><value>Hibernation is off, so no space is set aside for it.</value></data>
+  <data name="PsuHiber" xml:space="preserve"><value>{@HibernationTitle}</value></data>
+  <data name="PsuHiberNote" xml:space="preserve"><value>{@HibernationNote}</value></data>
+  <data name="PsuNoHiber" xml:space="preserve"><value>{@NoHibernation}</value></data>
   <data name="CanFreeShort" xml:space="preserve"><value>can be freed, sorted by how safe it is</value></data>
   <data name="OpenStorage" xml:space="preserve"><value>Open Storage</value></data>
   <data name="OpenMemory" xml:space="preserve"><value>Open Memory &amp; CPU</value></data>
@@ -288,7 +288,7 @@
   <data name="PartName_Processor" xml:space="preserve"><value>Processor</value></data>
   <data name="PartName_Graphics" xml:space="preserve"><value>Graphics card</value></data>
   <data name="PartName_Power" xml:space="preserve"><value>Power supply</value></data>
-  <data name="PartName_Trash" xml:space="preserve"><value>Recycle Bin &amp; cleanup</value></data>
+  <data name="PartName_Trash" xml:space="preserve"><value>{@Trash} &amp; cleanup</value></data>
   <data name="PartHint_Drive" xml:space="preserve"><value>Where everything you install and keep is stored.</value></data>
   <data name="PartHint_Memory" xml:space="preserve"><value>Short-term memory, for whatever is open at the moment.</value></data>
   <data name="PartHint_Processor" xml:space="preserve"><value>It does the work. Low numbers mean it is taking things easy.</value></data>
@@ -326,7 +326,7 @@
   <data name="FieldModel" xml:space="preserve"><value>Model</value></data>
   <data name="FieldModelAzure" xml:space="preserve"><value>Deployment name</value></data>
   <data name="FieldKey" xml:space="preserve"><value>API key</value></data>
-  <data name="KeyNote" xml:space="preserve"><value>Kept in the Windows Credential Manager, never in a file.</value></data>
+  <data name="KeyNote" xml:space="preserve"><value>Kept in the {@KeyStore}, never in a file.</value></data>
   <data name="TestConnection" xml:space="preserve"><value>Test connection</value></data>
   <data name="Testing" xml:space="preserve"><value>Testing…</value></data>
   <data name="TestOk" xml:space="preserve"><value>Connected in {1:N0} ms. It said: {0}</value></data>
@@ -353,7 +353,7 @@
   <data name="NotHelpful" xml:space="preserve"><value>Not helpful</value></data>
   <data name="FeedbackThanks" xml:space="preserve"><value>Thank you for telling me.</value></data>
   <data name="TokensUsed" xml:space="preserve"><value>{0:N0} tokens</value></data>
-  <data name="BlockedNote" xml:space="preserve"><value>I held back a suggestion that could harm Windows.</value></data>
+  <data name="BlockedNote" xml:space="preserve"><value>I held back a suggestion that could harm {@System}.</value></data>
   <data name="RepeatingNote" xml:space="preserve"><value>I stopped because I started repeating myself.</value></data>
   <data name="Thinking" xml:space="preserve"><value>Thinking…</value></data>
   <data name="BadgeLocal" xml:space="preserve"><value>On this PC · {0}</value></data>

@@ -38,7 +38,7 @@ public sealed partial class WelcomeViewModel(MainWindowViewModel shell) : Observ
     {
         get
         {
-            string drives = string.Join("  ", shell.Drives.Select(d => d.Letter));
+            string drives = string.Join("  ", shell.Drives.Select(d => d.Token));
             var system = shell.SystemDrive;
             return
             [
@@ -46,7 +46,7 @@ public sealed partial class WelcomeViewModel(MainWindowViewModel shell) : Observ
                 "",
                 "> " + shell.Greeting.ToLowerInvariant(),
                 Ascii.Leader(Strings.BootDrives, drives),
-                Ascii.Leader(string.Format(Strings.BootUsedOn, system?.Letter ?? "C:"), system is null ? "—" : ByteSize.Format(system.Summary.UsedBytes)),
+                Ascii.Leader(string.Format(Strings.BootUsedOn, shell.SystemDriveToken), system is null ? "—" : ByteSize.Format(system.Summary.UsedBytes)),
                 Ascii.Leader(Strings.BootMemory, shell.Live.HasSample ? shell.Live.MemoryTotalText : "—"),
                 Ascii.Leader(Strings.BootAccount, Strings.BootAccountValue),
                 "> " + Strings.BootReady,

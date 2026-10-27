@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using Pennyworth.Core.Wording;
 using Pennyworth.KnowledgeBase;
 using static Pennyworth.Assistant.Tests.Samples;
 
@@ -11,7 +12,7 @@ public class AssistantSessionTests
     private static readonly Anonymizer Ana = new("ana", @"C:\Users\ana", "DESKTOP-ANA");
 
     private static AssistantSession Session(FakeChatClient client, AssistantProfile profile) =>
-        new(client, profile, DiagnosisEngine.FromKnowledgeBase(), KnowledgeBaseLoader.LoadBlockedAdvice(), Ana);
+        new(client, profile, DiagnosisEngine.FromKnowledgeBase(), KnowledgeBaseLoader.LoadBlockedAdvice(), WindowsText.Instance, Ana);
 
     private static async Task<List<AssistantUpdate>> Ask(AssistantSession session, string question, PcSnapshot? snapshot = null, IReadOnlyList<ChatMessage>? history = null)
     {

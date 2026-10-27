@@ -144,9 +144,9 @@ public class FolderBrowserViewModelTests
 
         public int UnlockRequests { get; private set; }
 
-        public StorageTree? TreeFor(DriveViewModel drive) => drive.Letter == "C:" ? _tree : null;
+        public StorageTree? TreeFor(DriveViewModel drive) => drive.Token == "C:" ? _tree : null;
 
-        public void ScanDrive(DriveViewModel drive) => Scanned.Add(drive.Letter);
+        public void ScanDrive(DriveViewModel drive) => Scanned.Add(drive.Token);
 
         public void ShowInExplorer(string path) => Shown.Add(path);
 

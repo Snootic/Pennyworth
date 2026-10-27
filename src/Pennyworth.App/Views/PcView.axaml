@@ -273,7 +273,7 @@
               <TextBlock Classes="number" FontSize="28" Text="{Binding HibernationText}" />
               <StackPanel Orientation="Horizontal" Spacing="6">
                 <TextBlock FontSize="14" Text="{l:Tr PsuHiber}" />
-                <TextBlock Classes="mono secondary" FontSize="11" VerticalAlignment="Center" Text="hiberfil.sys" />
+                <TextBlock Classes="mono secondary" FontSize="11" VerticalAlignment="Center" Text="{Binding HibernationFileName}" />
               </StackPanel>
             </StackPanel>
           </Border>

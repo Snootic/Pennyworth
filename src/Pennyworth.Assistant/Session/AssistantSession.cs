@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.AI;
+using Pennyworth.Core.Wording;
 using Pennyworth.KnowledgeBase;
 
 namespace Pennyworth.Assistant;
@@ -17,6 +18,7 @@ public sealed partial class AssistantSession(
     AssistantProfile profile,
     DiagnosisEngine engine,
     AdviceCatalog advice,
+    IPlatformText wording,
     Anonymizer? anonymizer = null)
 {
     public const int MaxOutputTokens = 400;
@@ -50,7 +52,7 @@ public sealed partial class AssistantSession(
     public PreparedQuestion Prepare(string question, AssistantTopic topic, PcSnapshot snapshot, CultureInfo culture, IReadOnlyList<ChatMessage> history)
     {
         var facts = FactCollector.Collect(snapshot, culture);
-        var bundle = ContextBuilder.Build(topic, facts, engine.Evaluate(facts, culture), snapshot, culture);
+        var bundle = ContextBuilder.Build(topic, facts, engine.Evaluate(facts, culture), snapshot, culture, wording);
         bool cloud = !profile.IsLocal && anonymizer is not null;
         string Send(string text) => cloud ? anonymizer!.Anonymize(text) : text;
 

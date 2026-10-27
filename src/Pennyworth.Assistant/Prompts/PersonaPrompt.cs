@@ -1,4 +1,5 @@
 using System.Text;
+using Pennyworth.Core.Wording;
 
 namespace Pennyworth.Assistant;
 
@@ -25,14 +26,14 @@ public static class PersonaPrompt
               - Baseie-se apenas nos fatos e conclusões abaixo sobre este PC. Cite os números como estão escritos.
               - Se eles não respondem à pergunta, diga com franqueza que não consegue saber pelo que vê.
               - Explique termos técnicos em poucas palavras. Responda em no máximo {MaxWords} palavras, sem listas longas.
-              - Recomende apenas o que o próprio Pennyworth pode fazer, ou hábitos simples (fechar apps, reiniciar, esvaziar a Lixeira). Para qualquer mudança no sistema ou no hardware, sugira procurar uma pessoa de confiança que entenda do assunto.
+              - Recomende apenas o que o próprio Pennyworth pode fazer, ou hábitos simples (fechar apps, reiniciar, esvaziar a {bundle.Wording.Text(PlatformText.Trash, true)}). Para qualquer mudança no sistema ou no hardware, sugira procurar uma pessoa de confiança que entenda do assunto.
               - Se quiser levar a pessoa a uma tela do app, escreva no fim da resposta exatamente um destes códigos, uma vez só:
               """
             : $"""
               - Rely only on the facts and findings below about this PC. Quote numbers as they are written.
               - If they don't answer the question, say plainly that you can't tell from what you can see.
               - Explain technical terms in a few words. Answer in at most {MaxWords} words, without long lists.
-              - Only recommend what Pennyworth itself can do, or simple habits (closing apps, restarting, emptying the Recycle Bin). For any change to the system or the hardware, suggest asking a trusted person who knows about it.
+              - Only recommend what Pennyworth itself can do, or simple habits (closing apps, restarting, emptying the {bundle.Wording.Text(PlatformText.Trash, false)}). For any change to the system or the hardware, suggest asking a trusted person who knows about it.
               - If you want to take the person to a screen of the app, write exactly one of these codes at the end of the answer, once:
               """);
         foreach (AssistantAction action in bundle.AllowedActions)

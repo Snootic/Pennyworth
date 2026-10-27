@@ -1,8 +1,10 @@
 using System.Globalization;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.App.Services;
 using Pennyworth.Core.Formatting;
 using Pennyworth.Core.Storage;
+using Pennyworth.Core.Wording;
 using Pennyworth.Platform;
 using Pennyworth.Scanning;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -61,7 +63,7 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
     [ObservableProperty]
     public partial IReadOnlyList<BarSegment> Segments { get; private set; } = [];
 
-    /// <summary>The scan counted more than Windows reports as used (hard links).</summary>
+    /// <summary>The scan counted more than the system reports as used (hard links).</summary>
     [ObservableProperty]
     public partial bool HasOvercount { get; private set; }
 
@@ -73,11 +75,11 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
     /// <summary>When the scan finished, for "Scanned 2 min ago".</summary>
     public DateTimeOffset? CompletedAt { get; private set; }
 
-    /// <summary>True once the hidden system space has been measured with admin rights.</summary>
+    /// <summary>True once the hidden system space has been measured.</summary>
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(_hidden))]
     public bool IsUnlocked => _hidden is not null;
 
-    /// <summary>The Windows drive: the only one "Unlock full scan" measures.</summary>
+    /// <summary>The system drive: the only one the hidden-space measurement covers.</summary>
     public bool IsSystemDrive { get; }
 
     public bool ShowUnlockBanner => IsSystemDrive && !IsUnlocked;
@@ -126,7 +128,7 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
         SelectedCategory ??= Biggest;
     }
 
-    /// <summary>Adds restore points and NTFS data, measured with the user's permission.</summary>
+    /// <summary>Adds the measured hidden space: restore points and NTFS data on Windows, snapshots and filesystem metadata on Linux.</summary>
     public void ApplyHiddenSpace(HiddenSpaceReport report)
     {
         _hidden = report;
@@ -187,12 +189,12 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
                 string root = Drive.RootPath;
                 if (hidden.RestorePoints is > 0 and var restore)
                 {
-                    areas.Add(new CategoryAreaViewModel(null, Path.Combine(root, "System Volume Information"), restore, Strings.Place_RestorePoints, Strings.Place_RestorePointsHint, Share(restore, row.Bytes)));
+                    areas.Add(new CategoryAreaViewModel(null, Where(root, PlatformText.RestorePointsLocation), restore, Localizer.Instance.Resolve(Strings.Place_RestorePoints), Localizer.Instance.Resolve(Strings.Place_RestorePointsHint), Share(restore, row.Bytes)));
                 }
 
                 if (hidden.NtfsMetadata is > 0 and var ntfs)
                 {
-                    areas.Add(new CategoryAreaViewModel(null, Path.Combine(root, "$MFT"), ntfs, Strings.Place_Ntfs, Strings.Place_NtfsHint, Share(ntfs, row.Bytes)));
+                    areas.Add(new CategoryAreaViewModel(null, Where(root, PlatformText.MetadataLocation), ntfs, Localizer.Instance.Resolve(Strings.Place_Ntfs), Localizer.Instance.Resolve(Strings.Place_NtfsHint), Share(ntfs, row.Bytes)));
                 }
 
                 areas.Sort((a, b) => b.Bytes.CompareTo(a.Bytes));
@@ -208,6 +210,10 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
         return new CategoryAreaViewModel(
             area.Node, area.Node.FullPath, area.Bytes, description?.Title ?? area.Node.Name, description?.Description, Share(area.Bytes, categoryBytes));
     }
+
+    /// <summary>Where a measured hidden area sits: a name inside the drive, or the drive itself when the platform has none.</summary>
+    private static string Where(string root, PlatformText entry) =>
+        Localizer.Instance.Text(entry) is { Length: > 0 } name ? Path.Combine(root, name) : root;
 
     private static double Share(long bytes, long total) => total == 0 ? 0 : (double)bytes / total;
 

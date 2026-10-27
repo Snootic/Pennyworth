@@ -1,4 +1,5 @@
 using System.Globalization;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.App.Services;
 using Pennyworth.Cleanup;
@@ -72,9 +73,9 @@ public sealed partial class CleanupPreviewViewModel : ObservableObject
     }
 
     /// <summary>"18.2 GB in 1,204 files. Only these will be deleted; anything newer stays."</summary>
-    public string Summary => string.Format(Item.IsRecycleBin ? Strings.PreviewSubBin : Strings.PreviewSub, Item.SizeText, Item.Items);
+    public string Summary => string.Format(Localizer.Instance.Resolve(Item.IsRecycleBin ? Strings.PreviewSubBin : Strings.PreviewSub), Item.SizeText, Item.Items);
 
-    public string ListLabel => Item.IsRecycleBin ? Strings.PreviewItemsBin : Strings.PreviewFiles;
+    public string ListLabel => Localizer.Instance.Resolve(Item.IsRecycleBin ? Strings.PreviewItemsBin : Strings.PreviewFiles);
 
     /// <summary>"3.20 GB · 1,204 files" for this folder, or how many files match the search.</summary>
     public string MatchText => Search.Trim().Length == 0

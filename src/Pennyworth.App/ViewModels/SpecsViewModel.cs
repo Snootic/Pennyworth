@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Text;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.App.Services;
 using Pennyworth.Assistant;
 using Pennyworth.Core.Formatting;
+using Pennyworth.Core.Wording;
 using Pennyworth.Monitoring.Hardware;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -127,7 +129,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
         [
             new(Strings.SpecComputer, specs.System.ComputerName),
             new(Strings.SpecUser, specs.System.UserName),
-            new("Windows", Join(" · ", os.Name, os.Version)),
+            new(Localizer.Instance.Text(PlatformText.OsRowLabel), Join(" · ", os.Name, os.Version)),
             new(Strings.SpecBuild, $"{os.Build} · {os.Architecture}"),
             new(Strings.SpecInstalled, os.InstalledOn?.ToString("d", CultureInfo.CurrentCulture) ?? Unknown),
             new(Strings.SpecUptime, Uptime(os.Uptime)),
@@ -199,7 +201,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
                 Bytes(disk.Size),
                 disk.IsSsd switch { true => "SSD", false => "HDD", null => null },
                 disk.Bus,
-                disk.Letters.Count > 0 ? string.Join(", ", disk.Letters) : Strings.SpecNoLetter))).ToArray();
+                disk.Letters.Count > 0 ? string.Join(", ", disk.Letters) : Localizer.Instance.Resolve(Strings.SpecNoLetter)))).ToArray();
         string headline = string.Format(Strings.SpecDisksHeadline, Bytes(disks.Sum(d => d.Size)), disks.Count);
         return new SpecSection("05", Strings.Spec_Storage, headline, rows);
     }

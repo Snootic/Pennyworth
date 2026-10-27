@@ -359,7 +359,7 @@ public sealed partial class AskViewModel : ObservableObject
         }
 
         IChatClient client = _services.CreateClient(profile, key);
-        var session = new AssistantSession(client, profile, _engine.Value, _advice.Value, profile.IsLocal ? null : _services.Anonymizer);
+        var session = new AssistantSession(client, profile, _engine.Value, _advice.Value, Localizer.Instance.Wording, profile.IsLocal ? null : _services.Anonymizer);
         PcSnapshot snapshot = await _host.SnapshotAsync();
         PreparedQuestion prepared = session.Prepare(question, Topic, snapshot, Localizer.Instance.Culture, History());
 

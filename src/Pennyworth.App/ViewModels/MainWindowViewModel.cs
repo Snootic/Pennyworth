@@ -7,6 +7,7 @@ using Pennyworth.Assistant;
 using Pennyworth.Cleanup;
 using Pennyworth.Core.Formatting;
 using Pennyworth.Core.Storage;
+using Pennyworth.Core.Wording;
 using Pennyworth.Monitoring;
 using Pennyworth.Monitoring.Hardware;
 using Pennyworth.Platform;
@@ -32,7 +33,8 @@ public sealed record AppServices(
     CleanupHistory? CleanupHistory = null,
     Func<DateTimeOffset>? Clock = null,
     IClipboardService? Clipboard = null,
-    AssistantServices? Assistant = null);
+    AssistantServices? Assistant = null,
+    bool ExtendsIntoTitleBar = true);
 
 public enum Page
 {
@@ -96,6 +98,9 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
         Localizer.Instance.LanguageChanged += (_, _) => RefreshTexts();
     }
 
+    /// <summary>True when the window draws into the title bar and the system's caption buttons sit over it.</summary>
+    public bool ExtendsIntoTitleBar => _services.ExtendsIntoTitleBar;
+
     public LiveViewModel Live { get; }
 
     public WelcomeViewModel Welcome { get; }
@@ -121,9 +126,14 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
 
     IReadOnlyList<DriveViewModel> IFolderHost.Drives => Drives;
 
-    /// <summary>The drive Windows runs from.</summary>
+    /// <summary>The drive the operating system runs from.</summary>
     public DriveViewModel? SystemDrive => Drives.FirstOrDefault(d => string.Equals(d.Summary.RootPath, _services.Drives.SystemDriveRoot, StringComparison.OrdinalIgnoreCase))
         ?? Drives.FirstOrDefault();
+
+    /// <summary>The system drive's root, or the one the platform expects while no drive is known.</summary>
+    public string SystemDriveRoot => SystemDrive?.Summary.RootPath ?? Localizer.Instance.Text(PlatformText.SystemDriveRoot);
+
+    public string SystemDriveToken => SystemDrive?.Token ?? DriveViewModel.TokenOf(SystemDriveRoot);
 
     public StorageSummaryViewModel? SystemSummary => SystemDrive is { } drive ? _summaries.GetValueOrDefault(drive.Summary.RootPath) : null;
 
@@ -214,7 +224,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
 
     public bool HasToast => Toast is not null;
 
-    /// <summary>True once the hidden system space of the Windows drive has been measured.</summary>
+    /// <summary>True once the hidden system space of the system drive has been measured.</summary>
     [ObservableProperty]
     public partial bool IsUnlocked { get; private set; }
 
@@ -249,7 +259,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
 
     public string StatusShort => IsScanning ? Strings.StatusScanning : Strings.StatusReady;
 
-    public string SystemDriveStatus => SystemDrive is { } d ? $"{d.Letter} {d.UsedPercentText}" : "";
+    public string SystemDriveStatus => SystemDrive is { } d ? $"{d.Token} {d.UsedPercentText}" : "";
 
     public string RamStatus => Live.HasSample ? $"RAM {Live.MemoryUsedText}/{Live.MemoryTotalText}" : "";
 
@@ -262,7 +272,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
     /// <summary>The scan started by the latest drive selection; lets tests await it.</summary>
     public Task CurrentScan { get; private set; } = Task.CompletedTask;
 
-    /// <summary>Loads the drives, starts scanning the Windows drive and measuring what can be cleaned.</summary>
+    /// <summary>Loads the drives, starts scanning the system drive and measuring what can be cleaned.</summary>
     public void Initialize()
     {
         Drives.Clear();
@@ -337,7 +347,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
         Navigate(Page.Storage);
     }
 
-    /// <summary>Storage for the Windows drive, with a category selected (null keeps the current one).</summary>
+    /// <summary>Storage for the system drive, with a category selected (null keeps the current one).</summary>
     public void ShowStorageCategory(StorageCategory? category)
     {
         if (SystemDrive is { } system)
@@ -395,7 +405,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
         }
     }
 
-    /// <summary>Asks Windows for permission and measures the hidden system space (called by the dialog).</summary>
+    /// <summary>Measures the hidden system space, after the system's permission where it asks for one (called by the dialog).</summary>
     public async Task UnlockAsync(UnlockDialogViewModel dialog)
     {
         if (SystemDrive is not { } system)
@@ -412,7 +422,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
                 SystemSummary?.ApplyHiddenSpace(report);
                 IsUnlocked = true;
                 CloseDialog();
-                ShowToast(Strings.UnlockedToast);
+                ShowToast(Localizer.Instance.Resolve(Strings.UnlockedToast));
                 ShowStorageCategory(StorageCategory.HiddenSystem);
                 RefreshPages();
                 break;
@@ -421,7 +431,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
                 break;
             default:
                 CloseDialog();
-                ShowToast(Strings.UnlockFailed);
+                ShowToast(Localizer.Instance.Resolve(Strings.UnlockFailed));
                 break;
         }
     }
@@ -434,7 +444,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
     void IFolderHost.ShowInExplorer(string path)
     {
         _services.Explorer.ShowInExplorer(path);
-        ShowToast(string.Format(Strings.ExplorerToast, path));
+        ShowToast(string.Format(Localizer.Instance.Resolve(Strings.ExplorerToast), path));
     }
 
     /// <summary>The storage category of the folder an executable lives in.</summary>
@@ -791,13 +801,19 @@ public sealed partial class DriveViewModel(DriveSummary summary) : ObservableObj
 {
     public DriveSummary Summary { get; } = summary;
 
-    public string Name => $"{Label} ({Letter})";
+    /// <summary>The label with the drive's token, or the label alone when it is the token (a mount point with no volume label).</summary>
+    public string Name => Label == Token ? Label : $"{Label} ({Token})";
 
-    /// <summary>"C:".</summary>
-    public string Letter => Summary.RootPath.TrimEnd('\\');
+    /// <summary>What the drive is called in short: "C:" for <c>C:\</c>, "/home" for <c>/home</c>, "/" for the root.</summary>
+    public string Token => TokenOf(Summary.RootPath);
 
     /// <summary>The volume label, or "Local Disk" when the drive has none.</summary>
-    public string Label => string.IsNullOrWhiteSpace(Summary.Label) ? Strings.LocalDisk : Summary.Label;
+    public string Label => string.IsNullOrWhiteSpace(Summary.Label) ? Localizer.Instance.Resolve(Strings.LocalDisk) : Summary.Label;
+
+    /// <summary>The label to show beside the token: nothing when it would only repeat it.</summary>
+    public string Caption => Label == Token ? "" : Label;
+
+    public static string TokenOf(string root) => root.TrimEnd('\\', '/') is { Length: > 0 } trimmed ? trimmed : root;
 
     public string UsedPercentText => UsedFraction.ToString("P0");
 

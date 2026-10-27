@@ -93,7 +93,7 @@ public static class FactCollector
         {
             foreach (var (category, bytes) in categories.Where(c => c.Value > 0).OrderByDescending(c => c.Value))
             {
-                add($"storage.{category.ToString().ToLowerInvariant()}", TopicKind.Storage, t($"On the {os} drive: {CategoryName(category, false)}", $"No disco do {osPt}: {CategoryName(category, true)}"), FactKind.Bytes, bytes, null);
+                add($"storage.{category.ToString().ToLowerInvariant()}", TopicKind.Storage, t($"On the {os} drive: {CategoryName(category, false, windows)}", $"No disco do {osPt}: {CategoryName(category, true, windows)}"), FactKind.Bytes, bytes, null);
             }
         }
     }
@@ -244,12 +244,12 @@ public static class FactCollector
     private static string AppName(AppGroup app, CultureInfo culture) =>
         app.Explanation?.Title.Get(culture) ?? app.Description ?? app.Key;
 
-    private static string CategoryName(StorageCategory category, bool pt) => category switch
+    private static string CategoryName(StorageCategory category, bool pt, bool windows) => category switch
     {
         StorageCategory.Games => pt ? "jogos" : "games",
         StorageCategory.Apps => pt ? "apps" : "apps",
         StorageCategory.YourFiles => pt ? "seus arquivos" : "your files",
-        StorageCategory.Windows => "Windows",
+        StorageCategory.Windows => windows ? "Windows" : pt ? "sistema" : "system",
         StorageCategory.HiddenSystem => pt ? "sistema oculto" : "hidden system space",
         _ => pt ? "outros" : "other",
     };

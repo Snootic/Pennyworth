@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Services;
 using Pennyworth.App.Services.Windows;
 using Pennyworth.App.ViewModels;
@@ -26,6 +27,7 @@ public sealed partial class App : Application
             // Composition root: the only place concrete services are created, and the only place that
             // asks which operating system this is.
             IPlatform platform = CreatePlatform();
+            Localizer.Instance.UseWording(platform);
             var classifier = new RuleClassifier(KnowledgeBaseLoader.LoadEmbedded(platform.Name).Locations, platform.ResolveVariable);
             ISystemMonitor? monitor = platform.CreateMonitor(KnowledgeBaseLoader.LoadProcesses(platform.Name).Processes);
             var viewModel = new MainWindowViewModel(new AppServices(
@@ -42,7 +44,8 @@ public sealed partial class App : Application
                 platform.Closer,
                 new CleanupHistory(platform.CleanupHistoryPath),
                 Clipboard: new AvaloniaClipboardService(() => desktop.MainWindow),
-                Assistant: platform.CreateAssistant(() => monitor?.Sample().Memory.Available ?? 0)));
+                Assistant: platform.CreateAssistant(() => monitor?.Sample().Memory.Available ?? 0),
+                ExtendsIntoTitleBar: platform.ExtendsIntoTitleBar));
 
             desktop.MainWindow = new MainWindow { DataContext = viewModel };
             desktop.Exit += (_, _) => (monitor as IDisposable)?.Dispose();

@@ -1,3 +1,4 @@
+using Pennyworth.Core.Wording;
 using static Pennyworth.Assistant.Tests.Samples;
 
 namespace Pennyworth.Assistant.Tests;
@@ -8,7 +9,15 @@ public class PersonaPromptTests
     {
         var snapshot = Snapshot(diskUsedPercent: 92, apps: [App("chrome", 5 * Gb)]);
         var facts = FactCollector.Collect(snapshot, culture);
-        return ContextBuilder.Build(new AssistantTopic(TopicKind.Memory), facts, DiagnosisEngine.FromKnowledgeBase().Evaluate(facts, culture), snapshot, culture);
+        return ContextBuilder.Build(new AssistantTopic(TopicKind.Memory), facts, DiagnosisEngine.FromKnowledgeBase().Evaluate(facts, culture), snapshot, culture, WindowsText.Instance);
+    }
+
+    [Theory]
+    [InlineData("en-US", "emptying the Recycle Bin")]
+    [InlineData("pt-BR", "esvaziar a Lixeira")]
+    public void Windows_wording_keeps_the_original_advice(string culture, string expected)
+    {
+        Assert.Contains(expected, PersonaPrompt.Compose(Bundle(System.Globalization.CultureInfo.GetCultureInfo(culture))), StringComparison.Ordinal);
     }
 
     [Fact]

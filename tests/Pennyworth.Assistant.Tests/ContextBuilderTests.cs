@@ -1,4 +1,5 @@
 using Pennyworth.Cleanup;
+using Pennyworth.Core.Wording;
 using Pennyworth.KnowledgeBase;
 using static Pennyworth.Assistant.Tests.Samples;
 
@@ -12,7 +13,7 @@ public class ContextBuilderTests
     {
         culture ??= En;
         var facts = FactCollector.Collect(snapshot, culture);
-        return ContextBuilder.Build(topic, facts, Engine.Evaluate(facts, culture), snapshot, culture);
+        return ContextBuilder.Build(topic, facts, Engine.Evaluate(facts, culture), snapshot, culture, WindowsText.Instance);
     }
 
     [Fact]
@@ -85,9 +86,19 @@ public class ContextBuilderTests
     }
 
     [Fact]
+    public void Windows_wording_keeps_the_original_not_measured_line()
+    {
+        string english = ContextBuilder.Build(AssistantTopic.Overview, [], [], PcSnapshot.Empty, En, WindowsText.Instance).ToText();
+        string portuguese = ContextBuilder.Build(AssistantTopic.Overview, [], [], PcSnapshot.Empty, System.Globalization.CultureInfo.GetCultureInfo("pt-BR"), WindowsText.Instance).ToText();
+
+        Assert.Contains("NOT MEASURED by Pennyworth (say you can't see these): temperatures, fans, internet speed, game or Windows requirements, prices.", english, StringComparison.Ordinal);
+        Assert.Contains("NÃO MEDIDO pelo Pennyworth (diga que não consegue ver): temperaturas, ventoinhas, velocidade da internet, requisitos de jogos ou do Windows, preços.", portuguese, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Says_when_nothing_needs_attention()
     {
-        var bundle = ContextBuilder.Build(AssistantTopic.Overview, [], [], PcSnapshot.Empty, En);
+        var bundle = ContextBuilder.Build(AssistantTopic.Overview, [], [], PcSnapshot.Empty, En, WindowsText.Instance);
 
         Assert.EndsWith("FINDINGS: nothing needs attention right now." + Environment.NewLine, bundle.ToText());
         Assert.Equal([new AssistantAction(ActionKind.Cleanup), new AssistantAction(ActionKind.Memory), new AssistantAction(ActionKind.Specs)], bundle.AllowedActions);

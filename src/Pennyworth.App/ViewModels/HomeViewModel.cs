@@ -18,14 +18,14 @@ public sealed partial class HomeViewModel(MainWindowViewModel shell) : Observabl
     public string Greeting => shell.Greeting;
 
     public string StatusLine => shell.SystemDrive is { } system
-        ? string.Format(system.UsedFraction > AlmostFull ? Strings.HomeStatusFull : Strings.HomeStatusOk, system.Letter, system.UsedPercentText)
+        ? string.Format(system.UsedFraction > AlmostFull ? Strings.HomeStatusFull : Strings.HomeStatusOk, system.Token, system.UsedPercentText)
         : "";
 
     public IReadOnlyList<DriveCardViewModel> DriveCards => shell.Drives
         .Select(drive => new DriveCardViewModel(drive, drive.UsedFraction > AlmostFull))
         .ToArray();
 
-    public string StorageLabel => $"{Strings.NavStorage} · {shell.SystemDrive?.Letter}";
+    public string StorageLabel => $"{Strings.NavStorage} · {shell.SystemDrive?.Token}";
 
     /// <summary>"Apps use 413 GB", from the system drive's scan (live while it runs).</summary>
     public string TeaserLine => shell.SystemSummary?.Biggest is { } biggest
@@ -86,9 +86,9 @@ public sealed partial class HomeViewModel(MainWindowViewModel shell) : Observabl
 
 public sealed record DriveCardViewModel(DriveViewModel Drive, bool IsAlmostFull)
 {
-    public string Letter => Drive.Letter;
+    public string Token => Drive.Token;
 
-    public string Label => Drive.Label;
+    public string Caption => Drive.Caption;
 
     public string UsedLine => Drive.UsedText;
 

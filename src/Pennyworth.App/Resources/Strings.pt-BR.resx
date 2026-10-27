@@ -15,7 +15,7 @@
   <data name="NavMemory" xml:space="preserve"><value>Memória e CPU</value></data>
   <data name="NavMemoryHint" xml:space="preserve"><value>O que está rodando agora</value></data>
   <data name="NavFolders" xml:space="preserve"><value>Pastas</value></data>
-  <data name="NavFoldersHint" xml:space="preserve"><value>Navegue como no Explorador</value></data>
+  <data name="NavFoldersHint" xml:space="preserve"><value>Navegue como no {@FileManager}</value></data>
   <data name="ModeTip" xml:space="preserve"><value>Simples: listas e números. 3D: explore o PC peça por peça.</value></data>
   <data name="ModeSimple" xml:space="preserve"><value>Simples</value></data>
   <data name="Mode3d" xml:space="preserve"><value>3D</value></data>
@@ -24,7 +24,7 @@
   <data name="StatusReady" xml:space="preserve"><value>Pronto</value></data>
   <data name="StatusScanning" xml:space="preserve"><value>Verificando…</value></data>
   <data name="Ok" xml:space="preserve"><value>OK</value></data>
-  <data name="ExplorerToast" xml:space="preserve"><value>Abrindo no Explorador do Windows: {0}</value></data>
+  <data name="ExplorerToast" xml:space="preserve"><value>Abrindo no {@FileManagerFull}: {0}</value></data>
   <data name="GreetMorning" xml:space="preserve"><value>Bom dia.</value></data>
   <data name="GreetAfternoon" xml:space="preserve"><value>Boa tarde.</value></data>
   <data name="GreetEvening" xml:space="preserve"><value>Boa noite.</value></data>
@@ -52,16 +52,16 @@
   <data name="SeeStorage" xml:space="preserve"><value>Ver armazenamento</value></data>
   <data name="CanFree" xml:space="preserve"><value>Posso liberar</value></data>
   <data name="Safely" xml:space="preserve"><value>com toda a segurança.</value></data>
-  <data name="FreeSafelySub" xml:space="preserve"><value>Caches e arquivos temporários. O Windows os refaz sozinho; não farão falta.</value></data>
+  <data name="FreeSafelySub" xml:space="preserve"><value>Caches e arquivos temporários. {@SystemInitial} os refaz sozinho; não farão falta.</value></data>
   <data name="ReviewCleanup" xml:space="preserve"><value>Revisar limpeza</value></data>
   <data name="Memory" xml:space="preserve"><value>Memória</value></data>
   <data name="TopApp" xml:space="preserve"><value>maior</value></data>
   <data name="SeeMemory" xml:space="preserve"><value>Ver memória e CPU</value></data>
-  <data name="UnlockBanner" xml:space="preserve"><value>Há um canto do disco que ainda não tenho permissão para ver. Com a sua licença, meço em segundos.</value></data>
-  <data name="UnlockCta" xml:space="preserve"><value>Desbloquear verificação completa</value></data>
+  <data name="UnlockBanner" xml:space="preserve"><value>{@UnlockBanner}</value></data>
+  <data name="UnlockCta" xml:space="preserve"><value>{@UnlockCta}</value></data>
   <data name="StorageTitle" xml:space="preserve"><value>Para onde foi seu espaço</value></data>
   <data name="StorageHelp" xml:space="preserve"><value>Cada bloco da barra é um tipo de conteúdo. Escolha uma categoria e eu mostro onde ela está.</value></data>
-  <data name="LocalDisk" xml:space="preserve"><value>Disco Local</value></data>
+  <data name="LocalDisk" xml:space="preserve"><value>{@LocalDisk}</value></data>
   <data name="DriveUsed" xml:space="preserve"><value>{0} usados de {1}</value></data>
   <data name="DriveFree" xml:space="preserve"><value>{0} livres</value></data>
   <data name="ScanningFiles" xml:space="preserve"><value>Verificando… {0:N0} arquivos encontrados</value></data>
@@ -75,29 +75,29 @@
   <data name="Category_Games" xml:space="preserve"><value>Jogos</value></data>
   <data name="Category_Apps" xml:space="preserve"><value>Apps</value></data>
   <data name="Category_YourFiles" xml:space="preserve"><value>Seus arquivos</value></data>
-  <data name="Category_Windows" xml:space="preserve"><value>Windows</value></data>
-  <data name="Category_HiddenSystem" xml:space="preserve"><value>Sistema oculto</value></data>
+  <data name="Category_Windows" xml:space="preserve"><value>{@SystemCategory}</value></data>
+  <data name="Category_HiddenSystem" xml:space="preserve"><value>{@HiddenSystemCategory}</value></data>
   <data name="Category_Other" xml:space="preserve"><value>Outros</value></data>
   <data name="Category_Unaccounted" xml:space="preserve"><value>Ainda não medido</value></data>
   <data name="Category_UnaccountedMeasured" xml:space="preserve"><value>Não atribuído</value></data>
   <data name="CategoryHint_Games" xml:space="preserve"><value>Jogos e seus dados</value></data>
   <data name="CategoryHint_Apps" xml:space="preserve"><value>Programas instalados e seus dados</value></data>
   <data name="CategoryHint_YourFiles" xml:space="preserve"><value>Seus arquivos pessoais</value></data>
-  <data name="CategoryHint_Windows" xml:space="preserve"><value>O próprio Windows</value></data>
-  <data name="CategoryHint_HiddenSystem" xml:space="preserve"><value>Espaço que o Windows usa nos bastidores</value></data>
+  <data name="CategoryHint_Windows" xml:space="preserve"><value>{@SystemItself}</value></data>
+  <data name="CategoryHint_HiddenSystem" xml:space="preserve"><value>Espaço que {@System} usa nos bastidores</value></data>
   <data name="CategoryHint_Other" xml:space="preserve"><value>Todo o resto</value></data>
   <data name="CategoryHint_Unaccounted" xml:space="preserve"><value>Espaço usado que a verificação ainda não vê</value></data>
   <data name="CategoryHint_UnaccountedMeasured" xml:space="preserve"><value>Pequenas diferenças entre medições</value></data>
-  <data name="UnaccountedHint" xml:space="preserve"><value>O Windows mantém alguns cômodos trancados, como os pontos de restauração. Com sua permissão, a verificação completa mede tudo com precisão.</value></data>
-  <data name="OvercountHint" xml:space="preserve"><value>Uma pequena confissão: alguns arquivos foram contados duas vezes (links físicos), então os totais estão um tanto altos. A verificação completa põe tudo em ordem.</value></data>
+  <data name="UnaccountedHint" xml:space="preserve"><value>{@UnaccountedHint}</value></data>
+  <data name="OvercountHint" xml:space="preserve"><value>{@OvercountHint}</value></data>
   <data name="BiggestPlaces" xml:space="preserve"><value>Maiores lugares</value></data>
   <data name="PlacesIn" xml:space="preserve"><value>Onde está o espaço de {0}</value></data>
   <data name="BiggestPlacesPending" xml:space="preserve"><value>Um momento. Listo assim que terminar.</value></data>
   <data name="BrowseAllFolders" xml:space="preserve"><value>Ver todas as pastas</value></data>
-  <data name="Place_RestorePoints" xml:space="preserve"><value>Pontos de restauração</value></data>
-  <data name="Place_RestorePointsHint" xml:space="preserve"><value>Cópias que desfazem mudanças no sistema</value></data>
-  <data name="Place_Ntfs" xml:space="preserve"><value>Dados do sistema de arquivos NTFS</value></data>
-  <data name="Place_NtfsHint" xml:space="preserve"><value>O índice de arquivos do próprio disco</value></data>
+  <data name="Place_RestorePoints" xml:space="preserve"><value>{@RestorePointsPlace}</value></data>
+  <data name="Place_RestorePointsHint" xml:space="preserve"><value>{@RestorePointsHint}</value></data>
+  <data name="Place_Ntfs" xml:space="preserve"><value>{@MetadataPlace}</value></data>
+  <data name="Place_NtfsHint" xml:space="preserve"><value>{@MetadataHint}</value></data>
   <data name="ThisPc" xml:space="preserve"><value>Este PC</value></data>
   <data name="FoldersHelp" xml:space="preserve"><value>Escolha uma pasta para abrir. Deixei as maiores no topo.</value></data>
   <data name="FolderSummary" xml:space="preserve"><value>{0} · {1:N0} itens</value></data>
@@ -108,11 +108,11 @@
   <data name="ColumnSize" xml:space="preserve"><value>Tamanho</value></data>
   <data name="Back" xml:space="preserve"><value>Voltar</value></data>
   <data name="Up" xml:space="preserve"><value>Subir</value></data>
-  <data name="ShowInExplorer" xml:space="preserve"><value>Mostrar no Explorador</value></data>
+  <data name="ShowInExplorer" xml:space="preserve"><value>Mostrar no {@FileManager}</value></data>
   <data name="Locked" xml:space="preserve"><value>Bloqueada</value></data>
-  <data name="LockedHint" xml:space="preserve"><value>O Windows mantém esta pasta trancada. Normal em pastas do sistema.</value></data>
-  <data name="LockedTitle" xml:space="preserve"><value>O Windows não me deixou entrar aqui.</value></data>
-  <data name="LockedBody" xml:space="preserve"><value>Perfeitamente normal em pastas do sistema; não há nada de errado. Com sua permissão, a verificação completa consegue medir.</value></data>
+  <data name="LockedHint" xml:space="preserve"><value>{@SystemInitial} mantém esta pasta trancada. Normal em pastas do sistema.</value></data>
+  <data name="LockedTitle" xml:space="preserve"><value>{@SystemInitial} não me deixou entrar aqui.</value></data>
+  <data name="LockedBody" xml:space="preserve"><value>{@LockedBody}</value></data>
   <data name="EmptyFolder" xml:space="preserve"><value>Esta pasta está vazia.</value></data>
   <data name="EmptyFolderHint" xml:space="preserve"><value>Nada aqui ocupa espaço.</value></data>
   <data name="CanFreeTitle" xml:space="preserve"><value>Posso liberar {0}</value></data>
@@ -122,15 +122,15 @@
   <data name="Safety_Safe" xml:space="preserve"><value>Seguro</value></data>
   <data name="Safety_UsuallySafe" xml:space="preserve"><value>Geralmente seguro</value></data>
   <data name="Safety_ThinkFirst" xml:space="preserve"><value>Pense antes</value></data>
-  <data name="SafetyHint_Safe" xml:space="preserve"><value>Pode limpar. O Windows refaz sozinho. Já deixei marcado.</value></data>
+  <data name="SafetyHint_Safe" xml:space="preserve"><value>Pode limpar. {@SystemInitial} refaz sozinho. Já deixei marcado.</value></data>
   <data name="SafetyHint_UsuallySafe" xml:space="preserve"><value>Tudo bem para a maioria. Convém ler o aviso de cada um.</value></data>
   <data name="SafetyHint_ThinkFirst" xml:space="preserve"><value>Eu pensaria duas vezes. Este tem consequência real.</value></data>
-  <data name="NeedsFullScan" xml:space="preserve"><value>Precisa da permissão da verificação completa, que chega numa próxima versão.</value></data>
+  <data name="NeedsFullScan" xml:space="preserve"><value>{@NeedsFullScan}</value></data>
   <data name="SelectedOf" xml:space="preserve"><value>Selecionado: {0} de {1}</value></data>
   <data name="CleanButton" xml:space="preserve"><value>Limpar {0}</value></data>
   <data name="CleanConfirmTitle" xml:space="preserve"><value>Limpar {0}?</value></data>
   <data name="ConfirmSub" xml:space="preserve"><value>Posso prosseguir? Uma vez removidos, não há como trazê-los de volta.</value></data>
-  <data name="BinNote" xml:space="preserve"><value>A Lixeira guarda {0:N0} itens. Receio que sumirão de vez.</value></data>
+  <data name="BinNote" xml:space="preserve"><value>A {@Trash} guarda {0:N0} itens. Receio que sumirão de vez.</value></data>
   <data name="Cancel" xml:space="preserve"><value>Ainda não</value></data>
   <data name="ConfirmClean" xml:space="preserve"><value>Sim, pode limpar</value></data>
   <data name="Cleaning" xml:space="preserve"><value>Limpando…</value></data>
@@ -145,14 +145,14 @@
   <data name="CountBin" xml:space="preserve"><value>{0:N0} itens</value></data>
   <data name="PreviewLabel" xml:space="preserve"><value>O que será apagado</value></data>
   <data name="PreviewSub" xml:space="preserve"><value>{0} em {1:N0} arquivos. Só estes arquivos serão apagados: o que for criado ou alterado depois desta lista fica onde está.</value></data>
-  <data name="PreviewSubBin" xml:space="preserve"><value>{0} em {1:N0} itens. Esvaziar a Lixeira os apaga de vez, então vale dar uma olhada antes.</value></data>
+  <data name="PreviewSubBin" xml:space="preserve"><value>{0} em {1:N0} itens. Esvaziar a {@Trash} os apaga de vez, então vale dar uma olhada antes.</value></data>
   <data name="PreviewFolders" xml:space="preserve"><value>Limpo dentro destas pastas (as pastas em si ficam)</value></data>
   <data name="PreviewFolderLine" xml:space="preserve"><value>{0} · {1:N0} arquivos</value></data>
   <data name="PreviewFolderLineBin" xml:space="preserve"><value>{0} · {1:N0} itens</value></data>
   <data name="PreviewAllFolders" xml:space="preserve"><value>Todas as pastas</value></data>
-  <data name="PreviewShowFolder" xml:space="preserve"><value>Mostrar esta pasta no Explorador</value></data>
+  <data name="PreviewShowFolder" xml:space="preserve"><value>Mostrar esta pasta no {@FileManager}</value></data>
   <data name="PreviewFiles" xml:space="preserve"><value>Pastas e arquivos, dos maiores para os menores</value></data>
-  <data name="PreviewItemsBin" xml:space="preserve"><value>Itens na Lixeira, dos maiores para os menores</value></data>
+  <data name="PreviewItemsBin" xml:space="preserve"><value>Itens na {@Trash}, dos maiores para os menores</value></data>
   <data name="PreviewSearch" xml:space="preserve"><value>Buscar pelo nome</value></data>
   <data name="PreviewMatches" xml:space="preserve"><value>{0:N0} encontrados</value></data>
   <data name="PreviewNoMatch" xml:space="preserve"><value>Nenhum arquivo tem esse nome.</value></data>
@@ -175,7 +175,7 @@
   <data name="Compressed" xml:space="preserve"><value>Comprimida</value></data>
   <data name="Cached" xml:space="preserve"><value>Em cache</value></data>
   <data name="MemFree" xml:space="preserve"><value>Livre</value></data>
-  <data name="CachedNote" xml:space="preserve"><value>Memória em cache não é desperdício, garanto. O Windows a devolve no instante em que um app pede.</value></data>
+  <data name="CachedNote" xml:space="preserve"><value>Memória em cache não é desperdício, garanto. {@SystemInitial} a devolve no instante em que um app pede.</value></data>
   <data name="Last60" xml:space="preserve"><value>Últimos 60 segundos</value></data>
   <data name="AppsColumn" xml:space="preserve"><value>Apps</value></data>
   <data name="MemoryColumn" xml:space="preserve"><value>Memória usada</value></data>
@@ -184,7 +184,7 @@
   <data name="ProcessCount" xml:space="preserve"><value>{0:N0} processos</value></data>
   <data name="CloseApp" xml:space="preserve"><value>Fechar</value></data>
   <data name="Protected" xml:space="preserve"><value>Protegido</value></data>
-  <data name="ProtectedTip" xml:space="preserve"><value>O Windows precisa disto para funcionar, então não pode ser fechado.</value></data>
+  <data name="ProtectedTip" xml:space="preserve"><value>{@SystemInitial} precisa disto para funcionar, então não pode ser fechado.</value></data>
   <data name="StorageShort" xml:space="preserve"><value>Espaço</value></data>
   <data name="CloseTitle" xml:space="preserve"><value>Fechar {0}?</value></data>
   <data name="CloseSub" xml:space="preserve"><value>Convém salvar seu trabalho antes. Fecharei da maneira adequada.</value></data>
@@ -193,19 +193,19 @@
   <data name="ForceTitle" xml:space="preserve"><value>{0} não fechou</value></data>
   <data name="ForceSub" xml:space="preserve"><value>Talvez esteja esperando você salvar algo. Forçar o fechamento perde o que não foi salvo.</value></data>
   <data name="ForceClose" xml:space="preserve"><value>Forçar fechamento</value></data>
-  <data name="UnlockTitle" xml:space="preserve"><value>Posso ver o restante do disco?</value></data>
-  <data name="UnlockWhy" xml:space="preserve"><value>Para medir o espaço oculto do sistema, e em segundos, preciso ler o disco diretamente. O Windows vai pedir sua permissão; é o correto.</value></data>
+  <data name="UnlockTitle" xml:space="preserve"><value>{@UnlockTitle}</value></data>
+  <data name="UnlockWhy" xml:space="preserve"><value>{@UnlockWhy}</value></data>
   <data name="CanSee" xml:space="preserve"><value>O que verei</value></data>
-  <data name="SeeList" xml:space="preserve"><value>Pontos de restauração, pastas protegidas e o espaço oculto exato.</value></data>
+  <data name="SeeList" xml:space="preserve"><value>{@UnlockSees}</value></data>
   <data name="Wont" xml:space="preserve"><value>O que não farei</value></data>
   <data name="WontList" xml:space="preserve"><value>Apagar qualquer coisa sem antes mostrar a você. Tem a minha palavra.</value></data>
-  <data name="Unlock" xml:space="preserve"><value>Desbloquear</value></data>
+  <data name="Unlock" xml:space="preserve"><value>{@UnlockButton}</value></data>
   <data name="NotNow" xml:space="preserve"><value>Agora não</value></data>
-  <data name="Waiting" xml:space="preserve"><value>Aguardando a permissão do Windows…</value></data>
+  <data name="Waiting" xml:space="preserve"><value>{@UnlockWaiting}</value></data>
   <data name="DeclinedTitle" xml:space="preserve"><value>Pois não.</value></data>
   <data name="DeclinedSub" xml:space="preserve"><value>Sigo no modo normal. Se mudar de ideia, está em Armazenamento.</value></data>
-  <data name="UnlockedToast" xml:space="preserve"><value>Obrigado. Agora vejo tudo, inclusive o espaço oculto do sistema.</value></data>
-  <data name="UnlockFailed" xml:space="preserve"><value>Não consegui medir o espaço oculto desta vez. O modo normal continua.</value></data>
+  <data name="UnlockedToast" xml:space="preserve"><value>{@UnlockedToast}</value></data>
+  <data name="UnlockFailed" xml:space="preserve"><value>{@UnlockFailed}</value></data>
   <data name="ScanFailed" xml:space="preserve"><value>Não consegui terminar de ler {0}. Tente de novo ou escolha outro disco.</value></data>
   <data name="NavSpecs" xml:space="preserve"><value>Especificações</value></data>
   <data name="NavSpecsHint" xml:space="preserve"><value>Cada peça do seu PC</value></data>
@@ -246,7 +246,7 @@
   <data name="SpecMainDisplay" xml:space="preserve"><value>principal</value></data>
   <data name="SpecDisk" xml:space="preserve"><value>Disco {0}</value></data>
   <data name="SpecDisksHeadline" xml:space="preserve"><value>{0} · {1:N0} discos</value></data>
-  <data name="SpecNoLetter" xml:space="preserve"><value>sem letra de unidade</value></data>
+  <data name="SpecNoLetter" xml:space="preserve"><value>{@NoDriveLetter}</value></data>
   <data name="SpecBios" xml:space="preserve"><value>BIOS</value></data>
   <data name="SpecBiosDate" xml:space="preserve"><value>Data do BIOS</value></data>
   <data name="SpecNoNetwork" xml:space="preserve"><value>Sem conexão no momento.</value></data>
@@ -267,12 +267,12 @@
   <data name="TopMemory" xml:space="preserve"><value>Usando memória</value></data>
   <data name="TopCpu" xml:space="preserve"><value>Usando o processador</value></data>
   <data name="GpuNow" xml:space="preserve"><value>Uso agora</value></data>
-  <data name="GpuUnavailable" xml:space="preserve"><value>O Windows não está informando o uso da placa de vídeo agora.</value></data>
+  <data name="GpuUnavailable" xml:space="preserve"><value>{@SystemInitial} não está informando o uso da placa de vídeo agora.</value></data>
   <data name="ShaderNote" xml:space="preserve"><value>Arquivos de gráficos dos jogos ocupam {0}. Seguro limpar; os jogos os refazem no primeiro uso.</value></data>
   <data name="ShaderCleaned" xml:space="preserve"><value>Os caches de gráficos dos jogos já estão limpos.</value></data>
-  <data name="PsuHiber" xml:space="preserve"><value>Arquivo de hibernação</value></data>
-  <data name="PsuHiberNote" xml:space="preserve"><value>Desligar a hibernação liberaria este espaço, mas o PC deixaria de hibernar. Deixo como está, a menos que peça.</value></data>
-  <data name="PsuNoHiber" xml:space="preserve"><value>A hibernação está desligada, então nenhum espaço é reservado para ela.</value></data>
+  <data name="PsuHiber" xml:space="preserve"><value>{@HibernationTitle}</value></data>
+  <data name="PsuHiberNote" xml:space="preserve"><value>{@HibernationNote}</value></data>
+  <data name="PsuNoHiber" xml:space="preserve"><value>{@NoHibernation}</value></data>
   <data name="CanFreeShort" xml:space="preserve"><value>podem ser liberados, por nível de segurança</value></data>
   <data name="OpenStorage" xml:space="preserve"><value>Abrir armazenamento</value></data>
   <data name="OpenMemory" xml:space="preserve"><value>Abrir memória e CPU</value></data>
@@ -288,7 +288,7 @@
   <data name="PartName_Processor" xml:space="preserve"><value>Processador</value></data>
   <data name="PartName_Graphics" xml:space="preserve"><value>Placa de vídeo</value></data>
   <data name="PartName_Power" xml:space="preserve"><value>Fonte de energia</value></data>
-  <data name="PartName_Trash" xml:space="preserve"><value>Lixeira e limpeza</value></data>
+  <data name="PartName_Trash" xml:space="preserve"><value>{@Trash} e limpeza</value></data>
   <data name="PartHint_Drive" xml:space="preserve"><value>Onde fica guardado tudo o que você instala e salva.</value></data>
   <data name="PartHint_Memory" xml:space="preserve"><value>Memória de curto prazo, para o que está aberto agora.</value></data>
   <data name="PartHint_Processor" xml:space="preserve"><value>Faz o trabalho. Números baixos significam que está folgado.</value></data>
@@ -326,7 +326,7 @@
   <data name="FieldModel" xml:space="preserve"><value>Modelo</value></data>
   <data name="FieldModelAzure" xml:space="preserve"><value>Nome da implantação</value></data>
   <data name="FieldKey" xml:space="preserve"><value>Chave de API</value></data>
-  <data name="KeyNote" xml:space="preserve"><value>Guardada no Gerenciador de Credenciais do Windows, nunca em arquivo.</value></data>
+  <data name="KeyNote" xml:space="preserve"><value>Guardada no {@KeyStore}, nunca em arquivo.</value></data>
   <data name="TestConnection" xml:space="preserve"><value>Testar conexão</value></data>
   <data name="Testing" xml:space="preserve"><value>Testando…</value></data>
   <data name="TestOk" xml:space="preserve"><value>Conectado em {1:N0} ms. Resposta: {0}</value></data>
@@ -353,7 +353,7 @@
   <data name="NotHelpful" xml:space="preserve"><value>Não ajudou</value></data>
   <data name="FeedbackThanks" xml:space="preserve"><value>Obrigado por avisar.</value></data>
   <data name="TokensUsed" xml:space="preserve"><value>{0:N0} tokens</value></data>
-  <data name="BlockedNote" xml:space="preserve"><value>Segurei uma sugestão que poderia prejudicar o Windows.</value></data>
+  <data name="BlockedNote" xml:space="preserve"><value>Segurei uma sugestão que poderia prejudicar {@System}.</value></data>
   <data name="RepeatingNote" xml:space="preserve"><value>Parei porque comecei a me repetir.</value></data>
   <data name="Thinking" xml:space="preserve"><value>Pensando…</value></data>
   <data name="BadgeLocal" xml:space="preserve"><value>Neste PC · {0}</value></data>
