@@ -174,7 +174,8 @@ internal static class TestApp
         ISettingsStore? settings = null,
         ISystemMonitor? monitor = null,
         IProcessCloser? closer = null,
-        FakeExplorer? explorer = null) => new(
+        FakeExplorer? explorer = null,
+        IPrivilegedOperations? privileged = null) => new(
         new FakeDriveService(DriveD, DriveC),
         scanner ?? new FakeScanner(_ => SampleTrees.Build()),
         new NullClassifier(),
@@ -186,7 +187,8 @@ internal static class TestApp
         new SamplePcReader(),
         monitor,
         closer ?? new FakeCloser(closes: true),
-        Clock: () => new DateTimeOffset(2026, 10, 24, 20, 0, 0, TimeSpan.Zero));
+        Clock: () => new DateTimeOffset(2026, 10, 24, 20, 0, 0, TimeSpan.Zero),
+        Privileged: privileged);
 }
 
 /// <summary>Assistant services that work on temp folders and never call a model.</summary>
