@@ -28,6 +28,8 @@ public sealed class WindowsPlatform : IPlatform
 
     public IProcessCloser Closer { get; } = new ProcessCloser();
 
+    public IAppNames AppNames => NoAppNames.Instance;
+
     public ISpecsReader Specs { get; } = new WindowsSpecsReader();
 
     public string SettingsPath => FileSettingsStore.DefaultPath;

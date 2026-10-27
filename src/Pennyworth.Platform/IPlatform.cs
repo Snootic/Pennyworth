@@ -28,6 +28,9 @@ public interface IPlatform
 
     IProcessCloser Closer { get; }
 
+    /// <summary>Names of the installed apps behind folders, for the storage page.</summary>
+    IAppNames AppNames { get; }
+
     ISpecsReader Specs { get; }
 
     /// <summary>Where the settings file lives.</summary>

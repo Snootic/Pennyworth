@@ -61,6 +61,12 @@ public class LinuxClassificationTests
     [InlineData("/home/ana/.local/share/Steam/steamapps", StorageCategory.Games)]
     [InlineData("/mnt/games/SteamLibrary/steamapps", StorageCategory.Games)]
     [InlineData("/home/ana/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps", StorageCategory.Games)]
+    [InlineData("/var/lib/flatpak/runtime", StorageCategory.Apps)]
+    [InlineData("/home/ana/.var/app/net.lutris.Lutris", StorageCategory.Games)]
+    [InlineData("/home/ana/.local/share/anime-game-launcher", StorageCategory.Games)]
+    [InlineData("/home/ana/.local/share/Steam", StorageCategory.Apps)]
+    [InlineData("/home/ana/.local/share/Steam/steamapps/common", StorageCategory.Games)]
+    [InlineData("/home/linuxbrew", StorageCategory.Apps)]
     [InlineData("/swapfile", StorageCategory.HiddenSystem)]
     [InlineData("/.snapshots", StorageCategory.HiddenSystem)]
     [InlineData("/var/cache", StorageCategory.HiddenSystem)]
@@ -123,5 +129,28 @@ public class LinuxClassificationTests
         Assert.Equal(StorageCategory.Windows, classifier.Classify("/etc", StorageCategory.Other));
         Assert.Equal(StorageCategory.YourFiles, classifier.Classify("/home/ana", StorageCategory.Other));
         Assert.Equal(StorageCategory.Other, classifier.Classify("/home/ana/.cache", StorageCategory.Other));
+    }
+
+    [Fact]
+    public void Homebrew_is_not_somebodys_user_folder()
+    {
+        var classifier = Classifier();
+
+        Assert.Equal("homebrew", classifier.FindLocation("/home/linuxbrew")!.Id);
+        Assert.Equal("home-folders", classifier.FindLocation("/home/bob")!.Id);
+    }
+
+    [Theory]
+    [InlineData("/home/ana/.var/app", true)]
+    [InlineData("/home/ana/.local/share/flatpak/app", true)]
+    [InlineData("/var/lib/flatpak/app", true)]
+    [InlineData("/opt", true)]
+    [InlineData("/home/ana/.cache", true)]
+    [InlineData("/home/ana/.local/share/Steam/steamapps/common", true)]
+    [InlineData("/usr", false)]
+    [InlineData("/home/ana/.var/app/org.mozilla.firefox", false)]
+    public void Only_folders_that_hold_one_place_per_app_are_split(string path, bool split)
+    {
+        Assert.Equal(split, Classifier().FindLocation(path)?.Children is not null);
     }
 }
