@@ -145,4 +145,171 @@ public class StorageTreeTests
         // Exactly what the area list reports for the folder.
         Assert.Equal(40, tree.GetCategoryAreas(StorageCategory.Apps).Single(area => area.Node.Name == "data").Bytes);
     }
+
+    // / (Other)
+    //   open/ (Apps)           f.bin 10
+    //   secret/ (Apps)         locked
+    //   deep/ (Other)
+    //     vault/ (Games)       locked, the second one
+    private static StorageTree BuildWithLockedFolders()
+    {
+        var b = new StorageTreeBuilder("/", StorageCategory.Other);
+        int open = b.AddDirectory(StorageTreeBuilder.RootIndex, "open", StorageCategory.Apps);
+        b.AddFile(open, "f.bin", 10, 8, StorageCategory.Apps);
+        int secret = b.AddDirectory(StorageTreeBuilder.RootIndex, "secret", StorageCategory.Apps);
+        b.MarkLocked(secret);
+        int deep = b.AddDirectory(StorageTreeBuilder.RootIndex, "deep", StorageCategory.Other);
+        int vault = b.AddDirectory(deep, "vault", StorageCategory.Games);
+        b.MarkLocked(vault);
+        return b.Build();
+    }
+
+    private static StorageNode Find(StorageTree tree, string name) =>
+        Descendants(tree.Root).Single(node => node.Name == name);
+
+    [Fact]
+    public void Lists_the_locked_folders_that_have_no_size_yet()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+
+        Assert.Equal(["secret", "vault"], tree.GetLockedFolders().Select(node => node.Name).Order());
+        Assert.All(tree.GetLockedFolders(), node => Assert.False(node.IsMeasured));
+        Assert.Empty(BuildSample().GetLockedFolders());
+
+        StorageTree measured = tree.WithMeasuredFolders(new Dictionary<string, FolderMeasurement>
+        {
+            [Find(tree, "secret").FullPath] = new(100, 90, 4),
+        });
+
+        Assert.Equal(["vault"], measured.GetLockedFolders().Select(node => node.Name));
+    }
+
+    [Fact]
+    public void Measured_folders_add_up_in_ancestors_totals_and_categories()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+
+        StorageTree measured = tree.WithMeasuredFolders(new Dictionary<string, FolderMeasurement>
+        {
+            [Find(tree, "secret").FullPath] = new(100, 90, 4),
+            [Find(tree, "vault").FullPath] = new(1000, 900, 7),
+        });
+
+        Assert.Equal(1110, measured.TotalBytes);
+        Assert.Equal(1 + 4 + 7, measured.FileCount);
+        Assert.Equal(1110, measured.Root.SizeOnDisk);
+        Assert.Equal(998, measured.Root.LogicalSize);
+        Assert.Equal(1000, measured.Root.GetChildren().Single(node => node.Name == "deep").SizeOnDisk);
+        Assert.Equal(110, measured.GetCategoryBytes(StorageCategory.Apps));
+        Assert.Equal(1000, measured.GetCategoryBytes(StorageCategory.Games));
+        Assert.Equal(0, measured.GetCategoryBytes(StorageCategory.Other));
+
+        StorageNode secret = Find(measured, "secret");
+        Assert.True(secret.IsMeasured);
+        Assert.True(secret.IsLocked);
+        Assert.False(secret.HasChildren);
+        Assert.Equal(100, secret.SizeOnDisk);
+        Assert.Equal(90, secret.LogicalSize);
+    }
+
+    [Fact]
+    public void Measured_folders_count_as_leaves_of_their_category()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+        StorageTree measured = tree.WithMeasuredFolders(new Dictionary<string, FolderMeasurement>
+        {
+            [Find(tree, "secret").FullPath] = new(100, 90, 4),
+            [Find(tree, "vault").FullPath] = new(1000, 900, 7),
+        });
+
+        // The area list sums to the category's bytes, with the locked folder inside its area.
+        var apps = measured.GetCategoryAreas(StorageCategory.Apps);
+        Assert.Equal(110, apps.Sum(area => area.Bytes));
+        Assert.Equal(100, apps.Single(area => area.Node.Name == "secret").Bytes);
+        Assert.Equal(1000, measured.GetCategoryAreas(StorageCategory.Games).Single().Bytes);
+        Assert.Equal(100, measured.GetCategoryBytes(Find(measured, "secret"), StorageCategory.Apps));
+        Assert.Equal(1000, measured.GetCategoryBytes(Find(measured, "vault"), StorageCategory.Games));
+        Assert.Equal(0, measured.GetCategoryBytes(Find(measured, "vault"), StorageCategory.Apps));
+
+        // Before measuring, a locked folder holds nothing: the old behaviour.
+        Assert.Equal(10, tree.GetCategoryAreas(StorageCategory.Apps).Sum(area => area.Bytes));
+        Assert.Empty(tree.GetCategoryAreas(StorageCategory.Games));
+    }
+
+    [Fact]
+    public void Measured_folders_keep_the_children_listing_sorted_by_size()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+        StorageTree measured = tree.WithMeasuredFolders(new Dictionary<string, FolderMeasurement>
+        {
+            [Find(tree, "secret").FullPath] = new(100, 90, 4),
+        });
+
+        Assert.Equal(["secret", "open", "deep"], measured.Root.GetChildren().Select(node => node.Name));
+    }
+
+    [Fact]
+    public void A_folder_measured_twice_is_counted_once()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+        var sizes = new Dictionary<string, FolderMeasurement> { [Find(tree, "secret").FullPath] = new(100, 90, 4) };
+
+        StorageTree twice = tree.WithMeasuredFolders(sizes).WithMeasuredFolders(sizes);
+
+        Assert.Equal(110, twice.TotalBytes);
+        Assert.Equal(5, twice.FileCount);
+        Assert.Equal(110, twice.Root.SizeOnDisk);
+        Assert.Equal(110, twice.GetCategoryBytes(StorageCategory.Apps));
+    }
+
+    [Fact]
+    public void Unknown_keys_and_folders_that_are_not_locked_are_ignored()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+        StorageNode open = tree.Root.GetChildren().Single(node => node.Name == "open");
+
+        StorageTree measured = tree.WithMeasuredFolders(new Dictionary<string, FolderMeasurement>
+        {
+            ["/nowhere"] = new(500, 500, 5),
+            [open.FullPath] = new(500, 500, 5),
+            [tree.Root.FullPath] = new(500, 500, 5),
+        });
+
+        Assert.Equal(tree.TotalBytes, measured.TotalBytes);
+        Assert.Equal(tree.FileCount, measured.FileCount);
+        Assert.Equal(tree.Root.SizeOnDisk, measured.Root.SizeOnDisk);
+        Assert.Equal(2, measured.GetLockedFolders().Count);
+        Assert.False(measured.Root.GetChildren().Single(node => node.Name == "open").IsMeasured);
+    }
+
+    [Fact]
+    public void Measuring_leaves_the_original_tree_untouched()
+    {
+        StorageTree tree = BuildWithLockedFolders();
+
+        StorageTree measured = tree.WithMeasuredFolders(new Dictionary<string, FolderMeasurement>
+        {
+            [Find(tree, "secret").FullPath] = new(100, 90, 4),
+        });
+
+        Assert.NotSame(tree, measured);
+        Assert.Equal(10, tree.TotalBytes);
+        Assert.Equal(1, tree.FileCount);
+        Assert.Equal(10, tree.Root.SizeOnDisk);
+        Assert.Equal(10, tree.GetCategoryBytes(StorageCategory.Apps));
+        Assert.False(Find(tree, "secret").IsMeasured);
+        Assert.Equal(0, Find(tree, "secret").SizeOnDisk);
+    }
+
+    private static IEnumerable<StorageNode> Descendants(StorageNode node)
+    {
+        foreach (StorageNode child in node.GetChildren())
+        {
+            yield return child;
+            foreach (StorageNode below in Descendants(child))
+            {
+                yield return below;
+            }
+        }
+    }
 }

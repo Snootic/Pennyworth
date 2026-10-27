@@ -233,7 +233,8 @@ public partial class PlatformDataTests
 
         Assert.All(rules, r =>
         {
-            // Pennyworth never elevates on Linux: whatever lives outside the home folder needs root and must say so.
+            // Whatever lives outside the home folder needs root and must say so: the app only asks for the administrator
+            // password for a rule that declares it, and never lets an unprivileged rule reach system folders.
             bool outsideHome = r.Paths.Any(p => p.StartsWith('/'));
             Assert.True(!outsideHome || r.RequiresAdmin, $"{r.Id} cleans system folders without requiring admin");
             Assert.True(r.Safety != SafetyLevel.Safe || !r.RequiresAdmin, $"{r.Id} is marked Safe but needs admin");

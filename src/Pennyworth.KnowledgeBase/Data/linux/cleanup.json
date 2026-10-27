@@ -129,7 +129,7 @@
       "requiresAdmin": true,
       "title": { "en": "Downloaded installation packages", "pt-BR": "Pacotes de instalação baixados" },
       "description": { "en": "Copies of the packages your package manager (zypper, apt, pacman or dnf) downloaded when installing and updating programs.", "pt-BR": "Cópias dos pacotes que o gerenciador de pacotes (zypper, apt, pacman ou dnf) baixou ao instalar e atualizar programas." },
-      "consequence": { "en": "Reinstalling a program downloads it again. Needs administrator rights, which Pennyworth never asks for: clean this one with your package manager.", "pt-BR": "Reinstalar um programa baixa o pacote de novo. Exige direitos de administrador, que o Pennyworth nunca pede: limpe esta pelo seu gerenciador de pacotes." }
+      "consequence": { "en": "Reinstalling a program downloads it again, and your package manager's own clean command does the same. Needs your administrator password, asked when you confirm. Only the files in the list of what will be deleted are removed.", "pt-BR": "Reinstalar um programa baixa o pacote de novo, e o comando de limpeza do seu gerenciador de pacotes faz o mesmo. Exige a sua senha de administrador, pedida quando você confirma. Só os arquivos da lista do que será apagado são removidos." }
     },
     {
       "id": "system-crash-reports",
@@ -139,7 +139,7 @@
       "requiresAdmin": true,
       "title": { "en": "Old crash reports", "pt-BR": "Relatórios de falhas antigos" },
       "description": { "en": "Reports saved when a program crashed in the past.", "pt-BR": "Relatórios salvos quando algum programa travou no passado." },
-      "consequence": { "en": "Only matters if you are investigating a crash. Needs administrator rights, which Pennyworth never asks for.", "pt-BR": "Só importa se você estiver investigando uma falha. Exige direitos de administrador, que o Pennyworth nunca pede." }
+      "consequence": { "en": "Only matters if you are investigating a crash. Needs your administrator password, asked when you confirm. Only the files in the list of what will be deleted are removed.", "pt-BR": "Só importa se você estiver investigando uma falha. Exige a sua senha de administrador, pedida quando você confirma. Só os arquivos da lista do que será apagado são removidos." }
     }
   ]
 }

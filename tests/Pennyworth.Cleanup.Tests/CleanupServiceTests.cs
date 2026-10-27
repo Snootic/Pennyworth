@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
+using Pennyworth.Core.Privilege;
 using Pennyworth.KnowledgeBase;
 using Pennyworth.Tests;
 
@@ -315,6 +316,210 @@ public sealed class CleanupServiceTests : IDisposable
         Assert.Equal(when, entries[0].When);
     }
 
+    [Fact]
+    public async Task Admin_rule_is_available_when_the_admin_cleaner_can_be_asked()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10), ("sub/b.bin", 20));
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready);
+
+        var estimate = await AdminService(cleaner).MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+
+        Assert.True(estimate.IsAvailable);
+        Assert.Equal(PrivilegedCapability.Ready, estimate.Admin);
+        Assert.Equal(30, estimate.Bytes);
+        Assert.Equal(2, estimate.Items);
+        Assert.Empty(cleaner.Calls);
+        Assert.True(File.Exists(Path.Combine(folder, "a.bin")));
+    }
+
+    [Fact]
+    public async Task Admin_rule_says_why_the_admin_cleaner_cannot_be_asked()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10));
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Missing(PrivilegedUnavailableReason.NoAuthenticationAgent));
+
+        var estimate = await AdminService(cleaner).MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+
+        Assert.False(estimate.IsAvailable);
+        Assert.Equal(PrivilegedUnavailableReason.NoAuthenticationAgent, estimate.Admin?.Reason);
+        Assert.Equal(10, estimate.Bytes);
+    }
+
+    [Fact]
+    public async Task Admin_rule_is_not_offered_when_the_safety_rule_refuses_all_its_folders()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10));
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready);
+
+        var estimate = await AdminService(cleaner, mayCleanInside: _ => false).MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+
+        Assert.False(estimate.IsAvailable);
+        Assert.Equal(0, estimate.Items);
+        Assert.Equal(PrivilegedCapability.Ready, estimate.Admin);
+    }
+
+    [Fact]
+    public async Task Admin_rule_without_an_admin_cleaner_stays_unavailable_and_is_refused()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10));
+        var service = AdminService(cleaner: null);
+
+        var estimate = await service.MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+
+        Assert.False(estimate.IsAvailable);
+        Assert.Null(estimate.Admin);
+        var refused = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CleanAsync(estimate, null, TestContext.Current.CancellationToken));
+        Assert.Equal("Cleanup rule 'admin-test' needs admin rights.", refused.Message);
+        Assert.True(File.Exists(Path.Combine(folder, "a.bin")));
+    }
+
+    [Fact]
+    public async Task Admin_rule_hands_the_previewed_files_to_the_admin_cleaner_and_returns_its_result()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10), ("sub/b.bin", 20));
+        CleanupResult? given = null;
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready, estimate =>
+        {
+            given = new CleanupResult(estimate.Rule, 25, 1, 1);
+            return PrivilegedResult<CleanupResult>.Done(given);
+        });
+        var service = AdminService(cleaner);
+        var progress = new List<double>();
+
+        var estimate = await service.MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+        var result = await service.CleanAsync(estimate, new SyncProgress(progress), TestContext.Current.CancellationToken);
+
+        Assert.Same(given, result);
+        Assert.Equal(PrivilegedOutcome.Done, result.Outcome);
+        var forwarded = Assert.Single(cleaner.Calls);
+        Assert.Equal(estimate.Files!.Select(f => f.Path).Order(), forwarded.Files!.Select(f => f.Path).Order());
+        Assert.Equal(30, forwarded.Bytes);
+        Assert.Equal(2, forwarded.Items);
+        var forwardedFolder = Assert.Single(forwarded.Folders!);
+        Assert.Equal(Path.GetFullPath(folder), forwardedFolder.Path);
+        Assert.Equal(2, forwardedFolder.Files);
+        Assert.Equal(1, progress[^1]);
+        // Nothing is removed here, not even emptied folders: the cleaner owns all of that.
+        Assert.True(Directory.Exists(Path.Combine(folder, "sub")));
+        Assert.True(File.Exists(Path.Combine(folder, "sub", "b.bin")));
+    }
+
+    [Theory]
+    [InlineData(PrivilegedOutcome.Cancelled, null)]
+    [InlineData(PrivilegedOutcome.NotAvailable, PrivilegedUnavailableReason.HelperNotTrusted)]
+    [InlineData(PrivilegedOutcome.Failed, null)]
+    public async Task Admin_rule_that_did_not_finish_reports_the_outcome_and_deletes_nothing(PrivilegedOutcome outcome, PrivilegedUnavailableReason? reason)
+    {
+        string folder = WriteAdminFiles(("a.bin", 10), ("b.bin", 20));
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready, _ => new PrivilegedResult<CleanupResult>(outcome, Reason: reason));
+        var service = AdminService(cleaner);
+        var progress = new List<double>();
+
+        var estimate = await service.MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+        var result = await service.CleanAsync(estimate, new SyncProgress(progress), TestContext.Current.CancellationToken);
+
+        Assert.Equal(outcome, result.Outcome);
+        Assert.Equal(reason, result.Reason);
+        Assert.Equal(0, result.BytesFreed);
+        Assert.Equal(0, result.FilesDeleted);
+        Assert.Equal(2, result.Skipped);
+        Assert.Equal(1, progress[^1]);
+        Assert.True(File.Exists(Path.Combine(folder, "a.bin")));
+        Assert.True(File.Exists(Path.Combine(folder, "b.bin")));
+    }
+
+    [Fact]
+    public async Task Admin_rule_checks_the_capability_again_before_asking()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10));
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready);
+        var service = AdminService(cleaner);
+        var estimate = await service.MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+
+        cleaner.Capability = PrivilegedCapability.Missing(PrivilegedUnavailableReason.NoPkexec);
+        var result = await service.CleanAsync(estimate, null, TestContext.Current.CancellationToken);
+
+        Assert.Equal(PrivilegedOutcome.NotAvailable, result.Outcome);
+        Assert.Equal(PrivilegedUnavailableReason.NoPkexec, result.Reason);
+        Assert.Equal(1, result.Skipped);
+        Assert.Empty(cleaner.Calls);
+    }
+
+    [Fact]
+    public async Task Admin_rule_never_forwards_files_outside_the_rule_folders()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10));
+        string other = Path.Combine(_root, "other");
+        Directory.CreateDirectory(other);
+        File.WriteAllBytes(Path.Combine(other, "precious.bin"), new byte[5]);
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready, estimate =>
+            PrivilegedResult<CleanupResult>.Done(new CleanupResult(estimate.Rule, estimate.Bytes, estimate.Items, 0)));
+        var service = AdminService(cleaner);
+        var measured = await service.MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+        var date = DateTime.UtcNow;
+        var estimate = measured with
+        {
+            Files =
+            [
+                .. measured.Files!,
+                new CleanupFile(Path.Combine(other, "precious.bin"), 5, date),
+                new CleanupFile(Path.Combine(folder, "..", "other", "precious.bin"), 5, date),
+                new CleanupFile(folder, 1, date),
+                new CleanupFile(folder + "-sibling" + Path.DirectorySeparatorChar + "x.bin", 1, date),
+            ],
+        };
+
+        var result = await service.CleanAsync(estimate, null, TestContext.Current.CancellationToken);
+
+        var forwarded = Assert.Single(cleaner.Calls);
+        Assert.Equal([Path.Combine(folder, "a.bin")], forwarded.Files!.Select(f => f.Path));
+        Assert.Equal(10, forwarded.Bytes);
+        Assert.Equal(1, forwarded.Items);
+        Assert.Equal(PrivilegedOutcome.Done, result.Outcome);
+        Assert.Equal(4, result.Skipped);
+        Assert.True(File.Exists(Path.Combine(other, "precious.bin")));
+    }
+
+    [Fact]
+    public async Task Admin_rule_with_only_foreign_files_does_not_ask_at_all()
+    {
+        string folder = WriteAdminFiles(("a.bin", 10));
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready);
+        var service = AdminService(cleaner);
+        var measured = await service.MeasureAsync(AdminRule(folder), TestContext.Current.CancellationToken);
+        var estimate = measured with { Files = [new CleanupFile(Path.Combine(_root, "elsewhere.bin"), 5, DateTime.UtcNow)] };
+
+        var result = await service.CleanAsync(estimate, null, TestContext.Current.CancellationToken);
+
+        Assert.Empty(cleaner.Calls);
+        Assert.Equal(PrivilegedOutcome.Done, result.Outcome);
+        Assert.Equal(0, result.FilesDeleted);
+        Assert.Equal(1, result.Skipped);
+    }
+
+    [Fact]
+    public async Task Rules_that_need_no_admin_ignore_the_admin_cleaner()
+    {
+        string folder = Path.Combine(_root, "plain");
+        Directory.CreateDirectory(Path.Combine(folder, "sub"));
+        File.WriteAllBytes(Path.Combine(folder, "a.bin"), new byte[10]);
+        File.WriteAllBytes(Path.Combine(folder, "sub", "b.bin"), new byte[20]);
+        var cleaner = new FakeAdminCleaner(PrivilegedCapability.Ready);
+        var service = AdminService(cleaner);
+        var rule = AdminRule(folder) with { RequiresAdmin = false };
+
+        var estimate = await service.MeasureAsync(rule, TestContext.Current.CancellationToken);
+        var result = await service.CleanAsync(estimate, null, TestContext.Current.CancellationToken);
+
+        Assert.True(estimate.IsAvailable);
+        Assert.Null(estimate.Admin);
+        Assert.Equal(PrivilegedOutcome.Done, result.Outcome);
+        Assert.Equal(30, result.BytesFreed);
+        Assert.Equal(2, result.FilesDeleted);
+        Assert.False(Directory.Exists(Path.Combine(folder, "sub")));
+        Assert.Empty(cleaner.Calls);
+    }
+
     private static string? Env(string name) => name switch
     {
         "SystemRoot" => @"C:\Windows",
@@ -366,6 +571,42 @@ public sealed class CleanupServiceTests : IDisposable
         })!;
         process.WaitForExit();
         Assert.Equal(0, process.ExitCode);
+    }
+
+    private CleanupService AdminService(IAdminCleaner? cleaner, Func<string, bool>? mayCleanInside = null) => new(
+        [],
+        environment: new CleanupEnvironment(Environment.GetEnvironmentVariable, mayCleanInside ?? (_ => true), StringComparer.OrdinalIgnoreCase, AdminCleaner: cleaner));
+
+    private static CleanupRule AdminRule(string folder) => new(
+        "admin-test", SafetyLevel.UsuallySafe, CleanupKind.FolderContents, [folder], RequiresAdmin: true,
+        new("Test", "Teste"), new("", ""), new("", ""));
+
+    private string WriteAdminFiles(params (string RelativePath, int Length)[] files)
+    {
+        string folder = Path.Combine(_root, "system-cache");
+        foreach ((string relativePath, int length) in files)
+        {
+            string path = Path.Combine(folder, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllBytes(path, new byte[length]);
+        }
+
+        return folder;
+    }
+
+    private sealed class FakeAdminCleaner(
+        PrivilegedCapability capability,
+        Func<CleanupEstimate, PrivilegedResult<CleanupResult>>? clean = null) : IAdminCleaner
+    {
+        public List<CleanupEstimate> Calls { get; } = [];
+
+        public PrivilegedCapability Capability { get; set; } = capability;
+
+        public Task<PrivilegedResult<CleanupResult>> CleanAsync(CleanupEstimate estimate, CancellationToken cancellationToken)
+        {
+            Calls.Add(estimate);
+            return Task.FromResult(clean?.Invoke(estimate) ?? PrivilegedResult<CleanupResult>.Done(new CleanupResult(estimate.Rule, estimate.Bytes, estimate.Items, 0)));
+        }
     }
 
     private sealed class SyncProgress(List<double> values) : IProgress<double>

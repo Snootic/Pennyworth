@@ -118,6 +118,9 @@ internal enum NodeFlags : byte
     None = 0,
     Directory = 1,
     Locked = 2,
+
+    /// <summary>A locked directory whose size was filled in afterwards (see <see cref="StorageTree.WithMeasuredFolders"/>).</summary>
+    Measured = 4,
 }
 
 internal struct NodeData

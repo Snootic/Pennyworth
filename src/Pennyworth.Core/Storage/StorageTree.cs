@@ -39,6 +39,69 @@ public sealed class StorageTree
     }
 
     /// <summary>
+    /// Every folder the scan could not list and that has no size yet: the ones a privileged measurement can still fill in.
+    /// Locked folders never have children.
+    /// </summary>
+    public IReadOnlyList<StorageNode> GetLockedFolders()
+    {
+        var locked = new List<StorageNode>();
+        for (int i = 0; i < _nodes.Length; i++)
+        {
+            if ((_nodes[i].Flags & (NodeFlags.Directory | NodeFlags.Locked | NodeFlags.Measured)) == (NodeFlags.Directory | NodeFlags.Locked))
+            {
+                locked.Add(new StorageNode(this, i));
+            }
+        }
+
+        return locked;
+    }
+
+    /// <summary>
+    /// A new tree in which the locked folders found in <paramref name="sizesByPath"/> (key: <see cref="StorageNode.FullPath"/>,
+    /// compared by the dictionary's own comparer) carry the measured size, rolled up to every ancestor and added to the totals
+    /// and to the folder's category. Only folders that are locked and not yet measured are updated, so measuring twice never
+    /// counts a folder twice; other keys are ignored. This tree is not changed. Negative sizes count as zero.
+    /// </summary>
+    public StorageTree WithMeasuredFolders(IReadOnlyDictionary<string, FolderMeasurement> sizesByPath)
+    {
+        ArgumentNullException.ThrowIfNull(sizesByPath);
+
+        NodeData[] nodes = (NodeData[])_nodes.Clone();
+        long[] categoryBytes = (long[])_categoryBytes.Clone();
+        long fileCount = FileCount;
+        long totalBytes = TotalBytes;
+
+        if (sizesByPath.Count > 0)
+        {
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                if ((nodes[i].Flags & (NodeFlags.Directory | NodeFlags.Locked | NodeFlags.Measured)) != (NodeFlags.Directory | NodeFlags.Locked)
+                    || !sizesByPath.TryGetValue(new StorageNode(this, i).FullPath, out FolderMeasurement measurement))
+                {
+                    continue;
+                }
+
+                long sizeOnDisk = Math.Max(0, measurement.SizeOnDisk);
+                long logicalSize = Math.Max(0, measurement.LogicalSize);
+                long files = Math.Max(0, measurement.Files);
+
+                nodes[i].Flags |= NodeFlags.Measured;
+                for (int index = i; index >= 0; index = index == StorageTreeBuilder.RootIndex ? -1 : nodes[index].Parent)
+                {
+                    nodes[index].SizeOnDisk += sizeOnDisk;
+                    nodes[index].LogicalSize += logicalSize;
+                }
+
+                totalBytes += sizeOnDisk;
+                fileCount += files;
+                categoryBytes[(int)nodes[i].Category] += sizeOnDisk;
+            }
+        }
+
+        return new StorageTree(RootPath, nodes, _names, fileCount, totalBytes, categoryBytes);
+    }
+
+    /// <summary>
     /// The bytes below <paramref name="node"/> that belong to <paramref name="category"/> in the same area as the node:
     /// the walk stops at a folder of another category, the way <see cref="GetCategoryAreas"/> ends an area there.
     /// Zero when the node itself is of another category.
@@ -56,7 +119,7 @@ public sealed class StorageTree
         while (pending.TryPop(out int index))
         {
             ref readonly NodeData data = ref _nodes[index];
-            if ((data.Flags & NodeFlags.Directory) == 0)
+            if (IsLeaf(in data))
             {
                 bytes += data.SizeOnDisk;
                 continue;
@@ -76,6 +139,9 @@ public sealed class StorageTree
 
     internal ref readonly NodeData Node(int index) => ref _nodes[index];
 
+    /// <summary>Files, and locked folders whose size was measured afterwards, are where bytes are counted.</summary>
+    private static bool IsLeaf(in NodeData node) => (node.Flags & (NodeFlags.Directory | NodeFlags.Measured)) != NodeFlags.Directory;
+
     internal string Name(int index) => _names[index];
 
     private Dictionary<StorageCategory, IReadOnlyList<CategoryArea>> ComputeAreas()
@@ -87,7 +153,7 @@ public sealed class StorageTree
         {
             ref readonly NodeData node = ref _nodes[i];
             areaOf[i] = i == 0 || node.Category != _nodes[node.Parent].Category ? i : areaOf[node.Parent];
-            if ((node.Flags & NodeFlags.Directory) == 0)
+            if (IsLeaf(in node))
             {
                 bytesByArea[areaOf[i]] = bytesByArea.GetValueOrDefault(areaOf[i]) + node.SizeOnDisk;
             }
@@ -106,3 +172,9 @@ public sealed class StorageTree
 }
 
 public readonly record struct CategoryArea(StorageNode Node, long Bytes);
+
+/// <summary>The size of a folder the scan could not list, measured afterwards by someone who could.</summary>
+/// <param name="SizeOnDisk">Bytes the folder's files occupy on disk.</param>
+/// <param name="LogicalSize">Sum of the files' lengths.</param>
+/// <param name="Files">Number of files found.</param>
+public readonly record struct FolderMeasurement(long SizeOnDisk, long LogicalSize, long Files);
