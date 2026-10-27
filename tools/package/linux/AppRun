@@ -1,0 +1,5 @@
+#!/bin/sh
+# AppImage entry point. The AppImage runtime sets APPDIR to the mounted (or extracted) image; started directly from an
+# unpacked AppDir the script's own folder is used. No external commands: this must work with an empty PATH.
+HERE="${APPDIR:-${0%/*}}"
+exec "$HERE/usr/lib/pennyworth/Pennyworth" "$@"

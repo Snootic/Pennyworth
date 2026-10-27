@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=Pennyworth
+GenericName=PC tidy-up
+GenericName[pt_BR]=Organizador do PC
+Comment=See where your disk space went and free it safely
+Comment[pt_BR]=Veja para onde foi o espaço do disco e libere com segurança
+Exec=pennyworth
+Icon=pennyworth
+Terminal=false
+Categories=System;Monitor;
+Keywords=disk;space;cleanup;memory;monitor;
+Keywords[pt_BR]=disco;espaço;limpeza;memória;monitor;
+# Avalonia's X11 backend sets WM_CLASS to the assembly name; tools/package/smoke-linux.sh checks that this still holds.
+StartupWMClass=Pennyworth

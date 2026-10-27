@@ -1,16 +1,19 @@
 """Builds the app's icon and logo from the brand sources in docs/design/brand.
 
-    python -I tools/brand/build_logo_assets.py docs/design/brand src/Pennyworth.App/Assets
+    python -I tools/brand/build_logo_assets.py docs/design/brand src/Pennyworth.App/Assets [tools/package/linux/icons]
 
 Needs Pillow. Writes:
   pennyworth.ico  Windows icon (16-256 px) from logo-with-background.webp
   logo.png        512 px transparent logo from logo-transparent.svg
+  hicolor/NxN/apps/pennyworth.png  the Linux launcher icon at 16-512 px, from the same webp, when a
+                  third argument names the folder (it is packaged under share/icons by tools/package)
 
 The SVG holds no vector paths: it is two embedded images (ring, tuxedo), each cut out by a
 luminance mask image. This script reproduces that composition with Pillow.
 """
 import base64
 import io
+import os
 import re
 import sys
 
@@ -64,9 +67,21 @@ def build_logo(svg_path, out_path):
     square.resize((512, 512), Image.LANCZOS).save(out_path, optimize=True)
 
 
-def build_icon(webp_path, out_path):
+def trimmed_icon(webp_path):
     # Trim most of the black margin so the ring fills small taskbar sizes.
-    icon = Image.open(webp_path).convert('RGBA').crop((110, 110, 1090, 1090))
+    return Image.open(webp_path).convert('RGBA').crop((110, 110, 1090, 1090))
+
+
+def build_hicolor(webp_path, out_dir):
+    icon = trimmed_icon(webp_path)
+    for size in (16, 24, 32, 48, 64, 128, 256, 512):
+        folder = f'{out_dir}/hicolor/{size}x{size}/apps'
+        os.makedirs(folder, exist_ok=True)
+        icon.resize((size, size), Image.LANCZOS).save(f'{folder}/pennyworth.png', optimize=True)
+
+
+def build_icon(webp_path, out_path):
+    icon = trimmed_icon(webp_path)
     sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
     icon.resize((256, 256), Image.LANCZOS).save(out_path, sizes=sizes)
 
@@ -76,3 +91,6 @@ if __name__ == '__main__':
     build_logo(f'{source}/logo-transparent.svg', f'{out}/logo.png')
     build_icon(f'{source}/logo-with-background.webp', f'{out}/pennyworth.ico')
     print('wrote', f'{out}/logo.png', f'{out}/pennyworth.ico')
+    if len(sys.argv) > 3:
+        build_hicolor(f'{source}/logo-with-background.webp', sys.argv[3])
+        print('wrote', f'{sys.argv[3]}/hicolor')
