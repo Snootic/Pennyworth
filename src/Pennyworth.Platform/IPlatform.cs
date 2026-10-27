@@ -24,6 +24,12 @@ public interface IPlatform
 
     ISpecsReader Specs { get; }
 
+    /// <summary>
+    /// Reads the memory modules where reading them needs an administrator and the person must ask for it;
+    /// null when <see cref="Specs"/> already has them, or this OS has no way to ask.
+    /// </summary>
+    IMemoryModuleReader? MemoryModules => null;
+
     /// <summary>Where the settings file lives.</summary>
     string SettingsPath { get; }
 

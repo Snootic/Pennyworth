@@ -42,10 +42,15 @@ public sealed partial class App : Application
                 platform.Closer,
                 new CleanupHistory(platform.CleanupHistoryPath),
                 Clipboard: new AvaloniaClipboardService(() => desktop.MainWindow),
-                Assistant: platform.CreateAssistant(() => monitor?.Sample().Memory.Available ?? 0)));
+                Assistant: platform.CreateAssistant(() => monitor?.Sample().Memory.Available ?? 0),
+                MemoryModules: platform.MemoryModules));
 
             desktop.MainWindow = new MainWindow { DataContext = viewModel };
-            desktop.Exit += (_, _) => (monitor as IDisposable)?.Dispose();
+            desktop.Exit += (_, _) =>
+            {
+                viewModel.Specs.CancelModulesRead(); // Withdraws a pending password request.
+                (monitor as IDisposable)?.Dispose();
+            };
             viewModel.Initialize();
 
             // Live numbers once per second; the first sample right away.

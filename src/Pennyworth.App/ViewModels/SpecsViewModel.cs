@@ -11,9 +11,12 @@ using CommunityToolkit.Mvvm.Input;
 namespace Pennyworth.App.ViewModels;
 
 /// <summary>Full specs of the PC, in numbered sections of plain-language rows.</summary>
-public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host, IClipboardService? clipboard) : ObservableObject
+public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host, IClipboardService? clipboard, IMemoryModuleReader? moduleReader = null) : ObservableObject
 {
     private const string Unknown = "—";
+
+    private MemoryModulesOutcome? _modulesFailure;
+    private CancellationTokenSource? _modulesCancellation;
 
     [ObservableProperty]
     public partial bool IsLoading { get; private set; }
@@ -25,6 +28,80 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
     public partial IReadOnlyList<SpecSection> Sections { get; private set; } = [];
 
     public bool IsLoaded => Specs is not null;
+
+    /// <summary>True while the password prompt for the memory modules is open.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ModulesMessage), nameof(CanReadModules))]
+    [NotifyCanExecuteChangedFor(nameof(ReadModulesCommand))]
+    public partial bool IsReadingModules { get; private set; }
+
+    /// <summary>The one line under the memory modules button: waiting for the password, or why nothing was read.</summary>
+    public string? ModulesMessage => IsReadingModules
+        ? Strings.SpecsModulesReading
+        : _modulesFailure switch
+        {
+            MemoryModulesOutcome.Cancelled => Strings.SpecsModulesCancelled,
+            MemoryModulesOutcome.Unavailable => Strings.SpecsModulesUnavailable,
+            _ => null,
+        };
+
+    /// <summary>The button is offered only where this OS can ask, and only while the modules are unknown.</summary>
+    public bool CanReadModules => !IsReadingModules && Specs is { } specs && OffersModules(specs);
+
+    private bool OffersModules(PcSpecs specs) => moduleReader is not null && specs.Memory.Modules.Count == 0;
+
+    /// <summary>
+    /// Asks for the administrator's password, once, to read the memory modules from the firmware tables.
+    /// Nothing is changed and nothing is kept.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanReadModules))]
+    private async Task ReadModules()
+    {
+        if (moduleReader is null || Specs is null)
+        {
+            return;
+        }
+
+        using var cancellation = new CancellationTokenSource();
+        _modulesCancellation = cancellation;
+        _modulesFailure = null;
+        IsReadingModules = true;
+        MemoryModulesResult result;
+        try
+        {
+            result = await Task.Run(() => moduleReader.ReadAsync(cancellation.Token), CancellationToken.None);
+        }
+        catch (OperationCanceledException)
+        {
+            return; // The screen was left or the app is closing: no message for nobody.
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            result = MemoryModulesResult.Unavailable;
+        }
+        finally
+        {
+            _modulesCancellation = null;
+            IsReadingModules = false;
+        }
+
+        if (result.Outcome == MemoryModulesOutcome.Read && Specs is { } specs)
+        {
+            PcSpecs merged = specs with { Memory = specs.Memory with { Slots = result.Slots ?? specs.Memory.Slots, Modules = result.Modules } };
+            Specs = merged;
+            Sections = Build(merged, OffersModules(merged));
+            OnPropertyChanged(nameof(CanReadModules));
+            ReadModulesCommand.NotifyCanExecuteChanged();
+        }
+        else
+        {
+            _modulesFailure = result.Outcome;
+            OnPropertyChanged(nameof(ModulesMessage));
+        }
+    }
+
+    /// <summary>Withdraws a password request still waiting for the person (the screen was left, or the app closes).</summary>
+    public void CancelModulesRead() => _modulesCancellation?.Cancel();
 
     /// <summary>"Ask about this": set by the shell when the assistant is available.</summary>
     public Action<AssistantTopic, string>? AskAbout { get; set; }
@@ -54,7 +131,8 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
     {
         if (Specs is { } specs)
         {
-            Sections = Build(specs);
+            Sections = Build(specs, OffersModules(specs));
+            OnPropertyChanged(nameof(ModulesMessage));
         }
     }
 
@@ -96,8 +174,10 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
         {
             PcSpecs specs = await Task.Run(reader.Read);
             Specs = specs;
-            Sections = Build(specs);
+            Sections = Build(specs, OffersModules(specs));
             OnPropertyChanged(nameof(IsLoaded));
+            OnPropertyChanged(nameof(CanReadModules));
+            ReadModulesCommand.NotifyCanExecuteChanged();
         }
         finally
         {
@@ -105,11 +185,11 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
         }
     }
 
-    internal static IReadOnlyList<SpecSection> Build(PcSpecs specs) =>
+    internal static IReadOnlyList<SpecSection> Build(PcSpecs specs, bool offersModules = false) =>
     [
         SystemSection(specs),
         ProcessorSection(specs.Cpu),
-        MemorySection(specs.Memory),
+        MemorySection(specs.Memory, offersModules),
         GraphicsSection(specs),
         StorageSection(specs.Disks),
         BoardSection(specs.Board),
@@ -143,7 +223,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
         new(Strings.SpecArchitecture, Join(" · ", cpu.Architecture, cpu.Vendor)),
     ]);
 
-    private static SpecSection MemorySection(MemorySpecs memory)
+    private static SpecSection MemorySection(MemorySpecs memory, bool offersModules)
     {
         var rows = new List<SpecRow>();
         if (memory.Slots is { } slots && memory.Modules.Count > 0)
@@ -161,7 +241,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
             rows.Add(new(module.Slot, Join(" · ", Bytes(module.Size), module.Type, speed, module.FormFactor, Parts(" ", module.Manufacturer, module.PartNumber))));
         }
 
-        return new SpecSection("03", Strings.Spec_Memory, $"{Math.Round(memory.Total / (1024d * 1024 * 1024)):0} GB", rows);
+        return new SpecSection("03", Strings.Spec_Memory, $"{Math.Round(memory.Total / (1024d * 1024 * 1024)):0} GB", rows, offersModules);
     }
 
     private static SpecSection GraphicsSection(PcSpecs specs)
@@ -185,6 +265,11 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
             rows.Add(new(
                 string.Format(Strings.SpecDisplay, number++),
                 Join(" · ", $"{display.Width} × {display.Height}", $"{display.RefreshHz} Hz", display.IsPrimary ? Strings.SpecMainDisplay : null)));
+        }
+
+        if (specs.Compositor is { } compositor)
+        {
+            rows.Add(new(Strings.SpecCompositor, compositor.Text));
         }
 
         return new SpecSection("04", Strings.Spec_Graphics, specs.Gpus.FirstOrDefault()?.Name ?? Unknown, rows);
@@ -255,6 +340,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
 
 /// <param name="Index">"01".</param>
 /// <param name="Headline">The one thing to know about this part ("AMD Ryzen 5 5600").</param>
-public sealed record SpecSection(string Index, string Title, string Headline, IReadOnlyList<SpecRow> Rows);
+/// <param name="OffersModules">The memory section, when the modules are unknown and the person can ask to read them.</param>
+public sealed record SpecSection(string Index, string Title, string Headline, IReadOnlyList<SpecRow> Rows, bool OffersModules = false);
 
 public sealed record SpecRow(string Label, string Value);

@@ -6,8 +6,8 @@ namespace Pennyworth.Platform.Linux;
 /// <summary>
 /// The memory section. The total is <c>MemTotal</c> from <c>/proc/meminfo</c>: the RAM the kernel can
 /// use, a little under what is installed (firmware and the kernel reserve some), like Windows'
-/// figure. Slots and modules are only in the SMBIOS tables, which need root (<c>dmidecode</c>), so
-/// they stay unknown rather than asking for privileges.
+/// figure. Slots and modules are only in the SMBIOS tables, which need root, so this read leaves them
+/// unknown; <see cref="PkexecMemoryReader"/> reads them when the person asks.
 /// </summary>
 internal static class MemorySection
 {

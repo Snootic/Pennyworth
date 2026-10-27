@@ -139,4 +139,16 @@ public class FactCollectorTests
 
         Assert.Equal(facts.Count, facts.Select(f => f.Id).Distinct().Count());
     }
+
+    [Fact]
+    public void The_compositor_is_a_graphics_fact_only_when_the_specs_have_one()
+    {
+        var withCompositor = Specs() with { Compositor = new CompositorSpecs("Wayland", "KWin", "6.8.1") };
+
+        var facts = FactCollector.Collect(Snapshot(specs: withCompositor), En);
+
+        Assert.Equal("KWin 6.8.1 (Wayland)", facts.Get("display.compositor").Text);
+        Assert.Equal(TopicKind.Graphics, facts.Get("display.compositor").Group);
+        Assert.DoesNotContain(FactCollector.Collect(Snapshot(), En), f => f.Id == "display.compositor");
+    }
 }

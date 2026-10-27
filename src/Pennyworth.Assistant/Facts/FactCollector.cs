@@ -179,6 +179,11 @@ public static class FactCollector
         {
             add("display.main", TopicKind.Graphics, t("Main display", "Tela principal"), FactKind.Text, 0, $"{display.Width} × {display.Height}, {display.RefreshHz} Hz");
         }
+
+        if (snapshot.Specs?.Compositor is { } compositor)
+        {
+            add("display.compositor", TopicKind.Graphics, t("Compositor (what draws and manages the windows)", "Compositor (o que desenha e gerencia as janelas)"), FactKind.Text, 0, compositor.Text);
+        }
     }
 
     private static void Power(PcSnapshot snapshot, Action<string, TopicKind, string, FactKind, double, string?> add, Func<string, string, string> t)

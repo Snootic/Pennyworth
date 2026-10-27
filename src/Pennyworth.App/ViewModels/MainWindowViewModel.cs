@@ -32,7 +32,8 @@ public sealed record AppServices(
     CleanupHistory? CleanupHistory = null,
     Func<DateTimeOffset>? Clock = null,
     IClipboardService? Clipboard = null,
-    AssistantServices? Assistant = null);
+    AssistantServices? Assistant = null,
+    IMemoryModuleReader? MemoryModules = null);
 
 public enum Page
 {
@@ -84,7 +85,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
         Memory = new MemoryViewModel(Live, this, services.Closer ?? new ProcessCloser());
         Folders = new FolderBrowserViewModel(this);
         Pc = new PcViewModel(this);
-        Specs = new SpecsViewModel(services.Specs, this, services.Clipboard);
+        Specs = new SpecsViewModel(services.Specs, this, services.Clipboard, services.MemoryModules);
         Ask = services.Assistant is { } assistant ? new AskViewModel(assistant, this, _clock) : null;
         if (Ask is not null)
         {
@@ -163,6 +164,23 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MainContent), nameof(ShowSidebar))]
     public partial bool Is3d { get; private set; }
+
+    // Leaving the Specs screen withdraws a pending password request: nobody is looking at it any more.
+    partial void OnPageChanged(Page value)
+    {
+        if (value != Page.Specs)
+        {
+            Specs.CancelModulesRead();
+        }
+    }
+
+    partial void OnIs3dChanged(bool value)
+    {
+        if (value)
+        {
+            Specs.CancelModulesRead();
+        }
+    }
 
     /// <summary>The page view model for <see cref="Page"/>.</summary>
     public object? CurrentPage => Page switch
