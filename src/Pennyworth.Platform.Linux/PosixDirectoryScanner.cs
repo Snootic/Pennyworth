@@ -17,8 +17,10 @@ namespace Pennyworth.Platform.Linux;
 /// <item>Symbolic links are never followed; a link counts as a file of its own (tiny) size.</item>
 /// <item>The scan never leaves the file system of the scan root (<c>du -x</c>): a directory whose
 /// <c>st_dev</c> differs from the root's is left out. That keeps a scan of <c>/</c> finite
-/// (<c>/proc</c>, <c>/sys</c>, <c>/dev</c>, <c>/run</c>, tmpfs, network mounts) and also excludes separately
-/// mounted btrfs subvolumes, which have their own device number. Scan those folders on their own.</item>
+/// (<c>/proc</c>, <c>/sys</c>, <c>/dev</c>, <c>/run</c>, tmpfs, network mounts). One exception: a btrfs subvolume
+/// mounted below the root from the same device (<c>/var</c>, <c>/opt</c>, <c>/usr/local</c> on a default openSUSE or
+/// Fedora install) is part of the same drive and is scanned, or half of the apps and system data would be missing.
+/// Snapshots (<c>/.snapshots</c>) stay out: they share their files with the live system and are measured as hidden space.</item>
 /// <item>A file with several hard links is counted once, at the first path found.</item>
 /// <item>A directory that cannot be listed is marked locked; one that vanished mid-scan is skipped.</item>
 /// <item>Directory entries are read with <c>opendir</c>/<c>readdir</c> as raw bytes and stat'ed relative to
@@ -32,11 +34,14 @@ public sealed unsafe partial class PosixDirectoryScanner : IStorageScanner
 {
     private readonly int _workerCount;
     private readonly TimeSpan _progressInterval;
+    private readonly Func<string> _readMountinfo;
 
-    public PosixDirectoryScanner(int? workerCount = null, TimeSpan? progressInterval = null)
+    /// <param name="readMountinfo">The text of <c>/proc/self/mountinfo</c>; defaults to the running system's.</param>
+    public PosixDirectoryScanner(int? workerCount = null, TimeSpan? progressInterval = null, Func<string>? readMountinfo = null)
     {
         _workerCount = workerCount ?? Math.Clamp(Environment.ProcessorCount, 2, 16);
         _progressInterval = progressInterval ?? TimeSpan.FromMilliseconds(150);
+        _readMountinfo = readMountinfo ?? MountTable.ReadSystem;
     }
 
     public Task<StorageTree> ScanAsync(
@@ -45,8 +50,50 @@ public sealed unsafe partial class PosixDirectoryScanner : IStorageScanner
         IProgress<ScanProgress>? progress,
         CancellationToken cancellationToken)
     {
-        return Task.Run(() => new ScanRun(rootPath, classifier, _workerCount).Run(progress, _progressInterval, cancellationToken), cancellationToken);
+        return Task.Run(() => new ScanRun(rootPath, classifier, _workerCount, SameDriveMounts(rootPath, _readMountinfo())).Run(progress, _progressInterval, cancellationToken), cancellationToken);
     }
+
+    /// <summary>
+    /// The mount points below <paramref name="rootPath"/> that hold the same btrfs file system as the root and are not
+    /// snapshots: separately mounted subvolumes of one drive. A bind mount of a subvolume already included (same device
+    /// number) is left out, so nothing is counted twice.
+    /// </summary>
+    internal static IReadOnlySet<string> SameDriveMounts(string rootPath, string mountinfo)
+    {
+        string root = rootPath.Length > 1 ? rootPath.TrimEnd('/') : rootPath;
+        IReadOnlyList<MountEntry> mounts = MountTable.Parse(mountinfo);
+        MountEntry? own = mounts
+            .Where(m => m.FileSystemType == "btrfs" && IsAtOrBelow(root, m.MountPoint))
+            .MaxBy(m => m.MountPoint.Length);
+        var found = new HashSet<string>(StringComparer.Ordinal);
+        if (own is null)
+        {
+            return found;
+        }
+
+        var devices = new HashSet<string>(StringComparer.Ordinal) { own.MajorMinor };
+        foreach (MountEntry mount in mounts)
+        {
+            if (mount.FileSystemType == "btrfs"
+                && mount.Source == own.Source
+                && mount.MountPoint != root
+                && IsAtOrBelow(mount.MountPoint, root)
+                && !IsSnapshotMount(mount)
+                && devices.Add(mount.MajorMinor))
+            {
+                found.Add(mount.MountPoint);
+            }
+        }
+
+        return found;
+    }
+
+    private static bool IsSnapshotMount(MountEntry mount) =>
+        mount.Root.Contains("/.snapshots/", StringComparison.Ordinal) || mount.Root.EndsWith("/.snapshots", StringComparison.Ordinal);
+
+    /// <summary>True when <paramref name="path"/> is <paramref name="folder"/> or lies below it.</summary>
+    private static bool IsAtOrBelow(string path, string folder) =>
+        folder == "/" || path == folder || path.StartsWith(folder + "/", StringComparison.Ordinal);
 
     [LibraryImport("libc", EntryPoint = "opendir", SetLastError = true)]
     private static partial nint OpenDir(byte* path);
@@ -78,10 +125,13 @@ public sealed unsafe partial class PosixDirectoryScanner : IStorageScanner
         private readonly SemaphoreSlim _available = new(0);
         private readonly bool _hasRootDevice;
         private readonly ulong _rootDevice;
+        private readonly IReadOnlySet<string> _sameDriveMounts;
+        private readonly ConcurrentDictionary<ulong, string> _sameDriveDevices = new();
         private int _outstanding;
 
-        public ScanRun(string rootPath, IPathClassifier classifier, int workerCount)
+        public ScanRun(string rootPath, IPathClassifier classifier, int workerCount, IReadOnlySet<string> sameDriveMounts)
         {
+            _sameDriveMounts = sameDriveMounts;
             _classifier = classifier;
             _workerCount = workerCount;
             StorageCategory rootCategory = classifier.Classify(rootPath, StorageCategory.Other);
@@ -277,13 +327,13 @@ public sealed unsafe partial class PosixDirectoryScanner : IStorageScanner
 
                 if (stat.Kind == FileKind.Directory)
                 {
-                    if (_hasRootDevice && stat.HasIdentity && stat.Device != _rootDevice)
+                    string directoryName = Encoding.UTF8.GetString(nameBytes);
+                    string path = Path.Join(item.Path, directoryName);
+                    if (_hasRootDevice && stat.HasIdentity && stat.Device != _rootDevice && !IsSameDrive(stat.Device, path))
                     {
                         continue; // Another file system: not part of this scan.
                     }
 
-                    string directoryName = Encoding.UTF8.GetString(nameBytes);
-                    string path = Path.Join(item.Path, directoryName);
                     directories.Add(new PendingDirectory(
                         directoryName,
                         path,
@@ -303,6 +353,26 @@ public sealed unsafe partial class PosixDirectoryScanner : IStorageScanner
                     : item.Category;
                 files.Add(new PendingFile(fileName, stat.AllocatedBytes, stat.LogicalBytes, category));
             }
+        }
+
+        /// <summary>
+        /// True for a subvolume of the same drive: the mount point itself, which is remembered by device number, and
+        /// everything below it on that device. A directory of any other device below that (a mount inside <c>/var</c>) is not.
+        /// </summary>
+        private bool IsSameDrive(ulong device, string path)
+        {
+            if (_sameDriveDevices.TryGetValue(device, out string? mountPoint))
+            {
+                return IsAtOrBelow(path, mountPoint); // A bind mount of the same subvolume elsewhere is not counted twice.
+            }
+
+            if (_sameDriveMounts.Contains(path))
+            {
+                _sameDriveDevices.TryAdd(device, path);
+                return true;
+            }
+
+            return false;
         }
 
         private static bool IsDotEntry(ReadOnlySpan<byte> name) =>

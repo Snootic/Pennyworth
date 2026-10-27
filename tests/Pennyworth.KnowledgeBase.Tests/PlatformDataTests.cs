@@ -23,6 +23,11 @@ public partial class PlatformDataTests
             yield return ($"location {l.Id} title", l.Title.PtBr);
             yield return ($"location {l.Id} description", l.Description.En);
             yield return ($"location {l.Id} description", l.Description.PtBr);
+            foreach (LocalizedText t in new[] { l.Children?.Title, l.Children?.Description }.OfType<LocalizedText>())
+            {
+                yield return ($"location {l.Id} children", t.En);
+                yield return ($"location {l.Id} children", t.PtBr);
+            }
         }
 
         foreach (CleanupRule r in KnowledgeBaseLoader.LoadCleanupRules(platform).Rules)
@@ -70,6 +75,35 @@ public partial class PlatformDataTests
             Assert.False(string.IsNullOrWhiteSpace(l.Path), l.Id);
             AssertBilingual(l.Title, l.Id);
             AssertBilingual(l.Description, l.Id);
+        });
+    }
+
+    [Fact]
+    public void Windows_locations_never_split_into_places()
+    {
+        Assert.All(KnowledgeBaseLoader.LoadEmbedded(KnowledgeBaseLoader.Windows).Locations, l => Assert.Null(l.Children));
+    }
+
+    [Fact]
+    public void Linux_child_templates_are_bilingual_and_take_only_the_app_name()
+    {
+        var withChildren = KnowledgeBaseLoader.LoadEmbedded(KnowledgeBaseLoader.Linux).Locations.Where(l => l.Children is not null).ToList();
+
+        Assert.Contains(withChildren, l => l.Id == "flatpak-app-data-apps");
+        Assert.All(withChildren, l =>
+        {
+            foreach (LocalizedText? t in new[] { l.Children!.Title, l.Children.Description })
+            {
+                if (t is null)
+                {
+                    continue;
+                }
+
+                AssertBilingual(t, l.Id);
+                // string.Format with one argument must not throw: no other placeholder, no stray brace.
+                Assert.Equal(t.En.Replace("{0}", "x"), string.Format(t.En, "x"));
+                Assert.Equal(t.PtBr.Replace("{0}", "x"), string.Format(t.PtBr, "x"));
+            }
         });
     }
 

@@ -109,7 +109,8 @@
       "description": {
         "en": "Programs that bring their own files, such as some browsers, editors and drivers.",
         "pt-BR": "Programas que trazem seus próprios arquivos, como alguns navegadores, editores e drivers."
-      }
+      },
+      "children": {}
     },
     {
       "id": "snap-programs",
@@ -139,7 +140,8 @@
       "description": {
         "en": "Flatpak apps and runtimes installed for every user of this computer. Remove them with the software center or flatpak.",
         "pt-BR": "Apps e runtimes Flatpak instalados para todos os usuários deste computador. Remova pela central de programas ou pelo flatpak."
-      }
+      },
+      "children": {}
     },
     {
       "id": "flatpak-user",
@@ -149,7 +151,8 @@
       "description": {
         "en": "Flatpak apps and runtimes installed only for you.",
         "pt-BR": "Apps e runtimes Flatpak instalados só para você."
-      }
+      },
+      "children": {}
     },
     {
       "id": "container-images",
@@ -199,6 +202,13 @@
       "description": {
         "en": "Settings and data of the snap apps you use.",
         "pt-BR": "Configurações e dados dos apps Snap que você usa."
+      },
+      "children": {
+          "title": { "en": "{0} (Snap data)", "pt-BR": "{0} (dados do Snap)" },
+          "description": {
+            "en": "Settings and data of the snap app {0}.",
+            "pt-BR": "Configurações e dados do app Snap {0}."
+          }
       }
     },
     {
@@ -209,7 +219,8 @@
       "description": {
         "en": "A folder per Flatpak app with its settings, caches and data. Often much bigger than people expect.",
         "pt-BR": "Uma pasta por app Flatpak com configurações, caches e dados. Muitas vezes bem maior do que se imagina."
-      }
+      },
+      "children": {}
     },
     {
       "id": "app-cache",
@@ -219,7 +230,8 @@
       "description": {
         "en": "A hidden folder where apps keep copies they can download or build again. Most of it can be cleaned safely.",
         "pt-BR": "Uma pasta oculta onde os apps guardam cópias que podem baixar ou gerar de novo. Quase tudo pode ser limpo com segurança."
-      }
+      },
+      "children": {}
     },
     {
       "id": "app-config",
@@ -229,7 +241,8 @@
       "description": {
         "en": "A hidden folder with the settings of the apps you use. Small, but deleting it resets those apps.",
         "pt-BR": "Uma pasta oculta com as configurações dos apps que você usa. Pequena, mas apagá-la restaura esses apps ao padrão."
-      }
+      },
+      "children": {}
     },
     {
       "id": "app-data",
@@ -239,7 +252,8 @@
       "description": {
         "en": "A hidden folder where apps keep their data: game launchers, databases, icons and more.",
         "pt-BR": "Uma pasta oculta onde os apps guardam seus dados: lançadores de jogos, bancos de dados, ícones e mais."
-      }
+      },
+      "children": {}
     },
     {
       "id": "app-state",
@@ -259,7 +273,8 @@
       "description": {
         "en": "A hidden folder with your user's app data, state and programs.",
         "pt-BR": "Uma pasta oculta com os dados, o estado e os programas dos apps do seu usuário."
-      }
+      },
+      "children": {}
     },
     {
       "id": "home-mozilla",
@@ -419,7 +434,8 @@
       "description": {
         "en": "Games, mods and downloads from Steam, including their saved Wine prefixes and shader caches.",
         "pt-BR": "Jogos, mods e downloads da Steam, incluindo os prefixos Wine salvos e caches de shaders."
-      }
+      },
+      "children": {}
     },
     {
       "id": "games-folder",
@@ -429,7 +445,8 @@
       "description": {
         "en": "The usual place for games installed by Lutris, Heroic and similar launchers.",
         "pt-BR": "O lugar comum para jogos instalados por Lutris, Heroic e lançadores parecidos."
-      }
+      },
+      "children": {}
     },
     {
       "id": "minecraft",
@@ -462,6 +479,370 @@
       }
     },
     {
+      "id": "flatpak-user-apps",
+      "path": "%XDG_DATA_HOME%/flatpak/app",
+      "category": "Apps",
+      "title": { "en": "Flatpak apps (your user)", "pt-BR": "Apps Flatpak (seu usuário)" },
+      "description": {
+        "en": "The apps installed with Flatpak, one folder each.",
+        "pt-BR": "Os apps instalados com o Flatpak, uma pasta para cada um."
+      },
+      "children": {
+          "title": { "en": "{0} (Flatpak app)", "pt-BR": "{0} (app Flatpak)" },
+          "description": {
+            "en": "{0} installed with Flatpak. Remove it with the software center or flatpak, not by deleting folders.",
+            "pt-BR": "{0} instalado com o Flatpak. Remova pela central de programas ou pelo flatpak, não apagando pastas."
+          }
+      }
+    },
+    {
+      "id": "flatpak-system-apps",
+      "path": "/var/lib/flatpak/app",
+      "category": "Apps",
+      "title": { "en": "Flatpak apps (all users)", "pt-BR": "Apps Flatpak (todos os usuários)" },
+      "description": {
+        "en": "The apps installed with Flatpak, one folder each.",
+        "pt-BR": "Os apps instalados com o Flatpak, uma pasta para cada um."
+      },
+      "children": {
+          "title": { "en": "{0} (Flatpak app)", "pt-BR": "{0} (app Flatpak)" },
+          "description": {
+            "en": "{0} installed with Flatpak. Remove it with the software center or flatpak, not by deleting folders.",
+            "pt-BR": "{0} instalado com o Flatpak. Remova pela central de programas ou pelo flatpak, não apagando pastas."
+          }
+      }
+    },
+    {
+      "id": "flatpak-user-runtimes",
+      "path": "%XDG_DATA_HOME%/flatpak/runtime",
+      "category": "Apps",
+      "title": { "en": "Flatpak runtimes (your user)", "pt-BR": "Runtimes do Flatpak (seu usuário)" },
+      "description": {
+        "en": "The shared libraries Flatpak apps are built on, with several versions side by side. Unused ones are removed with flatpak uninstall --unused.",
+        "pt-BR": "As bibliotecas compartilhadas em que os apps Flatpak se baseiam, com várias versões lado a lado. As sem uso são removidas com flatpak uninstall --unused."
+      }
+    },
+    {
+      "id": "flatpak-system-runtimes",
+      "path": "/var/lib/flatpak/runtime",
+      "category": "Apps",
+      "title": { "en": "Flatpak runtimes (all users)", "pt-BR": "Runtimes do Flatpak (todos os usuários)" },
+      "description": {
+        "en": "The shared libraries Flatpak apps are built on, with several versions side by side. Unused ones are removed with flatpak uninstall --unused.",
+        "pt-BR": "As bibliotecas compartilhadas em que os apps Flatpak se baseiam, com várias versões lado a lado. As sem uso são removidas com flatpak uninstall --unused."
+      }
+    },
+    {
+      "id": "flatpak-user-repo",
+      "path": "%XDG_DATA_HOME%/flatpak/repo",
+      "category": "Apps",
+      "title": { "en": "Flatpak download store (your user)", "pt-BR": "Depósito de downloads do Flatpak (seu usuário)" },
+      "description": {
+        "en": "Flatpak's store of app and runtime files. Installed apps share these files, so most of their size is counted here. Managed by flatpak.",
+        "pt-BR": "O depósito de arquivos de apps e runtimes do Flatpak. Os apps instalados compartilham esses arquivos, então a maior parte do tamanho deles é contada aqui. Gerenciado pelo flatpak."
+      }
+    },
+    {
+      "id": "flatpak-system-repo",
+      "path": "/var/lib/flatpak/repo",
+      "category": "Apps",
+      "title": { "en": "Flatpak download store (all users)", "pt-BR": "Depósito de downloads do Flatpak (todos os usuários)" },
+      "description": {
+        "en": "Flatpak's store of app and runtime files. Installed apps share these files, so most of their size is counted here. Managed by flatpak.",
+        "pt-BR": "O depósito de arquivos de apps e runtimes do Flatpak. Os apps instalados compartilham esses arquivos, então a maior parte do tamanho deles é contada aqui. Gerenciado pelo flatpak."
+      }
+    },
+    {
+      "id": "flatpak-app-data-apps",
+      "path": "%HOME%/.var/app",
+      "category": "Apps",
+      "title": { "en": "Flatpak app data", "pt-BR": "Dados dos apps Flatpak" },
+      "description": {
+        "en": "A folder per Flatpak app with its settings, caches and saved data. Often much bigger than people expect.",
+        "pt-BR": "Uma pasta por app Flatpak com configurações, caches e dados salvos. Muitas vezes bem maior do que se imagina."
+      },
+      "children": {
+          "title": { "en": "{0} (settings and data)", "pt-BR": "{0} (configurações e dados)" },
+          "description": {
+            "en": "Settings, caches and saved data of {0}, a Flatpak app. Deleting the folder resets the app and removes what it saved.",
+            "pt-BR": "Configurações, caches e dados salvos de {0}, um app Flatpak. Apagar a pasta restaura o app ao padrão e remove o que ele salvou."
+          }
+      }
+    },
+    {
+      "id": "homebrew",
+      "path": "/home/linuxbrew",
+      "category": "Apps",
+      "title": { "en": "Homebrew programs", "pt-BR": "Programas do Homebrew" },
+      "description": {
+        "en": "Programs and libraries installed with Homebrew. Remove them with the brew command.",
+        "pt-BR": "Programas e bibliotecas instalados com o Homebrew. Remova pelo comando brew."
+      },
+      "children": {}
+    },
+    {
+      "id": "waydroid-data",
+      "path": "/var/lib/waydroid",
+      "category": "Apps",
+      "title": { "en": "Waydroid (Android apps)", "pt-BR": "Waydroid (apps Android)" },
+      "description": {
+        "en": "The Android system and the apps Waydroid runs.",
+        "pt-BR": "O sistema Android e os apps que o Waydroid executa."
+      }
+    },
+    {
+      "id": "waydroid-user",
+      "path": "%XDG_DATA_HOME%/waydroid",
+      "category": "Apps",
+      "title": { "en": "Waydroid app data", "pt-BR": "Dados dos apps do Waydroid" },
+      "description": {
+        "en": "The data of the Android apps you run with Waydroid.",
+        "pt-BR": "Os dados dos apps Android que você roda com o Waydroid."
+      }
+    },
+    {
+      "id": "virtual-machines",
+      "path": "/var/lib/libvirt",
+      "category": "Apps",
+      "title": { "en": "Virtual machines (libvirt)", "pt-BR": "Máquinas virtuais (libvirt)" },
+      "description": {
+        "en": "Disk images and settings of the virtual machines libvirt manages. They hold whole systems and their files.",
+        "pt-BR": "Imagens de disco e configurações das máquinas virtuais que o libvirt gerencia. Elas guardam sistemas inteiros e seus arquivos."
+      }
+    },
+    {
+      "id": "steam-client",
+      "path": "%XDG_DATA_HOME%/Steam",
+      "category": "Apps",
+      "title": { "en": "Steam client", "pt-BR": "Cliente da Steam" },
+      "description": {
+        "en": "The Steam program, its runtimes and compatibility tools. The games themselves are counted as games.",
+        "pt-BR": "O programa da Steam, seus runtimes e ferramentas de compatibilidade. Os jogos em si são contados como jogos."
+      },
+      "children": {}
+    },
+    {
+      "id": "bottles-data",
+      "path": "%XDG_DATA_HOME%/bottles",
+      "category": "Apps",
+      "title": { "en": "Bottles", "pt-BR": "Bottles" },
+      "description": {
+        "en": "Programs made for other systems, with their settings, kept in Bottles, one bottle each.",
+        "pt-BR": "Programas feitos para outros sistemas, com suas configurações, guardados no Bottles, uma garrafa para cada um."
+      }
+    },
+    {
+      "id": "cache-huggingface",
+      "path": "%XDG_CACHE_HOME%/huggingface",
+      "category": "Apps",
+      "title": { "en": "AI models (Hugging Face cache)", "pt-BR": "Modelos de IA (cache do Hugging Face)" },
+      "description": {
+        "en": "Models and datasets downloaded by Python tools. They download again when needed, which can be slow.",
+        "pt-BR": "Modelos e conjuntos de dados baixados por ferramentas Python. Baixam de novo quando necessário, o que pode demorar."
+      }
+    },
+    {
+      "id": "cache-uv",
+      "path": "%XDG_CACHE_HOME%/uv",
+      "category": "Apps",
+      "title": { "en": "Python packages (uv cache)", "pt-BR": "Pacotes Python (cache do uv)" },
+      "description": {
+        "en": "Packages that uv downloaded or built. Downloaded again when needed.",
+        "pt-BR": "Pacotes que o uv baixou ou gerou. São baixados de novo quando necessário."
+      }
+    },
+    {
+      "id": "cache-pip",
+      "path": "%XDG_CACHE_HOME%/pip",
+      "category": "Apps",
+      "title": { "en": "Python packages (pip cache)", "pt-BR": "Pacotes Python (cache do pip)" },
+      "description": {
+        "en": "Packages that pip downloaded or built. Downloaded again when needed.",
+        "pt-BR": "Pacotes que o pip baixou ou gerou. São baixados de novo quando necessário."
+      }
+    },
+    {
+      "id": "cache-shaders",
+      "path": "%XDG_CACHE_HOME%/mesa_shader_cache",
+      "category": "Apps",
+      "title": { "en": "Graphics shader cache", "pt-BR": "Cache de shaders gráficos" },
+      "description": {
+        "en": "Compiled graphics programs that games and apps reuse. Rebuilt on demand, which can cause a short stutter.",
+        "pt-BR": "Programas gráficos compilados que jogos e apps reutilizam. São refeitos sob demanda, o que pode causar uma pequena engasgada."
+      }
+    },
+    {
+      "id": "anime-game-launcher",
+      "path": "%XDG_DATA_HOME%/anime-game-launcher",
+      "category": "Games",
+      "title": { "en": "An Anime Game Launcher", "pt-BR": "An Anime Game Launcher" },
+      "description": {
+        "en": "The game, its voice packs, Wine builds and prefix kept by the launcher.",
+        "pt-BR": "O jogo, seus pacotes de voz, versões do Wine e o prefixo guardados pelo lançador."
+      }
+    },
+    {
+      "id": "heroic-data",
+      "path": "%XDG_CONFIG_HOME%/heroic",
+      "category": "Games",
+      "title": { "en": "Heroic Games Launcher", "pt-BR": "Heroic Games Launcher" },
+      "description": {
+        "en": "Settings, Wine and Proton builds and prefixes kept by Heroic.",
+        "pt-BR": "Configurações, versões do Wine e do Proton e prefixos guardados pelo Heroic."
+      }
+    },
+    {
+      "id": "umu-runtime",
+      "path": "%XDG_DATA_HOME%/umu",
+      "category": "Games",
+      "title": { "en": "Game runtimes (umu)", "pt-BR": "Runtimes de jogos (umu)" },
+      "description": {
+        "en": "Proton runtimes that launchers download to run games made for other systems.",
+        "pt-BR": "Runtimes do Proton que lançadores baixam para rodar jogos feitos para outros sistemas."
+      }
+    },
+    {
+      "id": "steam-common",
+      "path": "**/steamapps/common",
+      "category": "Games",
+      "title": { "en": "Installed Steam games", "pt-BR": "Jogos da Steam instalados" },
+      "description": {
+        "en": "One folder per installed game. Uninstall a game from Steam to free its space.",
+        "pt-BR": "Uma pasta para cada jogo instalado. Desinstale um jogo pela Steam para liberar o espaço dele."
+      },
+      "children": {}
+    },
+    {
+      "id": "steam-compat",
+      "path": "**/steamapps/compatdata",
+      "category": "Games",
+      "title": { "en": "Steam Wine prefixes (compatdata)", "pt-BR": "Prefixos Wine da Steam (compatdata)" },
+      "description": {
+        "en": "One folder per game that runs through Proton: its saved games and settings. Deleting one can lose saves.",
+        "pt-BR": "Uma pasta para cada jogo que roda pelo Proton: seus jogos salvos e configurações. Apagar uma pode perder os saves."
+      }
+    },
+    {
+      "id": "steam-shaders",
+      "path": "**/steamapps/shadercache",
+      "category": "Games",
+      "title": { "en": "Steam shader caches", "pt-BR": "Caches de shaders da Steam" },
+      "description": {
+        "en": "Compiled graphics programs for the Steam games. Rebuilt when a game starts.",
+        "pt-BR": "Programas gráficos compilados dos jogos da Steam. Refeitos quando um jogo inicia."
+      }
+    },
+    {
+      "id": "flatpak-game-net-lutris-lutris",
+      "path": "%HOME%/.var/app/net.lutris.Lutris",
+      "category": "Games",
+      "title": { "en": "Lutris (settings and data)", "pt-BR": "Lutris (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of Lutris, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do Lutris, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-com-heroicgameslauncher-hgl",
+      "path": "%HOME%/.var/app/com.heroicgameslauncher.hgl",
+      "category": "Games",
+      "title": { "en": "Heroic Games Launcher (settings and data)", "pt-BR": "Heroic Games Launcher (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of Heroic Games Launcher, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do Heroic Games Launcher, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-org-prismlauncher-prismlauncher",
+      "path": "%HOME%/.var/app/org.prismlauncher.PrismLauncher",
+      "category": "Games",
+      "title": { "en": "Prism Launcher (settings and data)", "pt-BR": "Prism Launcher (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of Prism Launcher, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do Prism Launcher, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-com-hypixel-hytalelauncher",
+      "path": "%HOME%/.var/app/com.hypixel.HytaleLauncher",
+      "category": "Games",
+      "title": { "en": "Hytale Launcher (settings and data)", "pt-BR": "Hytale Launcher (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of Hytale Launcher, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do Hytale Launcher, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-sh-ppy-osu",
+      "path": "%HOME%/.var/app/sh.ppy.osu",
+      "category": "Games",
+      "title": { "en": "osu! (settings and data)", "pt-BR": "osu! (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of osu!, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do osu!, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-org-dolphinemu-dolphin-emu",
+      "path": "%HOME%/.var/app/org.DolphinEmu.dolphin-emu",
+      "category": "Games",
+      "title": { "en": "Dolphin (settings and data)", "pt-BR": "Dolphin (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of Dolphin, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do Dolphin, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-net-pcsx2-pcsx2",
+      "path": "%HOME%/.var/app/net.pcsx2.PCSX2",
+      "category": "Games",
+      "title": { "en": "PCSX2 (settings and data)", "pt-BR": "PCSX2 (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of PCSX2, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do PCSX2, um app Flatpak."
+      }
+    },
+    {
+      "id": "flatpak-game-org-libretro-retroarch",
+      "path": "%HOME%/.var/app/org.libretro.RetroArch",
+      "category": "Games",
+      "title": { "en": "RetroArch (settings and data)", "pt-BR": "RetroArch (configurações e dados)" },
+      "description": {
+        "en": "Settings, saves and downloaded game files of RetroArch, a Flatpak app.",
+        "pt-BR": "Configurações, saves e arquivos de jogos baixados do RetroArch, um app Flatpak."
+      }
+    },
+    {
+      "id": "steam-compat-tools",
+      "path": "**/compatibilitytools.d",
+      "category": "Apps",
+      "title": { "en": "Steam compatibility tools", "pt-BR": "Ferramentas de compatibilidade da Steam" },
+      "description": {
+        "en": "Extra Proton builds you installed for Steam, such as Proton-GE. Each one can be removed from the tool that installed it.",
+        "pt-BR": "Versões extras do Proton que você instalou para a Steam, como o Proton-GE. Cada uma pode ser removida pela ferramenta que a instalou."
+      }
+    },
+    {
+      "id": "data-pnpm",
+      "path": "%XDG_DATA_HOME%/pnpm",
+      "category": "Apps",
+      "title": { "en": "JavaScript packages (pnpm)", "pt-BR": "Pacotes JavaScript (pnpm)" },
+      "description": {
+        "en": "Packages pnpm downloaded for your projects. Downloaded again when needed.",
+        "pt-BR": "Pacotes que o pnpm baixou para seus projetos. São baixados de novo quando necessário."
+      }
+    },
+    {
+      "id": "data-yarn",
+      "path": "%XDG_DATA_HOME%/yarn",
+      "category": "Apps",
+      "title": { "en": "JavaScript packages (yarn)", "pt-BR": "Pacotes JavaScript (yarn)" },
+      "description": {
+        "en": "Packages yarn downloaded for your projects. Downloaded again when needed.",
+        "pt-BR": "Pacotes que o yarn baixou para seus projetos. São baixados de novo quando necessário."
+      }
+    },
+    {
       "id": "home-folder",
       "path": "%HOME%",
       "category": "YourFiles",
@@ -469,7 +850,8 @@
       "description": {
         "en": "Your documents, pictures, downloads and other personal files.",
         "pt-BR": "Seus documentos, imagens, downloads e outros arquivos pessoais."
-      }
+      },
+      "children": {}
     },
     {
       "id": "home-folders",
@@ -479,7 +861,8 @@
       "description": {
         "en": "Documents, pictures, downloads, desktop and other personal files of one user.",
         "pt-BR": "Documentos, imagens, downloads, área de trabalho e outros arquivos pessoais de um usuário."
-      }
+      },
+      "children": {}
     },
     {
       "id": "documents",

@@ -34,7 +34,7 @@ public sealed partial class App : Application
                 platform.Drives,
                 platform.Scanner,
                 classifier,
-                new KnowledgeBaseLocationInfo(classifier),
+                new KnowledgeBaseLocationInfo(classifier, platform.AppNames),
                 platform.Explorer,
                 platform.CreateCleanup(KnowledgeBaseLoader.LoadCleanupRules(platform.Name).Rules),
                 platform.HiddenSpace,

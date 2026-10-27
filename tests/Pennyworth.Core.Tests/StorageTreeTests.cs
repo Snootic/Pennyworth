@@ -121,4 +121,28 @@ public class StorageTreeTests
         Assert.Equal(10, snapshot[(int)StorageCategory.Games]);
         Assert.Equal(StorageCategories.Count, snapshot.Length);
     }
+
+    [Fact]
+    public void Counts_the_bytes_of_one_category_below_a_folder_and_stops_at_another_category()
+    {
+        // /data (Apps) holds a loose 10, a/ (Apps, 30), g/ (Games, 7) and g/h/ (Apps again, 5).
+        var b = new StorageTreeBuilder("/", StorageCategory.Other);
+        int data = b.AddDirectory(StorageTreeBuilder.RootIndex, "data", StorageCategory.Apps);
+        b.AddFile(data, "loose", 10, 10, StorageCategory.Apps);
+        int a = b.AddDirectory(data, "a", StorageCategory.Apps);
+        b.AddFile(a, "a.bin", 30, 30, StorageCategory.Apps);
+        int g = b.AddDirectory(data, "g", StorageCategory.Games);
+        b.AddFile(g, "g.pak", 7, 7, StorageCategory.Games);
+        int h = b.AddDirectory(g, "h", StorageCategory.Apps);
+        b.AddFile(h, "h.bin", 5, 5, StorageCategory.Apps);
+        StorageTree tree = b.Build();
+        StorageNode dataNode = tree.Root.GetChildren().Single();
+
+        Assert.Equal(40, tree.GetCategoryBytes(dataNode, StorageCategory.Apps));
+        Assert.Equal(30, tree.GetCategoryBytes(dataNode.GetChildren().Single(n => n.Name == "a"), StorageCategory.Apps));
+        Assert.Equal(0, tree.GetCategoryBytes(dataNode.GetChildren().Single(n => n.Name == "g"), StorageCategory.Apps));
+        Assert.Equal(7, tree.GetCategoryBytes(dataNode.GetChildren().Single(n => n.Name == "g"), StorageCategory.Games));
+        // Exactly what the area list reports for the folder.
+        Assert.Equal(40, tree.GetCategoryAreas(StorageCategory.Apps).Single(area => area.Node.Name == "data").Bytes);
+    }
 }

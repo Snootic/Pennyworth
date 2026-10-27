@@ -38,6 +38,42 @@ public sealed class StorageTree
         return _areas.TryGetValue(category, out var list) ? list : [];
     }
 
+    /// <summary>
+    /// The bytes below <paramref name="node"/> that belong to <paramref name="category"/> in the same area as the node:
+    /// the walk stops at a folder of another category, the way <see cref="GetCategoryAreas"/> ends an area there.
+    /// Zero when the node itself is of another category.
+    /// </summary>
+    public long GetCategoryBytes(StorageNode node, StorageCategory category)
+    {
+        if (node.Category != category)
+        {
+            return 0;
+        }
+
+        long bytes = 0;
+        var pending = new Stack<int>();
+        pending.Push(node.Index);
+        while (pending.TryPop(out int index))
+        {
+            ref readonly NodeData data = ref _nodes[index];
+            if ((data.Flags & NodeFlags.Directory) == 0)
+            {
+                bytes += data.SizeOnDisk;
+                continue;
+            }
+
+            for (int child = data.FirstChild; child >= 0; child = _nodes[child].NextSibling)
+            {
+                if (_nodes[child].Category == category)
+                {
+                    pending.Push(child);
+                }
+            }
+        }
+
+        return bytes;
+    }
+
     internal ref readonly NodeData Node(int index) => ref _nodes[index];
 
     internal string Name(int index) => _names[index];
