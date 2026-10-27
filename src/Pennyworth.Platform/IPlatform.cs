@@ -48,6 +48,13 @@ public interface IPlatform : IPlatformText
     /// </summary>
     IMemoryModuleReader? MemoryModules => null;
 
+    /// <summary>
+    /// The things this OS can do with an administrator's password when the person asks: full system space,
+    /// cleaning root-owned folders, measuring folders the user cannot list. Null where the OS has its own way
+    /// (Windows elevates the whole app for the full scan) or none.
+    /// </summary>
+    IPrivilegedOperations? Privileged => null;
+
     /// <summary>Where the settings file lives.</summary>
     string SettingsPath { get; }
 

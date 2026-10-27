@@ -18,11 +18,13 @@ public interface IRecycleBin
 /// <param name="MayCleanInside">The hard safety rule: may a rule delete inside this folder at all?</param>
 /// <param name="PathComparison">How this OS tells two paths apart (ignoring case on Windows, never on Linux).</param>
 /// <param name="RecycleBin">Null when the OS has none; rules of kind <see cref="KnowledgeBase.CleanupKind.RecycleBin"/> then cannot run.</param>
+/// <param name="AdminCleaner">Null when the OS cannot clean rules that need admin rights; those are then refused.</param>
 public sealed record CleanupEnvironment(
     Func<string, string?> Variables,
     Func<string, bool> MayCleanInside,
     StringComparer PathComparison,
-    IRecycleBin? RecycleBin = null)
+    IRecycleBin? RecycleBin = null,
+    IAdminCleaner? AdminCleaner = null)
 {
     /// <summary>
     /// Windows' rules without its Recycle Bin: a protected-folder guard built from the Windows

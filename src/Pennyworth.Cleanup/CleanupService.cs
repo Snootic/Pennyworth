@@ -1,3 +1,4 @@
+using Pennyworth.Core.Privilege;
 using Pennyworth.KnowledgeBase;
 
 namespace Pennyworth.Cleanup;
@@ -14,16 +15,45 @@ public sealed record CleanupFolder(string Path, long Bytes, long Files);
 /// <summary>What cleaning a rule would remove, file by file. Cleaning removes exactly these files and nothing else.</summary>
 /// <param name="IsAvailable">False when the rule needs admin rights this app doesn't have yet.</param>
 /// <param name="Items">Files found (Recycle Bin: items in it).</param>
+/// <param name="Admin">
+/// Only for a rule that needs admin rights, on an OS whose cleanup can ask for them (<see cref="IAdminCleaner"/>):
+/// whether that can be done now (then <paramref name="IsAvailable"/> is true and cleaning shows a password prompt) or why not.
+/// Null everywhere else.
+/// </param>
 public sealed record CleanupEstimate(
     CleanupRule Rule,
     long Bytes,
     long Items,
     bool IsAvailable,
     IReadOnlyList<CleanupFolder>? Folders = null,
-    IReadOnlyList<CleanupFile>? Files = null);
+    IReadOnlyList<CleanupFile>? Files = null,
+    PrivilegedCapability? Admin = null);
 
 /// <param name="Skipped">Files left alone: in use, protected, changed since they were listed, or already gone.</param>
-public sealed record CleanupResult(CleanupRule Rule, long BytesFreed, long FilesDeleted, long Skipped);
+/// <param name="Outcome">
+/// <see cref="PrivilegedOutcome.Done"/> for every unprivileged rule. For a rule that needs admin rights it can also say the
+/// person cancelled the password prompt, it could not be asked for (<paramref name="Reason"/>), or it failed; nothing was deleted then.
+/// </param>
+public sealed record CleanupResult(
+    CleanupRule Rule,
+    long BytesFreed,
+    long FilesDeleted,
+    long Skipped,
+    PrivilegedOutcome Outcome = PrivilegedOutcome.Done,
+    PrivilegedUnavailableReason? Reason = null);
+
+/// <summary>
+/// Cleans the rules that need an administrator (<c>requiresAdmin</c>) on an OS that can ask for one. The preview is
+/// still made without privileges; this only deletes, and only the files of that preview.
+/// </summary>
+public interface IAdminCleaner
+{
+    /// <summary>Whether admin rules can be cleaned now; evaluated on every call, never shows a prompt.</summary>
+    PrivilegedCapability Capability { get; }
+
+    /// <summary>Deletes the files of <paramref name="estimate"/>, a rule that needs admin rights. Shows the system's password prompt.</summary>
+    Task<PrivilegedResult<CleanupResult>> CleanAsync(CleanupEstimate estimate, CancellationToken cancellationToken);
+}
 
 public interface ICleanupService
 {

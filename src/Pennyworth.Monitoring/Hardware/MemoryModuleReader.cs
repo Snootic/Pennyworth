@@ -1,3 +1,5 @@
+using Pennyworth.Core.Privilege;
+
 namespace Pennyworth.Monitoring.Hardware;
 
 public enum MemoryModulesOutcome
@@ -13,13 +15,16 @@ public enum MemoryModulesOutcome
 }
 
 /// <param name="Slots">Memory slots on the motherboard, when the firmware says.</param>
-public sealed record MemoryModulesResult(MemoryModulesOutcome Outcome, IReadOnlyList<MemoryModule> Modules, int? Slots)
+/// <param name="Reason">With <see cref="MemoryModulesOutcome.Unavailable"/>: why there was no way to ask, when that is the cause.</param>
+public sealed record MemoryModulesResult(MemoryModulesOutcome Outcome, IReadOnlyList<MemoryModule> Modules, int? Slots, PrivilegedUnavailableReason? Reason = null)
 {
     public static MemoryModulesResult Read(IReadOnlyList<MemoryModule> modules, int? slots) => new(MemoryModulesOutcome.Read, modules, slots);
 
     public static MemoryModulesResult Cancelled { get; } = new(MemoryModulesOutcome.Cancelled, [], null);
 
     public static MemoryModulesResult Unavailable { get; } = new(MemoryModulesOutcome.Unavailable, [], null);
+
+    public static MemoryModulesResult NotAvailable(PrivilegedUnavailableReason reason) => new(MemoryModulesOutcome.Unavailable, [], null, reason);
 }
 
 /// <summary>

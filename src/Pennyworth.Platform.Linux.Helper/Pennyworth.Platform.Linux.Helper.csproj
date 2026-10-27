@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pennyworth.Platform.Linux" />
+    <InternalsVisibleTo Include="Pennyworth.Platform.Linux.Tests" />
+  </ItemGroup>
+  <!-- What the root helper runs, and the contract the app speaks to it. It references nothing: the helper is the one
+       program Pennyworth runs as root, so what it contains is kept to this project and the framework. -->
+</Project>

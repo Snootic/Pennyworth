@@ -9,5 +9,6 @@
   <!-- Every Linux implementation lives here and nowhere else; it never references a Win32 symbol. -->
   <ItemGroup>
     <ProjectReference Include="..\Pennyworth.Platform\Pennyworth.Platform.csproj" />
+    <ProjectReference Include="..\Pennyworth.Platform.Linux.Helper\Pennyworth.Platform.Linux.Helper.csproj" />
   </ItemGroup>
 </Project>

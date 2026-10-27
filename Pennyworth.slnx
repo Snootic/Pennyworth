@@ -11,6 +11,8 @@
     <Project Path="src/Pennyworth.Monitoring/Pennyworth.Monitoring.csproj" />
     <Project Path="src/Pennyworth.Platform/Pennyworth.Platform.csproj" />
     <Project Path="src/Pennyworth.Platform.Linux/Pennyworth.Platform.Linux.csproj" />
+    <Project Path="src/Pennyworth.Platform.Linux.Helper/Pennyworth.Platform.Linux.Helper.csproj" />
+    <Project Path="src/Pennyworth.Helper/Pennyworth.Helper.csproj" />
     <Project Path="src/Pennyworth.Scanning/Pennyworth.Scanning.csproj" />
   </Folder>
   <Folder Name="/tests/">
