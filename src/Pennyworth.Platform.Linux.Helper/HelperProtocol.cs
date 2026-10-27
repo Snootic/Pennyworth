@@ -75,6 +75,12 @@ public static class HelperExit
     public const int Missing = 6;
 }
 
+/// <summary>Stops a helper action with one of the <see cref="HelperExit"/> codes; the message becomes the one line on stderr. Carries no secrets and no file content.</summary>
+public sealed class HelperException(int exitCode, string message) : Exception(message)
+{
+    public int ExitCode { get; } = exitCode;
+}
+
 /// <summary>Answer of <c>read-firmware-tables</c>.</summary>
 /// <param name="Table"><c>/sys/firmware/dmi/tables/DMI</c>, base64.</param>
 public sealed record FirmwareTablesResponse(int Version, string Table);
