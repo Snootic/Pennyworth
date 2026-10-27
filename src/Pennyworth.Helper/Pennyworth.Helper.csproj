@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>pennyworth-helper</AssemblyName>
+    <RootNamespace>Pennyworth.Helper</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <IlcOptimizationPreference>Size</IlcOptimizationPreference>
+    <StripSymbols>true</StripSymbols>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebuggerSupport>false</DebuggerSupport>
+    <EventSourceSupport>false</EventSourceSupport>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <!-- The program Pennyworth runs as root (through pkexec). It references only the helper library: nothing of the app,
+       Avalonia or the platform layer, so no native library of theirs is ever loaded into a root process. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Pennyworth.Platform.Linux.Helper\Pennyworth.Platform.Linux.Helper.csproj" />
+  </ItemGroup>
+</Project>
