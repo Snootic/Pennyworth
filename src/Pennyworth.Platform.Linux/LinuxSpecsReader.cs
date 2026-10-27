@@ -9,7 +9,7 @@ namespace Pennyworth.Platform.Linux;
 /// few optional helper programs (<c>lspci</c>, <c>nvidia-smi</c>, <c>vulkaninfo</c>, <c>stat</c>, and the ones that
 /// know the running session: <c>kscreen-doctor</c>, <c>gdbus</c>, <c>wlr-randr</c>, <c>xrandr</c>).
 /// Nothing needs root: what only root can read (SMBIOS memory modules, serial numbers) stays unknown
-/// instead of being asked for here; the memory modules alone can be read on request by <see cref="PkexecMemoryReader"/>.
+/// instead of being asked for here; the memory modules alone can be read on request by <see cref="PrivilegedMemoryReader"/>.
 /// A missing source empties its own field and nothing else.
 /// </summary>
 public sealed class LinuxSpecsReader : ISpecsReader

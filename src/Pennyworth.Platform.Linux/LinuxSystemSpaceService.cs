@@ -25,6 +25,8 @@ namespace Pennyworth.Platform.Linux;
 /// </list>
 /// Both fields null is <see cref="UnlockOutcome.Failed"/>; anything else is
 /// <see cref="UnlockOutcome.Measured"/>. <see cref="UnlockOutcome.Declined"/> never happens.
+/// The part only root can see (<c>btrfs qgroup show</c>, the snapshots of other users) is measured on request by
+/// <see cref="LinuxPrivilegedOperations.MeasureSystemSpaceAsync"/>, a separate and explicit step; this service stays unprivileged.
 /// </summary>
 internal sealed class LinuxSystemSpaceService : IHiddenSpaceService
 {

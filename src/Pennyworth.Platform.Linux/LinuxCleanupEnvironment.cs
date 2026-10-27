@@ -7,10 +7,11 @@ namespace Pennyworth.Platform.Linux;
 [SupportedOSPlatform("linux")]
 internal static class LinuxCleanupEnvironment
 {
-    public static CleanupEnvironment Create(XdgPaths paths, EnvironmentScope scope, Func<IReadOnlyList<string>> mountPoints, int uid) =>
+    public static CleanupEnvironment Create(XdgPaths paths, EnvironmentScope scope, Func<IReadOnlyList<string>> mountPoints, int uid, IAdminCleaner? adminCleaner = null) =>
         new(
             scope.Resolve,
             new LinuxSafetyGuard(paths, mountPoints, scope.Resolve).MayCleanInside,
             StringComparer.Ordinal,
-            new XdgTrash(paths, mountPoints, uid));
+            new XdgTrash(paths, mountPoints, uid),
+            adminCleaner);
 }

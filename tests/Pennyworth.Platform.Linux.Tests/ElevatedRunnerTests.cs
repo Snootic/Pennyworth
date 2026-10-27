@@ -7,7 +7,10 @@ namespace Pennyworth.Platform.Linux.Tests;
 public class ElevatedRunnerTests
 {
     private static Task<ElevatedRun> Run(string file, TimeSpan timeout, CancellationToken token, params string[] arguments) =>
-        ElevatedRunner.RunAsync(file, arguments, timeout, token);
+        ElevatedRunner.RunAsync(file, arguments, null, ElevatedRunner.MaxOutput, timeout, token);
+
+    private static Task<ElevatedRun> RunWith(string file, byte[]? input, int maxOutput, params string[] arguments) =>
+        ElevatedRunner.RunAsync(file, arguments, input, maxOutput, TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
 
     [LinuxFact]
     public async Task Returns_the_exit_code_and_the_raw_bytes()
@@ -85,5 +88,94 @@ public class ElevatedRunnerTests
 
         Assert.Equal(ElevatedStatus.TooLarge, run.Status);
         Assert.Empty(run.Output);
+    }
+
+    [LinuxFact]
+    public async Task The_limit_is_the_callers_to_set()
+    {
+        ElevatedRun small = await RunWith("/bin/sh", null, 1000, "-c", "head -c 5000 /dev/zero");
+        ElevatedRun large = await RunWith("/bin/sh", null, 8 * 1024 * 1024, "-c", "head -c 5000000 /dev/zero");
+
+        Assert.Equal(ElevatedStatus.TooLarge, small.Status);
+        Assert.Equal((ElevatedStatus.Exited, 5_000_000), (large.Status, large.Output.Length));
+    }
+
+    [LinuxFact]
+    public async Task The_input_reaches_standard_input_and_is_then_closed()
+    {
+        byte[] input = Enumerable.Range(0, 256).Select(i => (byte)i).ToArray();
+
+        ElevatedRun run = await RunWith("/bin/cat", input, ElevatedRunner.MaxOutput);
+
+        Assert.Equal((ElevatedStatus.Exited, 0), (run.Status, run.ExitCode)); // cat ends only when its input is closed
+        Assert.Equal(input, run.Output);
+    }
+
+    [LinuxFact]
+    public async Task An_input_far_larger_than_a_pipe_is_written_while_the_output_is_read()
+    {
+        byte[] input = new byte[3 * 1024 * 1024];
+        new Random(7).NextBytes(input);
+
+        ElevatedRun run = await RunWith("/bin/cat", input, 8 * 1024 * 1024);
+
+        Assert.Equal(ElevatedStatus.Exited, run.Status);
+        Assert.Equal(input, run.Output);
+    }
+
+    [LinuxFact]
+    public async Task A_program_that_exits_without_reading_its_input_is_not_an_error()
+    {
+        byte[] input = new byte[5 * 1024 * 1024];
+
+        ElevatedRun run = await RunWith("/bin/sh", input, ElevatedRunner.MaxOutput, "-c", "exit 126");
+
+        Assert.Equal((ElevatedStatus.Exited, 126), (run.Status, run.ExitCode));
+    }
+
+    [LinuxFact]
+    public async Task A_request_over_the_limit_is_refused_before_anything_starts()
+    {
+        byte[] input = new byte[HelperProtocol.MaxRequestBytes + 1];
+
+        ElevatedRun run = await RunWith("/nonexistent/pennyworth-pkexec", input, ElevatedRunner.MaxOutput);
+
+        Assert.Equal(ElevatedStatus.TooLarge, run.Status); // not NotStarted: the program was never looked for
+    }
+
+    [LinuxFact]
+    public async Task Standard_error_is_kept_as_text()
+    {
+        ElevatedRun run = await RunWith("/bin/sh", null, ElevatedRunner.MaxOutput, "-c", "echo 'pennyworth-helper: refused' >&2; exit 3");
+
+        Assert.Equal((ElevatedStatus.Exited, 3), (run.Status, run.ExitCode));
+        Assert.Equal("pennyworth-helper: refused\n", run.Error);
+        Assert.Empty(run.Output);
+    }
+
+    [LinuxFact]
+    public async Task Only_the_first_8_KiB_of_standard_error_is_kept_and_the_program_still_finishes()
+    {
+        ElevatedRun run = await RunWith("/bin/sh", null, ElevatedRunner.MaxOutput, "-c", "head -c 300000 /dev/zero | tr '\\000' x >&2; exit 2");
+
+        Assert.Equal((ElevatedStatus.Exited, 2), (run.Status, run.ExitCode));
+        Assert.Equal(ElevatedRunner.MaxErrorBytes, run.Error.Length);
+        Assert.All(run.Error, c => Assert.Equal('x', c));
+    }
+
+    [LinuxFact]
+    public async Task Standard_error_that_is_not_UTF8_is_decoded_leniently()
+    {
+        ElevatedRun run = await RunWith("/bin/sh", null, ElevatedRunner.MaxOutput, "-c", "printf 'a\\377b' >&2");
+
+        Assert.Equal("a\uFFFDb", run.Error);
+    }
+
+    [LinuxFact]
+    public async Task No_standard_error_is_an_empty_string()
+    {
+        ElevatedRun run = await Run("/bin/true", TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+
+        Assert.Equal("", run.Error);
     }
 }

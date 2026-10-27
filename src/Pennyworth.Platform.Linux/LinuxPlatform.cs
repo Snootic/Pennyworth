@@ -11,13 +11,17 @@ namespace Pennyworth.Platform.Linux;
 
 /// <summary>
 /// Linux: <c>/proc</c>, <c>/sys</c>, the XDG trash and base directories, <c>statx</c> and the Secret
-/// Service behind <see cref="IPlatform"/>. Nothing here asks for administrator rights.
+/// Service behind <see cref="IPlatform"/>. Nothing here asks for administrator rights on its own: the
+/// unprivileged services (<see cref="HiddenSpace"/> and the rest) never run <c>pkexec</c>. The few opt-in features
+/// that need root (memory modules, full system space, root-owned cleanup rules, folders the person cannot list) are
+/// behind <see cref="Privileged"/>, each started only by a button and each showing the desktop's own password dialog.
 /// </summary>
 [SupportedOSPlatform("linux")]
 public sealed class LinuxPlatform : IPlatform
 {
     private readonly XdgPaths _paths;
     private readonly EnvironmentScope _scope;
+    private readonly LinuxPrivilegedOperations _privileged = new();
 
     /// <exception cref="InvalidOperationException">The home directory is unknown, so there is nowhere to keep files.</exception>
     public LinuxPlatform()
@@ -33,6 +37,7 @@ public sealed class LinuxPlatform : IPlatform
         _paths = new XdgPaths();
         _scope = new EnvironmentScope(_paths);
         AppNames = new FlatpakAppNames(_paths.DataHome);
+        MemoryModules = new PrivilegedMemoryReader(_privileged);
     }
 
     /// <summary>The native parts this machine lacks, checked once when the platform was created.</summary>
@@ -54,8 +59,11 @@ public sealed class LinuxPlatform : IPlatform
 
     public ISpecsReader Specs { get; } = new LinuxSpecsReader();
 
-    /// <summary>Opt-in, behind a button: the one place Pennyworth asks for a password (decision D1, memory modules).</summary>
-    public IMemoryModuleReader? MemoryModules { get; } = new PkexecMemoryReader();
+    /// <summary>Opt-in, behind a button: reads the SMBIOS tables as root through <see cref="Privileged"/> (decision D1).</summary>
+    public IMemoryModuleReader? MemoryModules { get; }
+
+    /// <summary>The operations that need an administrator, each asked for only when a person pressed the button for it.</summary>
+    public IPrivilegedOperations? Privileged => _privileged;
 
     public string SettingsPath => _paths.SettingsPath;
 
@@ -73,7 +81,7 @@ public sealed class LinuxPlatform : IPlatform
 
     public ICleanupService CreateCleanup(IReadOnlyList<CleanupRule> rules) => new CleanupService(
         rules,
-        environment: LinuxCleanupEnvironment.Create(_paths, _scope, () => MountTable.MountPoints(), XdgTrash.CurrentUid()));
+        environment: LinuxCleanupEnvironment.Create(_paths, _scope, () => MountTable.MountPoints(), XdgTrash.CurrentUid(), new LinuxAdminCleaner(_privileged)));
 
     public ISystemMonitor? CreateMonitor(IEnumerable<ProcessExplanation> explanations) => new LinuxMonitor(explanations);
 

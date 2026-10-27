@@ -1,4 +1,4 @@
-using System.Text;
+using Pennyworth.Core.Privilege;
 using Pennyworth.Monitoring.Hardware;
 
 namespace Pennyworth.Platform.Linux.Tests;
@@ -9,29 +9,23 @@ namespace Pennyworth.Platform.Linux.Tests;
 /// </summary>
 public class MemoryModuleTests
 {
-    private const string Pkexec = "/usr/bin/pkexec";
+    private const string Pkexec = Privileged.Pkexec;
     private const string Dmidecode = "/usr/sbin/dmidecode";
 
-    private static ElevatedRun Exit(int code, byte[]? output = null) => new(ElevatedStatus.Exited, code, output ?? []);
+    private static ElevatedRun Exit(int code, byte[]? output = null, string error = "") => Privileged.Exit(code, output, error);
 
-    private static ElevatedRun Text(string text) => Exit(0, Encoding.UTF8.GetBytes(text));
+    private static ElevatedRun Text(string text) => Privileged.Text(text);
 
-    /// <summary>A runner that answers in order and records every command line it was asked to run.</summary>
-    private sealed class FakeRunner(params ElevatedRun[] answers)
-    {
-        private readonly Queue<ElevatedRun> _answers = new(answers);
+    /// <summary>The reader over the generic pkexec route (no helper installed), with only <paramref name="installed"/> found.</summary>
+    private static PrivilegedMemoryReader Reader(FakeRunner runner, params string[] installed) =>
+        new(Privileged.Ops(runner, Privileged.MissingLstat, installed));
 
-        public List<string> Calls { get; } = [];
+    /// <summary>The reader over the helper (installed and trusted).</summary>
+    private static PrivilegedMemoryReader HelperReader(FakeRunner runner, params string[] installed) =>
+        new(Privileged.Ops(runner, Privileged.TrustedLstat, installed));
 
-        public Task<ElevatedRun> Run(string file, IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellationToken)
-        {
-            Calls.Add(string.Join(' ', [file, .. arguments]));
-            return Task.FromResult(_answers.Dequeue());
-        }
-    }
-
-    private static PkexecMemoryReader Reader(FakeRunner runner, params string[] installed) =>
-        new(runner.Run, installed.Contains, TimeSpan.FromSeconds(1));
+    private static ElevatedRun HelperTable(byte[] table) =>
+        Privileged.Json(new FirmwareTablesResponse(HelperProtocol.Version, Convert.ToBase64String(table)), HelperJson.Default.FirmwareTablesResponse);
 
     // ---- the synthetic table, through the reader Windows uses ----
 
@@ -130,12 +124,24 @@ public class MemoryModuleTests
         Assert.Equal(MemoryModulesOutcome.Read, result.Outcome);
         Assert.Equal(["DIMM_A1", "DIMM_B1"], result.Modules.Select(m => m.Slot));
         Assert.Equal(3, result.Slots);
-        Assert.Equal([$"{Pkexec} /usr/bin/cat /sys/firmware/dmi/tables/DMI"], runner.Calls); // one prompt, no PATH lookup, no sudo
+        Assert.Equal([$"{Pkexec} /usr/bin/cat /sys/firmware/dmi/tables/DMI"], runner.Lines); // one prompt, no PATH lookup, no sudo
+    }
+
+    [Fact]
+    public async Task Reads_the_table_through_the_helper_when_it_is_trusted()
+    {
+        var runner = new FakeRunner(HelperTable(SmbiosTable.ThreeSlots()));
+
+        MemoryModulesResult result = await HelperReader(runner, Pkexec, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(MemoryModulesOutcome.Read, result.Outcome);
+        Assert.Equal(["DIMM_A1", "DIMM_B1"], result.Modules.Select(m => m.Slot));
+        Assert.Equal([$"{Pkexec} {HelperProtocol.InstalledPath} read-firmware-tables"], runner.Lines);
     }
 
     [Theory]
     [InlineData(126)] // the dialog was dismissed
-    [InlineData(127)] // not authorised, or no agent to ask
+    [InlineData(127)] // not authorised
     public async Task A_dismissed_or_refused_prompt_is_cancelled_and_is_not_asked_again(int exitCode)
     {
         var runner = new FakeRunner(Exit(exitCode));
@@ -148,6 +154,29 @@ public class MemoryModuleTests
     }
 
     [Fact]
+    public async Task A_dismissed_helper_prompt_is_cancelled_and_not_asked_again()
+    {
+        var runner = new FakeRunner(Exit(126));
+
+        MemoryModulesResult result = await HelperReader(runner, Pkexec, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(MemoryModulesOutcome.Cancelled, result.Outcome);
+        Assert.Single(runner.Calls);
+    }
+
+    [Fact]
+    public async Task Without_an_authentication_agent_it_says_so_and_does_not_ask_again()
+    {
+        var runner = new FakeRunner(Exit(127, error: "Error getting authority: No authentication agent found.\n"));
+
+        MemoryModulesResult result = await Reader(runner, Pkexec, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(MemoryModulesOutcome.Unavailable, result.Outcome);
+        Assert.Equal(PrivilegedUnavailableReason.NoAuthenticationAgent, result.Reason);
+        Assert.Single(runner.Calls);
+    }
+
+    [Fact]
     public async Task Without_pkexec_there_is_no_way_to_ask()
     {
         var runner = new FakeRunner();
@@ -155,7 +184,20 @@ public class MemoryModuleTests
         MemoryModulesResult result = await Reader(runner, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(MemoryModulesOutcome.Unavailable, result.Outcome);
+        Assert.Equal(PrivilegedUnavailableReason.NoPkexec, result.Reason);
         Assert.Empty(runner.Calls);
+    }
+
+    [Fact]
+    public async Task An_outdated_helper_is_unavailable_with_its_reason()
+    {
+        var runner = new FakeRunner(Privileged.Json(new FirmwareTablesResponse(HelperProtocol.Version + 1, ""), HelperJson.Default.FirmwareTablesResponse));
+
+        MemoryModulesResult result = await HelperReader(runner, Pkexec, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(MemoryModulesOutcome.Unavailable, result.Outcome);
+        Assert.Equal(PrivilegedUnavailableReason.HelperOutdated, result.Reason);
+        Assert.Single(runner.Calls);
     }
 
     [Theory]
@@ -183,6 +225,20 @@ public class MemoryModuleTests
         Assert.Single(runner.Calls);
     }
 
+    [Theory]
+    [InlineData(1)] // the helper failed
+    [InlineData(6)] // the table is not there
+    public async Task A_failing_helper_is_unavailable_and_does_not_prompt_again(int exitCode)
+    {
+        var runner = new FakeRunner(Exit(exitCode, error: "pennyworth-helper: no table\n"));
+
+        MemoryModulesResult result = await HelperReader(runner, Pkexec, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(MemoryModulesOutcome.Unavailable, result.Outcome);
+        Assert.Null(result.Reason);
+        Assert.Single(runner.Calls);
+    }
+
     [Fact]
     public async Task Garbage_with_no_dmidecode_is_unavailable()
     {
@@ -206,7 +262,18 @@ public class MemoryModuleTests
         Assert.Equal(MemoryModulesOutcome.Read, result.Outcome);
         Assert.Equal(2, result.Modules.Count);
         Assert.Equal(3, result.Slots);
-        Assert.Equal([$"{Pkexec} /usr/bin/cat /sys/firmware/dmi/tables/DMI", $"{Pkexec} {Dmidecode} -t 17"], runner.Calls);
+        Assert.Equal([$"{Pkexec} /usr/bin/cat /sys/firmware/dmi/tables/DMI", $"{Pkexec} {Dmidecode} -t 17"], runner.Lines);
+    }
+
+    [Fact]
+    public async Task The_helper_then_dmidecode_when_the_table_it_returns_gives_nothing()
+    {
+        var runner = new FakeRunner(HelperTable([0xFF, 0xFF, 0xFF, 0xFF]), Text(SmbiosTable.ThreeSlotsDmidecode));
+
+        MemoryModulesResult result = await HelperReader(runner, Pkexec, "/usr/bin/cat", Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(MemoryModulesOutcome.Read, result.Outcome);
+        Assert.Equal([$"{Pkexec} {HelperProtocol.InstalledPath} read-firmware-tables", $"{Pkexec} {Dmidecode} -t 17"], runner.Lines);
     }
 
     [Fact]
@@ -217,7 +284,7 @@ public class MemoryModuleTests
         MemoryModulesResult result = await Reader(runner, Pkexec, Dmidecode).ReadAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(MemoryModulesOutcome.Read, result.Outcome);
-        Assert.Equal([$"{Pkexec} {Dmidecode} -t 17"], runner.Calls);
+        Assert.Equal([$"{Pkexec} {Dmidecode} -t 17"], runner.Lines);
     }
 
     [Fact]
@@ -235,16 +302,16 @@ public class MemoryModuleTests
     {
         using var source = new CancellationTokenSource();
         CancellationToken seen = default;
-        var reader = new PkexecMemoryReader(
-            (_, _, _, token) =>
+        var reader = new PrivilegedMemoryReader(Privileged.Ops(
+            (_, _, _, _, _, token) =>
             {
                 seen = token;
                 source.Cancel();
                 token.ThrowIfCancellationRequested();
                 return Task.FromResult(Exit(0));
             },
-            path => path is Pkexec or "/usr/bin/cat",
-            TimeSpan.FromSeconds(1));
+            Privileged.MissingLstat,
+            [Pkexec, "/usr/bin/cat"]));
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => reader.ReadAsync(source.Token));
         Assert.Equal(source.Token, seen);
@@ -253,18 +320,11 @@ public class MemoryModuleTests
     [Fact]
     public async Task Gives_the_runner_the_long_wait_a_person_needs()
     {
-        TimeSpan asked = default;
-        var reader = new PkexecMemoryReader(
-            (_, _, timeout, _) =>
-            {
-                asked = timeout;
-                return Task.FromResult(Exit(126));
-            },
-            path => path is Pkexec or "/usr/bin/cat",
-            PkexecMemoryReader.PromptTimeout);
+        var runner = new FakeRunner(Exit(126));
+        var reader = new PrivilegedMemoryReader(Privileged.Ops(runner, Privileged.MissingLstat, [Pkexec, "/usr/bin/cat"], timeout: LinuxPrivilegedOperations.PromptTimeout));
 
         await reader.ReadAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(TimeSpan.FromSeconds(120), asked);
+        Assert.Equal(TimeSpan.FromSeconds(120), runner.Calls.Single().Timeout);
     }
 }
