@@ -37,6 +37,9 @@ public sealed class LinuxPlatform : IPlatform
 
     public ISpecsReader Specs { get; } = new LinuxSpecsReader();
 
+    /// <summary>Opt-in, behind a button: the one place Pennyworth asks for a password (decision D1, memory modules).</summary>
+    public IMemoryModuleReader? MemoryModules { get; } = new PkexecMemoryReader();
+
     public string SettingsPath => _paths.SettingsPath;
 
     public string CleanupHistoryPath => _paths.CleanupHistoryPath;
