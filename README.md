@@ -58,7 +58,7 @@ dotnet publish src/Pennyworth.App -c Release -r win-x64 -p:PublishAot=true -o pu
 
 Requirements: x64 Linux with glibc 2.27+ and an X11 or Wayland session; `libicu` and `libfontconfig`
 (present on every common desktop). `libsecret-1` is optional: without it Pennyworth starts, says in one
-sentence that API keys cannot be saved, and turns off only the keyring. Nothing asks for a password.
+sentence that API keys cannot be saved, and turns off only the keyring.
 
 The window uses Wayland natively inside a Wayland session and X11 otherwise;
 `PENNYWORTH_DISPLAY=x11` keeps X11 (XWayland) inside a Wayland session.
@@ -72,10 +72,64 @@ tools/package/smoke-linux.sh --tarball artifacts/linux-x64/pennyworth-0.1.0-linu
 
 The script publishes `linux-x64` self-contained, lays the result out as `bin/`, `lib/pennyworth/` and `share/`
 (desktop file and `hicolor` icons), and builds the AppImage with a pinned, checksum-verified `appimagetool`
-(downloaded on first use). `--aot` publishes with Native AOT instead (needs clang and zlib headers),
-`--no-appimage` stops after the tarball and the AppDir. The smoke script starts a package with an empty
+(downloaded on first use). `--aot` publishes the app with Native AOT instead (needs clang and zlib headers),
+`--no-appimage` stops after the tarball and the AppDir. The administrator helper (below) is always published with
+Native AOT, whatever `--aot` says, so it needs no runtime next to it; that needs clang and zlib headers too, and
+`--no-helper` builds without it on a host that has neither (the tarball then has no helper, no policy and no
+`install-helper.sh`, and its README says so). The tarball is sorted, owned by root and stamped with the commit time;
+the helper is built with `ContinuousIntegrationBuild`, but bit-identical rebuilds also depend on the C toolchain and
+are not guaranteed. The smoke script starts a package with an empty
 environment and no SDK in a private Xvfb (`--display wayland`: a private headless sway, no X server) and
 checks that the window opened, that its class matches the desktop file, and that something was drawn.
+
+#### Administrator features (optional, opt-in)
+
+Pennyworth runs as you. On Linux four things need more than that, and each happens only when you press its button
+and the system (polkit, the usual `pkexec` prompt) asks for your administrator password. Pennyworth never asks for
+the password itself, never sees it, and never types one. Nothing is changed except the cleanup you confirm.
+
+| Feature | What it does as root | Without the helper | With the helper |
+|---|---|---|---|
+| Memory modules | Reads the firmware's SMBIOS table (read-only) | works: fixed system tool through `pkexec` | works |
+| Full system space | Measures btrfs snapshots and metadata (read-only) | works: fixed system tools (`btrfs`) through `pkexec` | works |
+| Cleaning `system-package-cache`, `system-crash-reports` | Deletes only files listed in the preview you confirmed, from compiled-in folders | not available (explained in the app) | works |
+| Measuring folders your account cannot open | Reads sizes only, so Storage totals add up | not available | works |
+
+The helper is `/usr/libexec/pennyworth/pennyworth-helper`, a small Native AOT program that references only a
+dependency-free library (no UI, no ONNX, nothing from the app). It is part of the tarball and is installed by you,
+never by the app or the build:
+
+```bash
+tar -xzf pennyworth-0.1.0-linux-x64.tar.gz && cd pennyworth-0.1.0-linux-x64
+sudo ./install-helper.sh            # copies the helper and the polkit policy, both owned by root
+sudo ./install-helper.sh --uninstall
+```
+
+From a checkout, publish `src/Pennyworth.Helper` with Native AOT and pass it: `sudo tools/package/linux/install-helper.sh --helper <published pennyworth-helper>`.
+The AppImage does not ship the helper (an AppImage runs from a FUSE mount, which is not a trusted root-owned path);
+a helper installed from the tarball is used by any build of the app.
+
+Why it is built this way:
+
+- **Trusted path only.** The app runs the helper only from `/usr/libexec/pennyworth`, and only if the file and every
+  folder above it are owned by root, not writable by group or others, and not symbolic links (checked without
+  following links). Otherwise it does not use it; the two read-only features fall back to `pkexec` of fixed system
+  tools, and the other two say the helper is missing or not trusted. Nothing else is ever run as root.
+- **One polkit action per subcommand.** `app.pennyworth.policy` has an action for each of `read-firmware-tables`,
+  `measure-system-space`, `measure-folders` and `clean-system`, matched by program path and first argument
+  (`org.freedesktop.policykit.exec.argv1`, see `pkexec(1)`). Each prompt then says what that button does, and the
+  cleanup action uses `auth_admin` (asks every time) while the read-only ones use `auth_admin_keep`. Inactive and
+  remote sessions are refused.
+- **The helper trusts nothing from the caller.** No environment, no shell, a fixed subcommand with at most one
+  validated argument, bounded input and run time. For cleanup it uses only its compiled-in folders for the rule and
+  deletes a listed file only if it is still the same regular file (or link) from the preview, without following
+  symbolic links or crossing file systems; it refuses a root that is not root-owned or is reached through a link.
+  The request must come from a normal desktop user (`PKEXEC_UID`), never root itself.
+- **Windows is unchanged.** Windows keeps its own elevation; none of this applies there.
+
+This is a deliberate, explicit exception to "Pennyworth never elevates", approved for these four features only.
+The Linux port plan (`docs/design/2026-10-26-linux-port-plan.md`) is not part of this branch, so this section is the
+decision record for the exception.
 
 The launcher icons are generated from the brand sources:
 `python -I tools/brand/build_logo_assets.py docs/design/brand src/Pennyworth.App/Assets tools/package/linux/icons`
@@ -93,6 +147,8 @@ Wayland compositor, keeping the screenshots as artifacts; `windows.yml` builds a
 | `Pennyworth.Insights` | Path classification |
 | `Pennyworth.Scanning` | Drive scanning |
 | `Pennyworth.Cleanup` | Measuring and cleaning, Recycle Bin |
+| `Pennyworth.Platform.Linux.Helper` | Dependency-free library the app and the root helper share: the helper protocol, mount table, `statx`, system-space parsers (Linux only) |
+| `Pennyworth.Helper` | The `pennyworth-helper` executable, the only program that runs as root; references nothing but the library above (Linux only, optional) |
 | `Pennyworth.Monitoring` | Live memory/CPU/GPU and hardware specs |
 | `Pennyworth.Assistant` | Facts, diagnosis, context, persona prompt, action links, advice filter, anonymiser, session, history, usage |
 | `Pennyworth.Assistant.Providers` | Cloud chat clients, API keys in the Credential Manager, test connection |

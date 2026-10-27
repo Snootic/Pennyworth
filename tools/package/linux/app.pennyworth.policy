@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD polkit Policy Configuration 1.0//EN" "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+<!--
+  Pennyworth's optional administrator helper: one polkit action per helper subcommand.
+
+  pkexec picks an action by the program path and, because of exec.argv1, by the first argument too. So each action
+  authorises exactly one subcommand of one program, and each one carries its own wording: what the person is shown
+  at the prompt is what that button does, not a generic "run a program as root".
+
+  allow_any and allow_inactive are "no": nothing runs for a remote or a background session. allow_active asks the
+  person for their administrator password. The three read-only actions use auth_admin_keep (the same prompt is not
+  repeated for a few minutes); the one that deletes files uses auth_admin, so every cleanup asks again.
+
+  Installed by install-helper.sh to /usr/share/polkit-1/actions/. The path below is the only place the app runs
+  the helper from (HelperProtocol.InstalledPath); a test keeps this file and that constant in step.
+-->
+<policyconfig>
+  <vendor>Pennyworth</vendor>
+  <vendor_url>https://github.com/snootic/Pennyworth</vendor_url>
+
+  <action id="app.pennyworth.read-firmware-tables">
+    <description>Read the computer's memory module information</description>
+    <description xml:lang="pt_BR">Ler as informações dos módulos de memória do computador</description>
+    <message>Authentication is required to read the memory module information (type, speed, slots) from the computer's firmware. Nothing is changed.</message>
+    <message xml:lang="pt_BR">É preciso autenticar para ler as informações dos módulos de memória (tipo, velocidade, encaixes) do firmware do computador. Nada é alterado.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/pennyworth/pennyworth-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">read-firmware-tables</annotate>
+  </action>
+
+  <action id="app.pennyworth.measure-system-space">
+    <description>Measure snapshots and file system metadata</description>
+    <description xml:lang="pt_BR">Medir snapshots e metadados do sistema de arquivos</description>
+    <message>Authentication is required to measure the space used by snapshots and file system metadata. Nothing is changed.</message>
+    <message xml:lang="pt_BR">É preciso autenticar para medir o espaço usado por snapshots e metadados do sistema de arquivos. Nada é alterado.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/pennyworth/pennyworth-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">measure-system-space</annotate>
+  </action>
+
+  <action id="app.pennyworth.measure-folders">
+    <description>Measure folders you cannot open</description>
+    <description xml:lang="pt_BR">Medir pastas que você não consegue abrir</description>
+    <message>Authentication is required to measure the size of folders your account cannot open. Only sizes are read; nothing is changed.</message>
+    <message xml:lang="pt_BR">É preciso autenticar para medir o tamanho de pastas que sua conta não consegue abrir. Só os tamanhos são lidos; nada é alterado.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/pennyworth/pennyworth-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">measure-folders</annotate>
+  </action>
+
+  <action id="app.pennyworth.clean-system">
+    <description>Delete system package caches and crash reports</description>
+    <description xml:lang="pt_BR">Apagar caches de pacotes e relatórios de falhas do sistema</description>
+    <message>Authentication is required to delete the files you confirmed in the preview from the system package caches and crash reports. Nothing else is deleted.</message>
+    <message xml:lang="pt_BR">É preciso autenticar para apagar, dos caches de pacotes e relatórios de falhas do sistema, os arquivos que você confirmou na prévia. Nada além disso é apagado.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/pennyworth/pennyworth-helper</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">clean-system</annotate>
+  </action>
+</policyconfig>
