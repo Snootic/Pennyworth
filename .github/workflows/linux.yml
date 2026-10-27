@@ -1,0 +1,86 @@
+name: Linux
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Build
+        run: dotnet build -c Release
+      - name: Test
+        run: dotnet test --solution Pennyworth.slnx -c Release --no-build
+
+  package:
+    name: Publish, package and launch
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Install the headless display and screenshot tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb imagemagick libfontconfig1 libsecret-1-0
+      - name: Tarball and AppImage
+        run: tools/package/build-linux.sh --version "ci-${GITHUB_SHA::7}"
+      - name: Launch the tarball under Xvfb (no SDK, empty environment)
+        run: tools/package/smoke-linux.sh --tarball artifacts/linux-x64/pennyworth-*-linux-x64.tar.gz --display x11 --shot artifacts/screenshots/x11-tarball.png
+      - name: Launch the AppImage under Xvfb
+        run: tools/package/smoke-linux.sh --appimage artifacts/linux-x64/Pennyworth-*-x86_64.AppImage --display x11 --shot artifacts/screenshots/x11-appimage.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-x11
+          path: artifacts/screenshots/*.png
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pennyworth-linux-x64
+          path: |
+            artifacts/linux-x64/pennyworth-*-linux-x64.tar.gz
+            artifacts/linux-x64/Pennyworth-*-x86_64.AppImage
+            artifacts/linux-x64/SHA256SUMS
+
+  wayland:
+    name: Launch under a Wayland compositor
+    needs: package
+    runs-on: ubuntu-24.04
+    # Not run before this workflow was written: sway's headless backend with the pixman renderer is the assumption.
+    # Remove this line once the job has been green.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install a headless Wayland compositor and screenshot tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends sway grim imagemagick libfontconfig1 libsecret-1-0
+      - uses: actions/download-artifact@v4
+        with:
+          name: pennyworth-linux-x64
+          path: artifacts
+      - name: Launch the tarball with no X server at all
+        run: tools/package/smoke-linux.sh --tarball artifacts/pennyworth-*-linux-x64.tar.gz --display wayland --shot artifacts/screenshots/wayland-tarball.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-wayland
+          path: artifacts/screenshots/*.png
+          if-no-files-found: ignore
