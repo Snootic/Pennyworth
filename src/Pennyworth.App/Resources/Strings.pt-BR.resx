@@ -399,7 +399,7 @@
   <data name="ActionStorage" xml:space="preserve"><value>Abrir armazenamento</value></data>
   <data name="ActionFolders" xml:space="preserve"><value>Abrir pastas</value></data>
   <data name="ActionSpecs" xml:space="preserve"><value>Abrir especificações</value></data>
-  <data name="ActionUnlock" xml:space="preserve"><value>Liberar verificação completa</value></data>
+  <data name="ActionUnlock" xml:space="preserve"><value>{@UnlockAction}</value></data>
   <data name="DeviceGpu" xml:space="preserve"><value>{0} na placa de vídeo</value></data>
   <data name="DeviceCpu" xml:space="preserve"><value>{0} no processador</value></data>
   <data name="StartupProblemTitle" xml:space="preserve"><value>O Pennyworth não consegue iniciar</value></data>

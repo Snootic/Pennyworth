@@ -32,6 +32,7 @@ public sealed class LinuxPlatform : IPlatform
         Preflight = preflight;
         _paths = new XdgPaths();
         _scope = new EnvironmentScope(_paths);
+        AppNames = new FlatpakAppNames(_paths.DataHome);
     }
 
     /// <summary>The native parts this machine lacks, checked once when the platform was created.</summary>
@@ -48,6 +49,8 @@ public sealed class LinuxPlatform : IPlatform
     public IHiddenSpaceService HiddenSpace { get; } = new LinuxSystemSpaceService();
 
     public IProcessCloser Closer { get; } = new SignalProcessCloser();
+
+    public IAppNames AppNames { get; }
 
     public ISpecsReader Specs { get; } = new LinuxSpecsReader();
 

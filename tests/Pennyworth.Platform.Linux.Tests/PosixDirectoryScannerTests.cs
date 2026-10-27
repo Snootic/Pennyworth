@@ -413,4 +413,33 @@ public sealed class PosixDirectoryScannerTests : IDisposable
             }
         }
     }
+
+    // /proc/self/mountinfo of an openSUSE machine whose root is a btrfs snapshot with its own subvolumes, a second btrfs disk and a /home partition.
+    private const string SubvolumeMounts = """
+        43 45 0:40 /@/.snapshots /.snapshots rw,relatime shared:43 - btrfs /dev/nvme0n1p2 rw,subvolid=262,subvol=/@/.snapshots
+        45 1 0:41 /@/.snapshots/499/snapshot / rw,relatime shared:1 - btrfs /dev/nvme0n1p2 rw,subvolid=762,subvol=/@/.snapshots/499/snapshot
+        57 45 0:46 /@/opt /opt rw,relatime shared:45 - btrfs /dev/nvme0n1p2 rw,subvolid=261,subvol=/@/opt
+        66 45 0:52 /@/usr/local /usr/local rw,relatime shared:55 - btrfs /dev/nvme0n1p2 rw,subvolid=258,subvol=/@/usr/local
+        67 45 0:50 /@/var /var rw,relatime shared:57 - btrfs /dev/nvme0n1p2 rw,subvolid=257,subvol=/@/var
+        68 67 0:50 /@/var /srv/bind-of-var rw,relatime shared:57 - btrfs /dev/nvme0n1p2 rw,subvolid=257,subvol=/@/var
+        71 45 259:3 / /boot/efi rw,relatime shared:59 - vfat /dev/nvme0n1p3 rw
+        73 45 259:1 / /home rw,relatime shared:61 - ext4 /dev/nvme0n1p1 rw
+        97 45 0:53 / /mnt/exram rw,relatime shared:63 - btrfs /dev/sda1 rw,subvolid=5,subvol=/
+        """;
+
+    [Fact]
+    public void Subvolumes_of_the_roots_own_btrfs_are_part_of_the_drive_but_snapshots_and_other_disks_are_not()
+    {
+        Assert.Equal(
+            ["/opt", "/usr/local", "/var"],
+            PosixDirectoryScanner.SameDriveMounts("/", SubvolumeMounts).Order());
+    }
+
+    [Fact]
+    public void Only_mounts_below_the_scan_root_count_and_other_file_systems_have_none()
+    {
+        Assert.Equal(["/usr/local"], PosixDirectoryScanner.SameDriveMounts("/usr", SubvolumeMounts));
+        Assert.Empty(PosixDirectoryScanner.SameDriveMounts("/home", SubvolumeMounts));
+        Assert.Empty(PosixDirectoryScanner.SameDriveMounts("/", ""));
+    }
 }

@@ -90,6 +90,12 @@ public enum PlatformText
     /// <summary>The button of that banner.</summary>
     UnlockCta,
 
+    /// <summary>The same offer as a button under an assistant answer.</summary>
+    UnlockAction,
+
+    /// <summary>That button as the assistant's instructions describe it to the model: a verb phrase after "—".</summary>
+    UnlockActionHint,
+
     /// <summary>The title of the dialog behind that button.</summary>
     UnlockTitle,
 

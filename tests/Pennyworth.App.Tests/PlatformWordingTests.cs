@@ -62,6 +62,7 @@ public class PlatformWordingTests
         ["PsuNoHiber"] = ("Hibernation is off, so no space is set aside for it.", "A hibernação está desligada, então nenhum espaço é reservado para ela."),
         ["PartName_Trash"] = ("Recycle Bin & cleanup", "Lixeira e limpeza"),
         ["KeyNote"] = ("Kept in the Windows Credential Manager, never in a file.", "Guardada no Gerenciador de Credenciais do Windows, nunca em arquivo."),
+        ["ActionUnlock"] = ("Unlock full scan", "Liberar verificação completa"),
         ["BlockedNote"] = ("I held back a suggestion that could harm Windows.", "Segurei uma sugestão que poderia prejudicar o Windows."),
     };
 
@@ -197,6 +198,48 @@ public class PlatformWordingTests
 
         Assert.False(WindowsOnly.IsMatch(prompt), prompt);
         Assert.Contains(portuguese ? "esvaziar a Lixeira" : "emptying the Trash", prompt, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(false, "asks for the full-scan permission")]
+    [InlineData(true, "pede a permissão da verificação completa")]
+    public void The_persona_describes_the_unlock_action_as_it_always_did_on_Windows(bool portuguese, string description)
+    {
+        ContextBundle bundle = ContextBuilder.Build(AssistantTopic.Overview, [], [], PcSnapshot.Empty, CultureInfo.GetCultureInfo(portuguese ? "pt-BR" : "en-US"), WindowsText.Instance)
+            with { AllowedActions = [new AssistantAction(ActionKind.Unlock)] };
+
+        Assert.Contains($"[[action:unlock]] — {description}", PersonaPrompt.Compose(bundle), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(false, "offers to measure the system space")]
+    [InlineData(true, "oferece medir o espaço do sistema")]
+    public void The_persona_describes_the_unlock_action_on_Linux_without_a_permission_prompt(bool portuguese, string description)
+    {
+        ContextBundle bundle = ContextBuilder.Build(AssistantTopic.Overview, [], [], PcSnapshot.Empty, CultureInfo.GetCultureInfo(portuguese ? "pt-BR" : "en-US"), LinuxText.Instance)
+            with { AllowedActions = [.. Enum.GetValues<ActionKind>().Select(kind => new AssistantAction(kind, kind is ActionKind.CleanupItem or ActionKind.CloseApp or ActionKind.Folders ? "x" : null))] };
+
+        string prompt = PersonaPrompt.Compose(bundle);
+
+        Assert.Contains($"[[action:unlock]] — {description}", prompt, StringComparison.Ordinal);
+        Assert.False(WindowsOnly.IsMatch(prompt), prompt);
+    }
+
+    [Fact]
+    public void Every_platform_text_is_used_by_a_resource_string_or_by_code()
+    {
+        // A text no screen asks for is wording nobody checks: it must be named by a token, or be one the code reads directly.
+        string[] readDirectly =
+        [
+            nameof(PlatformText.SystemDriveRoot), nameof(PlatformText.HibernationFile), nameof(PlatformText.RestorePointsLocation),
+            nameof(PlatformText.MetadataLocation), nameof(PlatformText.RequirementsNotMeasured), nameof(PlatformText.UnlockActionHint),
+            nameof(PlatformText.OsRowLabel),
+        ];
+        HashSet<string> named = [.. Raw(null).Values.Concat(Raw(Portuguese).Values).SelectMany(PlatformTokens.Names)];
+
+        string[] unused = [.. Enum.GetNames<PlatformText>().Where(name => !named.Contains(name) && !readDirectly.Contains(name))];
+
+        Assert.Empty(unused);
     }
 
     private static Dictionary<string, string> Raw(CultureInfo? culture) =>

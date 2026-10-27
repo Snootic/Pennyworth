@@ -181,6 +181,8 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
         foreach (CategoryRowViewModel row in Categories)
         {
             var areas = tree.GetCategoryAreas(row.Category!.Value)
+                .SelectMany(area => SplitIntoPlaces(tree, area, row.Category!.Value))
+                .OrderByDescending(area => area.Bytes)
                 .Take(MaxAreasPerCategory)
                 .Select(area => CreateArea(area, row.Bytes))
                 .ToList();
@@ -208,7 +210,46 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
     {
         var description = _locations.Describe(area.Node.FullPath);
         return new CategoryAreaViewModel(
-            area.Node, area.Node.FullPath, area.Bytes, description?.Title ?? area.Node.Name, description?.Description, Share(area.Bytes, categoryBytes));
+            area.Node, area.Node.FullPath, area.Bytes, description?.Title ?? area.Node.Name, description?.Description is { Length: > 0 } text ? text : null, Share(area.Bytes, categoryBytes));
+    }
+
+    /// <summary>
+    /// A folder that holds one place per app (Flatpak data, /opt, caches) becomes one place per folder inside it, each with
+    /// only the bytes of its own category, so a 40 GB lump turns into the apps that fill it. What lies directly in the folder
+    /// stays as a place of its own. Any other area is returned as it is.
+    /// </summary>
+    private IEnumerable<CategoryArea> SplitIntoPlaces(StorageTree tree, CategoryArea area, StorageCategory category)
+    {
+        if (!area.Node.IsDirectory || !_locations.SplitsIntoPlaces(area.Node.FullPath))
+        {
+            yield return area;
+            yield break;
+        }
+
+        long inside = 0;
+        foreach (StorageNode child in area.Node.GetChildren())
+        {
+            if (!child.IsDirectory || child.Category != category)
+            {
+                continue;
+            }
+
+            foreach (CategoryArea place in SplitIntoPlaces(tree, new CategoryArea(child, tree.GetCategoryBytes(child, category)), category))
+            {
+                if (place.Bytes <= 0)
+                {
+                    continue;
+                }
+
+                inside += place.Bytes;
+                yield return place;
+            }
+        }
+
+        if (area.Bytes - inside is > 0 and var loose)
+        {
+            yield return new CategoryArea(area.Node, loose);
+        }
     }
 
     /// <summary>Where a measured hidden area sits: a name inside the drive, or the drive itself when the platform has none.</summary>
