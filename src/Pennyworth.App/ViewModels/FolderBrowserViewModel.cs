@@ -35,7 +35,7 @@ public sealed partial class FolderBrowserViewModel : ObservableObject
 
     /// <summary>The open folder; null means "This PC" (the list of drives).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Items), nameof(Breadcrumbs), nameof(Title), nameof(SummaryText), nameof(IsEmpty), nameof(IsLockedFolder), nameof(HasItems), nameof(IsThisPc))]
+    [NotifyPropertyChangedFor(nameof(Items), nameof(Breadcrumbs), nameof(Title), nameof(SummaryText), nameof(IsEmpty), nameof(IsLockedFolder), nameof(IsMeasuredLockedFolder), nameof(LockedMeasuredBody), nameof(HasItems), nameof(IsThisPc))]
     [NotifyCanExecuteChangedFor(nameof(UpCommand))]
     public partial StorageNode? Current { get; private set; }
 
@@ -51,9 +51,9 @@ public sealed partial class FolderBrowserViewModel : ObservableObject
             }
 
             var children = folder.GetChildren();
-            long largest = Math.Max(children.Where(child => !child.IsLocked).Select(child => child.SizeOnDisk).DefaultIfEmpty(0).Max(), 1);
+            long largest = Math.Max(children.Where(child => !IsUnmeasured(child)).Select(child => child.SizeOnDisk).DefaultIfEmpty(0).Max(), 1);
             return children
-                .OrderBy(child => child.IsLocked) // Locked folders have no size; they go last.
+                .OrderBy(IsUnmeasured) // Locked folders nobody measured have no size; they go last, the measured ones sit by size.
                 .Select(child => FolderItemViewModel.ForNode(child, largest))
                 .ToArray();
         }
@@ -86,7 +86,16 @@ public sealed partial class FolderBrowserViewModel : ObservableObject
     /// <summary>Nothing inside, and not because Windows refused to list it.</summary>
     public bool IsEmpty => Current is { } folder && !folder.HasChildren && !folder.IsLocked;
 
-    public bool IsLockedFolder => Current is { IsLocked: true };
+    /// <summary>A folder Windows or Linux refuses to list, whose size is not known either.</summary>
+    public bool IsLockedFolder => Current is { IsLocked: true, IsMeasured: false };
+
+    /// <summary>A folder that cannot be listed but whose size was measured with an administrator's rights.</summary>
+    public bool IsMeasuredLockedFolder => Current is { IsLocked: true, IsMeasured: true };
+
+    /// <summary>"The system keeps this folder closed to you. Its size (3 GB) was measured with your password."</summary>
+    public string LockedMeasuredBody => string.Format(Strings.LockedMeasuredBody, Current is { } folder ? ByteSize.Format(folder.SizeOnDisk) : "");
+
+    private static bool IsUnmeasured(StorageNode node) => node.IsLocked && !node.IsMeasured;
 
     public bool CanGoBack => _history.Count > 0;
 
@@ -176,6 +185,8 @@ public enum FolderItemKind
 }
 
 /// <summary>One row of the folder browser: a drive (on "This PC"), a folder or a file.</summary>
+/// <param name="IsLocked">The scan could not list the folder. It stays true after its size was measured with a password.</param>
+/// <param name="IsMeasured">A locked folder whose size is known because it was measured with an administrator's rights.</param>
 public sealed record FolderItemViewModel(
     string Name,
     string Path,
@@ -184,7 +195,8 @@ public sealed record FolderItemViewModel(
     string SizeText,
     double Fraction,
     StorageNode? Node,
-    DriveViewModel? Drive)
+    DriveViewModel? Drive,
+    bool IsMeasured = false)
 {
     public bool IsFolder => Kind == FolderItemKind.Folder;
 
@@ -194,16 +206,24 @@ public sealed record FolderItemViewModel(
 
     public bool CanOpen => Kind != FolderItemKind.File;
 
+    /// <summary>The "Locked" badge: locked and its size still unknown.</summary>
+    public bool ShowLockedBadge => IsLocked && !IsMeasured;
+
     /// <param name="largest">The largest sibling: the design scales share bars to it.</param>
-    public static FolderItemViewModel ForNode(StorageNode node, long largest) => new(
-        node.Name,
-        node.FullPath,
-        node.IsDirectory ? FolderItemKind.Folder : FolderItemKind.File,
-        node.IsLocked,
-        node.IsLocked ? "—" : ByteSize.Format(node.SizeOnDisk),
-        node.IsLocked ? 0 : (double)node.SizeOnDisk / largest,
-        node,
-        null);
+    public static FolderItemViewModel ForNode(StorageNode node, long largest)
+    {
+        bool unknown = node.IsLocked && !node.IsMeasured;
+        return new(
+            node.Name,
+            node.FullPath,
+            node.IsDirectory ? FolderItemKind.Folder : FolderItemKind.File,
+            node.IsLocked,
+            unknown ? "—" : ByteSize.Format(node.SizeOnDisk),
+            unknown ? 0 : (double)node.SizeOnDisk / largest,
+            node,
+            null,
+            node.IsLocked && node.IsMeasured);
+    }
 
     /// <summary>Drives show their used space as Windows reports it, scanned or not.</summary>
     public static FolderItemViewModel ForDrive(DriveViewModel drive) => new(

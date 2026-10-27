@@ -413,4 +413,44 @@
   <data name="StartupProblemMonitoring" xml:space="preserve"><value>Live monitoring needs {0}, which this system does not provide.</value></data>
   <data name="StartupProblemHint" xml:space="preserve"><value>Install or repair the missing part and start Pennyworth again. Nothing was changed.</value></data>
   <data name="StartupProblemClose" xml:space="preserve"><value>Close</value></data>
+  <data name="SpecsModulesAsks" xml:space="preserve"><value>Asks for your password. Nothing is changed.</value></data>
+  <data name="PrivReasonNoPkexec" xml:space="preserve"><value>This system has no way to ask for administrator rights, so this isn't possible here.</value></data>
+  <data name="PrivReasonNoAuthenticationAgent" xml:space="preserve"><value>No password dialog is running on this desktop, so the system has nowhere to ask for your password.</value></data>
+  <data name="PrivReasonHelperNotInstalled" xml:space="preserve"><value>This needs the Pennyworth helper to be installed (see the README: sudo install-helper.sh).</value></data>
+  <data name="PrivReasonHelperNotTrusted" xml:space="preserve"><value>The installed Pennyworth helper is not owned by root or can be changed by others, so Pennyworth will not run it.</value></data>
+  <data name="PrivReasonHelperOutdated" xml:space="preserve"><value>The installed Pennyworth helper is older than this app. Install it again.</value></data>
+  <data name="PrivReasonUnknown" xml:space="preserve"><value>Pennyworth can't ask for administrator rights on this system.</value></data>
+  <data name="PrivWaiting" xml:space="preserve"><value>Waiting for your password…</value></data>
+  <data name="PrivCancelled" xml:space="preserve"><value>No password was given, so nothing was measured and nothing was changed. You can ask again whenever you like.</value></data>
+  <data name="PrivFailed" xml:space="preserve"><value>It didn't work this time, so nothing was added. Your totals are unchanged.</value></data>
+  <data name="PrivAsk" xml:space="preserve"><value>Ask for my password</value></data>
+  <data name="PrivTryAgain" xml:space="preserve"><value>Try again</value></data>
+  <data name="AdminSpaceBanner" xml:space="preserve"><value>Snapshots and the file system's own bookkeeping can only be measured by an administrator. They are not in these totals yet.</value></data>
+  <data name="AdminSpaceCta" xml:space="preserve"><value>Include what needs administrator access</value></data>
+  <data name="AdminSpaceUnavailable" xml:space="preserve"><value>Snapshots and the file system's bookkeeping can't be included. {0}</value></data>
+  <data name="AdminSpaceTitle" xml:space="preserve"><value>Include what needs administrator access?</value></data>
+  <data name="AdminSpaceWhy" xml:space="preserve"><value>Some space on this drive is kept where only an administrator can look. Your system will ask for your password once; Pennyworth never sees it.</value></data>
+  <data name="AdminSpaceReads" xml:space="preserve"><value>How much space the snapshots and the file system's own bookkeeping take. Read only.</value></data>
+  <data name="AdminSpaceWont" xml:space="preserve"><value>Nothing is changed, deleted or kept. These numbers replace the estimates; they are not added on top.</value></data>
+  <data name="AdminSpaceToast" xml:space="preserve"><value>Included what needs administrator access ({0}).</value></data>
+  <data name="LockedBannerOne" xml:space="preserve"><value>Measure {0} folder I couldn't read (asks for your password; nothing is changed)</value></data>
+  <data name="LockedBannerMany" xml:space="preserve"><value>Measure {0} folders I couldn't read (asks for your password; nothing is changed)</value></data>
+  <data name="LockedMeasureCta" xml:space="preserve"><value>Measure with my password</value></data>
+  <data name="LockedUnavailable" xml:space="preserve"><value>Some folders couldn't be read, so their size is missing from these totals. {0}</value></data>
+  <data name="LockedMeasureTitle" xml:space="preserve"><value>Measure the folders I couldn't read?</value></data>
+  <data name="LockedMeasureWhy" xml:space="preserve"><value>Some folders can only be opened by an administrator, so their size is missing from your totals. Your system will ask for your password once; Pennyworth never sees it.</value></data>
+  <data name="LockedMeasureReads" xml:space="preserve"><value>Only the size of each folder: not the names, not the contents. Read only.</value></data>
+  <data name="LockedMeasureWont" xml:space="preserve"><value>Nothing is changed, deleted or kept. You still won't be able to browse inside those folders.</value></data>
+  <data name="LockedMeasuredToastOne" xml:space="preserve"><value>Added {0} folder ({1}).</value></data>
+  <data name="LockedMeasuredToastMany" xml:space="preserve"><value>Added {0} folders ({1}).</value></data>
+  <data name="LockedMeasuredIncomplete" xml:space="preserve"><value>Some sizes are at least that much: part of those folders couldn't be read.</value></data>
+  <data name="MeasuredBadge" xml:space="preserve"><value>Measured with your password</value></data>
+  <data name="MeasuredBadgeHint" xml:space="preserve"><value>The size was measured with your password. What is inside still can't be listed.</value></data>
+  <data name="LockedMeasuredTitle" xml:space="preserve"><value>I can't list what's inside, but I know its size.</value></data>
+  <data name="LockedMeasuredBody" xml:space="preserve"><value>The system keeps this folder closed to you. Its size ({0}) was measured with your password; nothing was changed.</value></data>
+  <data name="CleanNeedsPassword" xml:space="preserve"><value>Needs your password</value></data>
+  <data name="ConfirmPasswordNote" xml:space="preserve"><value>Your system will ask for your password for each of these: {0}. Only the files you saw in the preview are deleted.</value></data>
+  <data name="CleanSkippedCancelled" xml:space="preserve"><value>Skipped: the password prompt was cancelled.</value></data>
+  <data name="CleanCancelled" xml:space="preserve"><value>Cancelled: no password was given, so nothing was deleted.</value></data>
+  <data name="CleanAdminFailed" xml:space="preserve"><value>Couldn't finish cleaning this one. Look at the list again before trying a second time.</value></data>
 </root>

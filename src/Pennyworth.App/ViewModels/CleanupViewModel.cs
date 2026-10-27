@@ -5,6 +5,7 @@ using Pennyworth.App.Services;
 using Pennyworth.Assistant;
 using Pennyworth.Cleanup;
 using Pennyworth.Core.Formatting;
+using Pennyworth.Core.Privilege;
 using Pennyworth.KnowledgeBase;
 using Pennyworth.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -204,23 +205,45 @@ public sealed partial class CleanupViewModel : ObservableObject
         }
 
         Preview = null;
-        RunItems = selected;
+
+        // Rules that need a password go last: everything that does not is cleaned before the first prompt appears.
+        CleanupItemViewModel[] ordered = [.. selected.OrderBy(item => item.NeedsPassword)];
+        RunItems = ordered;
         FreedBytes = 0;
         SkippedFiles = 0;
         Phase = CleanupPhase.Cleaning;
-        var results = new List<CleanupResult>();
-        foreach (CleanupItemViewModel item in selected)
+        var finished = new List<CleanupResult>();
+        bool promptCancelled = false;
+        foreach (CleanupItemViewModel item in ordered)
         {
+            if (item.NeedsPassword && promptCancelled)
+            {
+                // Someone who just dismissed the password prompt is not asked again for the next item.
+                item.SkipAfterCancelledPrompt();
+                continue;
+            }
+
             var progress = new Progress<double>(value => item.Progress = value);
             CleanupResult result = await _service.CleanAsync(item.Estimate, progress, CancellationToken.None);
             item.Progress = 1;
+            item.Record(result);
+            promptCancelled |= result.Outcome == PrivilegedOutcome.Cancelled;
+            if (result.Outcome != PrivilegedOutcome.Done)
+            {
+                continue; // Nothing was deleted: no history entry, nothing freed.
+            }
+
             item.FreedBytes = result.BytesFreed;
             FreedBytes += result.BytesFreed;
             SkippedFiles += result.Skipped;
-            results.Add(result);
+            finished.Add(result);
         }
 
-        _history?.Append(results, DateTimeOffset.Now);
+        if (finished.Count > 0)
+        {
+            _history?.Append(finished, DateTimeOffset.Now);
+        }
+
         Phase = CleanupPhase.Done;
     }
 
@@ -266,6 +289,10 @@ public sealed partial class CleanupItemViewModel : ObservableObject
 {
     private const int ProgressWidth = 24;
 
+    private PrivilegedOutcome? _outcome;
+    private PrivilegedUnavailableReason? _reason;
+    private bool _skippedAfterCancel;
+
     public CleanupItemViewModel(CleanupEstimate estimate)
     {
         Estimate = estimate;
@@ -273,7 +300,10 @@ public sealed partial class CleanupItemViewModel : ObservableObject
         Bytes = estimate.Bytes;
         Items = estimate.Items;
         IsAvailable = estimate.IsAvailable;
-        IsSelected = IsAvailable && Rule.Safety == SafetyLevel.Safe;
+        Admin = estimate.Admin;
+
+        // A rule that asks for a password is never pre-ticked: a prompt must come from a choice, not from a default.
+        IsSelected = IsAvailable && !NeedsPassword && Rule.Safety == SafetyLevel.Safe;
     }
 
     /// <summary>The exact list cleaning will delete; nothing found after it was made.</summary>
@@ -286,10 +316,26 @@ public sealed partial class CleanupItemViewModel : ObservableObject
     /// <summary>Files found; for the Recycle Bin, the items in it.</summary>
     public long Items { get; }
 
-    /// <summary>False for items that need admin rights.</summary>
+    /// <summary>False for items that cannot be cleaned now: they need admin rights this app has no way to ask for.</summary>
     public bool IsAvailable { get; }
 
-    public bool NeedsFullScan => !IsAvailable;
+    /// <summary>Whether a rule that needs admin rights can be cleaned on this system; null for every other rule and for Windows.</summary>
+    public PrivilegedCapability? Admin { get; }
+
+    /// <summary>Cleaning this item shows the system's password prompt.</summary>
+    public bool NeedsPassword => IsAvailable && Admin is { Available: true };
+
+    /// <summary>Needs admin rights and this app cannot ask for them on this system (the reason is under the item).</summary>
+    public bool HasAdminReason => Admin is { Available: false };
+
+    /// <summary>Why the item cannot be cleaned here, in a plain sentence; null when it can or when the full scan is what is missing.</summary>
+    public string? AdminReasonText => Admin is { Available: false } missing ? PrivilegedText.Reason(missing.Reason) : null;
+
+    /// <summary>Needs admin rights and no platform offers to ask for them: the full scan of a later version.</summary>
+    public bool NeedsFullScan => !IsAvailable && Admin is null;
+
+    /// <summary>Not selectable: either of the above.</summary>
+    public bool IsBlocked => !IsAvailable;
 
     public bool IsRecycleBin => Rule.Kind == CleanupKind.RecycleBin;
 
@@ -322,10 +368,44 @@ public sealed partial class CleanupItemViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(FreedText), nameof(ProgressText))]
     public partial long FreedBytes { get; set; }
 
+    /// <summary>What happened to an item that was not cleaned (cancelled prompt, no way to ask, failure); null when it was cleaned or not yet run.</summary>
+    public string? OutcomeText => _skippedAfterCancel ? Strings.CleanSkippedCancelled : _outcome switch
+    {
+        PrivilegedOutcome.Cancelled => Strings.CleanCancelled,
+        PrivilegedOutcome.NotAvailable => PrivilegedText.Reason(_reason),
+        PrivilegedOutcome.Failed => Strings.CleanAdminFailed,
+        _ => null,
+    };
+
+    public bool HasOutcome => OutcomeText is not null;
+
+    /// <summary>Remembers how the clean ended; the sentence is built on demand so a language switch updates it.</summary>
+    internal void Record(CleanupResult result)
+    {
+        _outcome = result.Outcome;
+        _reason = result.Reason;
+        OnOutcomeChanged();
+    }
+
+    /// <summary>Not attempted because the person dismissed the password prompt of an earlier item.</summary>
+    internal void SkipAfterCancelledPrompt()
+    {
+        _skippedAfterCancel = true;
+        Progress = 1;
+        OnOutcomeChanged();
+    }
+
+    private void OnOutcomeChanged()
+    {
+        OnPropertyChanged(nameof(OutcomeText));
+        OnPropertyChanged(nameof(HasOutcome));
+        OnPropertyChanged(nameof(ProgressText));
+    }
+
     /// <summary>"[############............]".</summary>
     public string ProgressBar => "[" + Ascii.Bar(Progress, ProgressWidth) + "]";
 
-    public string ProgressText => Progress >= 1 ? ByteSize.Format(FreedBytes) : $"{Math.Round(Progress * 100):0}%";
+    public string ProgressText => HasOutcome ? "—" : Progress >= 1 ? ByteSize.Format(FreedBytes) : $"{Math.Round(Progress * 100):0}%";
 
     public string FreedText => ByteSize.Format(FreedBytes);
 
@@ -369,6 +449,12 @@ public sealed partial class CleanConfirmDialogViewModel(CleanupViewModel cleanup
     public IReadOnlyList<CleanupItemViewModel> Rows { get; } = cleanup.Items.Where(item => item.IsSelected).ToArray();
 
     public bool ShowBinNote => Rows.Any(row => row.Rule.Kind == CleanupKind.RecycleBin);
+
+    /// <summary>Some of the selected items show the system's password prompt.</summary>
+    public bool ShowPasswordNote => Rows.Any(row => row.NeedsPassword);
+
+    /// <summary>Which items ask for the password, and that only the previewed files go.</summary>
+    public string PasswordNote => string.Format(Strings.ConfirmPasswordNote, string.Join(", ", Rows.Where(row => row.NeedsPassword).Select(row => row.Title)));
 
     public string BinNote => string.Format(Localizer.Instance.Resolve(Strings.BinNote), Rows.FirstOrDefault(row => row.Rule.Kind == CleanupKind.RecycleBin)?.Items ?? 0);
 

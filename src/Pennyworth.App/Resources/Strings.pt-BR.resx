@@ -413,4 +413,44 @@
   <data name="StartupProblemMonitoring" xml:space="preserve"><value>O monitoramento ao vivo exige {0}, que este sistema não oferece.</value></data>
   <data name="StartupProblemHint" xml:space="preserve"><value>Instale ou repare a parte que falta e abra o Pennyworth de novo. Nada foi alterado.</value></data>
   <data name="StartupProblemClose" xml:space="preserve"><value>Fechar</value></data>
+  <data name="SpecsModulesAsks" xml:space="preserve"><value>Pede sua senha. Nada é alterado.</value></data>
+  <data name="PrivReasonNoPkexec" xml:space="preserve"><value>Este sistema não tem como pedir direitos de administrador, então isso não é possível aqui.</value></data>
+  <data name="PrivReasonNoAuthenticationAgent" xml:space="preserve"><value>Nenhuma janela de senha está rodando nesta área de trabalho, então o sistema não tem onde pedir sua senha.</value></data>
+  <data name="PrivReasonHelperNotInstalled" xml:space="preserve"><value>Isso precisa do auxiliar do Pennyworth instalado (veja o README: sudo install-helper.sh).</value></data>
+  <data name="PrivReasonHelperNotTrusted" xml:space="preserve"><value>O auxiliar do Pennyworth instalado não pertence ao root ou pode ser alterado por outras pessoas, então o Pennyworth não vai executá-lo.</value></data>
+  <data name="PrivReasonHelperOutdated" xml:space="preserve"><value>O auxiliar do Pennyworth instalado é mais antigo que este app. Instale-o de novo.</value></data>
+  <data name="PrivReasonUnknown" xml:space="preserve"><value>O Pennyworth não consegue pedir direitos de administrador neste sistema.</value></data>
+  <data name="PrivWaiting" xml:space="preserve"><value>Aguardando sua senha…</value></data>
+  <data name="PrivCancelled" xml:space="preserve"><value>Nenhuma senha foi informada, então nada foi medido e nada foi alterado. Você pode pedir de novo quando quiser.</value></data>
+  <data name="PrivFailed" xml:space="preserve"><value>Não funcionou desta vez, então nada foi adicionado. Seus totais continuam iguais.</value></data>
+  <data name="PrivAsk" xml:space="preserve"><value>Pedir minha senha</value></data>
+  <data name="PrivTryAgain" xml:space="preserve"><value>Tentar de novo</value></data>
+  <data name="AdminSpaceBanner" xml:space="preserve"><value>Os snapshots e os registros internos do sistema de arquivos só podem ser medidos por um administrador. Eles ainda não estão nestes totais.</value></data>
+  <data name="AdminSpaceCta" xml:space="preserve"><value>Incluir o que exige acesso de administrador</value></data>
+  <data name="AdminSpaceUnavailable" xml:space="preserve"><value>Não dá para incluir os snapshots e os registros internos do sistema de arquivos. {0}</value></data>
+  <data name="AdminSpaceTitle" xml:space="preserve"><value>Incluir o que exige acesso de administrador?</value></data>
+  <data name="AdminSpaceWhy" xml:space="preserve"><value>Parte do espaço deste disco fica num lugar que só um administrador pode ver. O sistema vai pedir sua senha uma vez; o Pennyworth nunca a vê.</value></data>
+  <data name="AdminSpaceReads" xml:space="preserve"><value>Quanto espaço os snapshots e os registros internos do sistema de arquivos ocupam. Somente leitura.</value></data>
+  <data name="AdminSpaceWont" xml:space="preserve"><value>Nada é alterado, apagado ou guardado. Estes números substituem as estimativas; não são somados a elas.</value></data>
+  <data name="AdminSpaceToast" xml:space="preserve"><value>Incluí o que exige acesso de administrador ({0}).</value></data>
+  <data name="LockedBannerOne" xml:space="preserve"><value>Medir {0} pasta que não consegui ler (pede sua senha; nada é alterado)</value></data>
+  <data name="LockedBannerMany" xml:space="preserve"><value>Medir {0} pastas que não consegui ler (pede sua senha; nada é alterado)</value></data>
+  <data name="LockedMeasureCta" xml:space="preserve"><value>Medir com minha senha</value></data>
+  <data name="LockedUnavailable" xml:space="preserve"><value>Algumas pastas não puderam ser lidas, então o tamanho delas falta nestes totais. {0}</value></data>
+  <data name="LockedMeasureTitle" xml:space="preserve"><value>Medir as pastas que não consegui ler?</value></data>
+  <data name="LockedMeasureWhy" xml:space="preserve"><value>Algumas pastas só podem ser abertas por um administrador, então o tamanho delas falta nos seus totais. O sistema vai pedir sua senha uma vez; o Pennyworth nunca a vê.</value></data>
+  <data name="LockedMeasureReads" xml:space="preserve"><value>Só o tamanho de cada pasta: não os nomes, não o conteúdo. Somente leitura.</value></data>
+  <data name="LockedMeasureWont" xml:space="preserve"><value>Nada é alterado, apagado ou guardado. Você continua sem poder navegar dentro dessas pastas.</value></data>
+  <data name="LockedMeasuredToastOne" xml:space="preserve"><value>{0} pasta adicionada ({1}).</value></data>
+  <data name="LockedMeasuredToastMany" xml:space="preserve"><value>{0} pastas adicionadas ({1}).</value></data>
+  <data name="LockedMeasuredIncomplete" xml:space="preserve"><value>Alguns tamanhos são no mínimo isso: parte dessas pastas não pôde ser lida.</value></data>
+  <data name="MeasuredBadge" xml:space="preserve"><value>Medida com sua senha</value></data>
+  <data name="MeasuredBadgeHint" xml:space="preserve"><value>O tamanho foi medido com a sua senha. O que há dentro continua sem poder ser listado.</value></data>
+  <data name="LockedMeasuredTitle" xml:space="preserve"><value>Não consigo listar o que há dentro, mas sei o tamanho.</value></data>
+  <data name="LockedMeasuredBody" xml:space="preserve"><value>O sistema mantém esta pasta fechada para você. O tamanho ({0}) foi medido com a sua senha; nada foi alterado.</value></data>
+  <data name="CleanNeedsPassword" xml:space="preserve"><value>Pede sua senha</value></data>
+  <data name="ConfirmPasswordNote" xml:space="preserve"><value>O sistema vai pedir sua senha para cada um destes: {0}. Só os arquivos que você viu na prévia serão apagados.</value></data>
+  <data name="CleanSkippedCancelled" xml:space="preserve"><value>Ignorado: o pedido de senha foi cancelado.</value></data>
+  <data name="CleanCancelled" xml:space="preserve"><value>Cancelado: nenhuma senha foi informada, então nada foi apagado.</value></data>
+  <data name="CleanAdminFailed" xml:space="preserve"><value>Não consegui terminar de limpar este item. Olhe a lista de novo antes de tentar outra vez.</value></data>
 </root>

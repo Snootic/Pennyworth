@@ -55,7 +55,8 @@ public sealed partial class App : Application
                 Clipboard: new AvaloniaClipboardService(() => desktop.MainWindow),
                 Assistant: platform.CreateAssistant(() => monitor?.Sample().Memory.Available ?? 0),
                 ExtendsIntoTitleBar: platform.ExtendsIntoTitleBar,
-                MemoryModules: platform.MemoryModules));
+                MemoryModules: platform.MemoryModules,
+                Privileged: platform.Privileged));
 
             desktop.MainWindow = new MainWindow { DataContext = viewModel };
             desktop.Exit += (_, _) =>

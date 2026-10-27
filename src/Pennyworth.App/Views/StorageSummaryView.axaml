@@ -126,6 +126,46 @@
         </Grid>
       </Border>
 
+      <!-- Linux, second step: snapshots and file system bookkeeping that only an administrator can measure. -->
+      <Border BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1" Padding="16,12" IsVisible="{Binding ShowAdminSpaceBanner}">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+          <TextBlock Classes="mono secondary" Text="[■]" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Text="{l:Tr AdminSpaceBanner}" />
+          <Button Grid.Column="2" MinHeight="30" Padding="12,0" FontSize="10.5" Command="{Binding IncludeAdminSpaceCommand}">
+            <TextBlock>
+              <Run Text="{l:Tr AdminSpaceCta, Upper=True}" />
+              <Run Text=" →" />
+            </TextBlock>
+          </Button>
+        </Grid>
+      </Border>
+      <Border Classes="card" Padding="16,12" IsVisible="{Binding ShowAdminSpaceReason}">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+          <TextBlock Classes="mono" Text="i" />
+          <TextBlock Grid.Column="1" Classes="secondary" FontSize="13" TextWrapping="Wrap" Text="{Binding AdminSpaceReasonText}" />
+        </Grid>
+      </Border>
+
+      <!-- Linux: folders the scan could not list, measured on request. -->
+      <Border BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1" Padding="16,12" IsVisible="{Binding ShowLockedBanner}">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+          <TextBlock Classes="mono secondary" Text="[■]" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding LockedBannerText}" />
+          <Button Grid.Column="2" MinHeight="30" Padding="12,0" FontSize="10.5" Command="{Binding MeasureLockedCommand}">
+            <TextBlock>
+              <Run Text="{l:Tr LockedMeasureCta, Upper=True}" />
+              <Run Text=" →" />
+            </TextBlock>
+          </Button>
+        </Grid>
+      </Border>
+      <Border Classes="card" Padding="16,12" IsVisible="{Binding ShowLockedReason}">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+          <TextBlock Classes="mono" Text="i" />
+          <TextBlock Grid.Column="1" Classes="secondary" FontSize="13" TextWrapping="Wrap" Text="{Binding LockedReasonText}" />
+        </Grid>
+      </Border>
+
       <Grid ColumnDefinitions="1.1*,*" ColumnSpacing="32">
         <!-- Category legend -->
         <StackPanel>

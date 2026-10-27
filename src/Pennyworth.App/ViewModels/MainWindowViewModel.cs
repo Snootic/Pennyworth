@@ -6,6 +6,7 @@ using Pennyworth.App.Services;
 using Pennyworth.Assistant;
 using Pennyworth.Cleanup;
 using Pennyworth.Core.Formatting;
+using Pennyworth.Core.Privilege;
 using Pennyworth.Core.Storage;
 using Pennyworth.Core.Wording;
 using Pennyworth.Monitoring;
@@ -35,7 +36,8 @@ public sealed record AppServices(
     IClipboardService? Clipboard = null,
     AssistantServices? Assistant = null,
     bool ExtendsIntoTitleBar = true,
-    IMemoryModuleReader? MemoryModules = null);
+    IMemoryModuleReader? MemoryModules = null,
+    IPrivilegedOperations? Privileged = null);
 
 public enum Page
 {
@@ -61,6 +63,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
     private readonly Func<DateTimeOffset> _clock;
     private readonly Dictionary<string, StorageSummaryViewModel> _summaries = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, HiddenSpaceReport> _hidden = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _adminSpace = new(StringComparer.OrdinalIgnoreCase);
     private AppSettings _settings;
     private CancellationTokenSource? _scanCancellation;
     private int _toastVersion;
@@ -454,6 +457,154 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
         }
     }
 
+    /// <summary>Offers the second step of the full system space: what only an administrator can measure (snapshots, file system bookkeeping).</summary>
+    public void RequestAdminSpace()
+    {
+        if (_services.Privileged is not null && IsUnlocked)
+        {
+            Dialog = new AdminSpaceDialogViewModel(this);
+        }
+    }
+
+    /// <summary>Offers to measure the folders of <paramref name="summary"/> the person cannot list.</summary>
+    public void RequestLockedMeasure(StorageSummaryViewModel summary)
+    {
+        if (_services.Privileged is not null && summary.IsComplete)
+        {
+            Dialog = new LockedMeasureDialogViewModel(this, summary);
+        }
+    }
+
+    /// <summary>
+    /// Measures the snapshots and file system bookkeeping of the system drive with an administrator's rights (called by the
+    /// dialog) and merges them into the hidden space already measured: a number the administrator read replaces the same
+    /// estimate, one it could not read leaves the estimate where it was. Nothing is added when nothing was read.
+    /// </summary>
+    public async Task IncludeAdminSpaceAsync(AdminSpaceDialogViewModel dialog)
+    {
+        if (SystemDrive is not { } system || _services.Privileged is not { } privileged)
+        {
+            CloseDialog();
+            return;
+        }
+
+        string root = system.Summary.RootPath;
+        PrivilegedResult<HiddenSpaceReport> result;
+        try
+        {
+            result = await privileged.MeasureSystemSpaceAsync(root, CancellationToken.None);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            Debug.WriteLine(ex);
+            dialog.Failed();
+            return;
+        }
+
+        switch (result.Outcome)
+        {
+            case PrivilegedOutcome.Done when result.Value is { RestorePoints: not null } or { NtfsMetadata: not null }:
+                HiddenSpaceReport merged = MergeAdminSpace(_hidden.GetValueOrDefault(root), result.Value);
+                _hidden[root] = merged;
+                _adminSpace.Add(root);
+                IsUnlocked = true;
+                SystemSummary?.ApplyHiddenSpace(merged, includesAdminSpace: true);
+                CloseDialog();
+                ShowToast(string.Format(Strings.AdminSpaceToast, ByteSize.Format(result.Value.Total)));
+                ShowStorageCategory(StorageCategory.HiddenSystem);
+                RefreshPages();
+                break;
+            case PrivilegedOutcome.Cancelled:
+                dialog.Cancelled();
+                break;
+            case PrivilegedOutcome.NotAvailable:
+                dialog.Unavailable(result.Reason);
+                break;
+            default:
+                dialog.Failed();
+                break;
+        }
+    }
+
+    /// <summary>The hidden space with what the administrator measured: per field the new number wins when there is one.</summary>
+    internal static HiddenSpaceReport MergeAdminSpace(HiddenSpaceReport? measuredBefore, HiddenSpaceReport privileged) => new(
+        privileged.RestorePoints ?? measuredBefore?.RestorePoints,
+        privileged.NtfsMetadata ?? measuredBefore?.NtfsMetadata);
+
+    /// <summary>
+    /// Measures the folders the scan could not list, with an administrator's rights (called by the dialog), and rebuilds the
+    /// drive's tree with their sizes so the categories and "not measured yet" add up again. Folders the helper did not answer
+    /// for stay locked.
+    /// </summary>
+    public async Task MeasureLockedAsync(LockedMeasureDialogViewModel dialog)
+    {
+        StorageSummaryViewModel summary = dialog.Summary;
+        if (_services.Privileged is not { } privileged || summary.Tree is not { } tree)
+        {
+            CloseDialog();
+            return;
+        }
+
+        string[] paths = [.. tree.GetLockedFolders().Select(node => node.FullPath)];
+        if (paths.Length == 0)
+        {
+            CloseDialog();
+            return;
+        }
+
+        PrivilegedResult<IReadOnlyList<MeasuredFolder>> result;
+        try
+        {
+            result = await privileged.MeasureFoldersAsync(paths, CancellationToken.None);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            Debug.WriteLine(ex);
+            dialog.Failed();
+            return;
+        }
+
+        switch (result.Outcome)
+        {
+            case PrivilegedOutcome.Done when result.Value is { } folders:
+                var asked = paths.ToHashSet(StringComparer.Ordinal);
+                var sizes = new Dictionary<string, FolderMeasurement>(StringComparer.Ordinal);
+                int incomplete = 0;
+                foreach (MeasuredFolder folder in folders.Where(folder => asked.Contains(folder.Path)))
+                {
+                    sizes[folder.Path] = new FolderMeasurement(folder.SizeOnDisk, folder.LogicalSize, folder.Files);
+                    incomplete += folder.Complete ? 0 : 1;
+                }
+
+                if (sizes.Count == 0)
+                {
+                    dialog.Failed();
+                    break;
+                }
+
+                CloseDialog();
+                if (ReferenceEquals(summary.Tree, tree))
+                {
+                    // A rescan that finished while the prompt was open has a newer tree; its folders are not these.
+                    summary.ApplyResult(tree.WithMeasuredFolders(sizes), summary.CompletedAt);
+                    string added = string.Format(sizes.Count == 1 ? Strings.LockedMeasuredToastOne : Strings.LockedMeasuredToastMany, sizes.Count, ByteSize.Format(sizes.Values.Sum(size => size.SizeOnDisk)));
+                    ShowToast(incomplete > 0 ? $"{added} {Strings.LockedMeasuredIncomplete}" : added);
+                    RefreshPages();
+                }
+
+                break;
+            case PrivilegedOutcome.Cancelled:
+                dialog.Cancelled();
+                break;
+            case PrivilegedOutcome.NotAvailable:
+                dialog.Unavailable(result.Reason);
+                break;
+            default:
+                dialog.Failed();
+                break;
+        }
+    }
+
     StorageTree? IFolderHost.TreeFor(DriveViewModel drive) =>
         _summaries.GetValueOrDefault(drive.Summary.RootPath) is { IsComplete: true } summary ? summary.Tree : null;
 
@@ -687,10 +838,12 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
 
         var cancellation = new CancellationTokenSource();
         _scanCancellation = cancellation;
-        var summary = new StorageSummaryViewModel(drive.Summary, _services.Locations, OpenFolder, RequestUnlock, isSystemDrive: drive == SystemDrive);
+        var summary = new StorageSummaryViewModel(
+            drive.Summary, _services.Locations, OpenFolder, RequestUnlock, isSystemDrive: drive == SystemDrive,
+            privileged: _services.Privileged, requestAdminSpace: RequestAdminSpace, requestLockedMeasure: RequestLockedMeasure);
         if (_hidden.TryGetValue(root, out var hidden))
         {
-            summary.ApplyHiddenSpace(hidden);
+            summary.ApplyHiddenSpace(hidden, _adminSpace.Contains(root));
         }
 
         _summaries[root] = summary;
@@ -780,6 +933,7 @@ public sealed partial class MainWindowViewModel : ObservableObject, IFolderHost,
         }
 
         Cleanup.RefreshTexts();
+        (Dialog as PrivilegedDialogViewModel)?.RefreshTexts();
         Memory.RefreshTexts();
         Specs.RefreshTexts();
         Ask?.RefreshTexts();

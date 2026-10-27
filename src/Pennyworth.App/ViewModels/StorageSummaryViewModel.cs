@@ -3,6 +3,7 @@ using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.App.Services;
 using Pennyworth.Core.Formatting;
+using Pennyworth.Core.Privilege;
 using Pennyworth.Core.Storage;
 using Pennyworth.Core.Wording;
 using Pennyworth.Platform;
@@ -23,17 +24,35 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
     private readonly ILocationInfo _locations;
     private readonly Action<StorageNode> _openFolder;
     private readonly Action _requestUnlock;
+    private readonly IPrivilegedOperations? _privileged;
+    private readonly Action _requestAdminSpace;
+    private readonly Action<StorageSummaryViewModel> _requestLockedMeasure;
+    private IReadOnlyList<StorageNode> _lockedFolders = [];
     private StorageTree? _tree;
     private long[] _categoryBytes = new long[StorageCategories.Count];
     private HiddenSpaceReport? _hidden;
 
-    public StorageSummaryViewModel(DriveSummary drive, ILocationInfo locations, Action<StorageNode> openFolder, Action? requestUnlock = null, bool isSystemDrive = false)
+    /// <param name="privileged">Null where nothing can be done with an administrator's rights (Windows): then no banner below ever shows.</param>
+    /// <param name="requestAdminSpace">Opens the dialog for what only an administrator can measure of the system drive.</param>
+    /// <param name="requestLockedMeasure">Opens the dialog for the folders the scan could not list.</param>
+    public StorageSummaryViewModel(
+        DriveSummary drive,
+        ILocationInfo locations,
+        Action<StorageNode> openFolder,
+        Action? requestUnlock = null,
+        bool isSystemDrive = false,
+        IPrivilegedOperations? privileged = null,
+        Action? requestAdminSpace = null,
+        Action<StorageSummaryViewModel>? requestLockedMeasure = null)
     {
         Drive = drive;
         IsSystemDrive = isSystemDrive;
         _locations = locations;
         _openFolder = openFolder;
         _requestUnlock = requestUnlock ?? (() => { });
+        _privileged = privileged;
+        _requestAdminSpace = requestAdminSpace ?? (() => { });
+        _requestLockedMeasure = requestLockedMeasure ?? (_ => { });
         Categories = StorageCategories.All.Select(category => new CategoryRowViewModel(category)).ToArray();
         Unaccounted = new CategoryRowViewModel(null);
         Legend = [.. Categories, Unaccounted];
@@ -84,6 +103,44 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
 
     public bool ShowUnlockBanner => IsSystemDrive && !IsUnlocked;
 
+    /// <summary>True once what only an administrator can measure (snapshots, file system bookkeeping) is part of the totals.</summary>
+    public bool IncludesAdminSpace { get; private set; }
+
+    /// <summary>The second step of the system space is offered: only after the first, on the system drive, while it is not done yet.</summary>
+    private PrivilegedCapability? AdminSpaceCapability =>
+        IsSystemDrive && IsUnlocked && !IncludesAdminSpace && _privileged is { } privileged
+            ? privileged.Capability(PrivilegedOperation.SystemSpace)
+            : null;
+
+    /// <summary>"Include what needs administrator access": offered when it can be asked for.</summary>
+    public bool ShowAdminSpaceBanner => AdminSpaceCapability is { Available: true };
+
+    /// <summary>The one line that says why the second step cannot be offered, instead of its button.</summary>
+    public bool ShowAdminSpaceReason => AdminSpaceCapability is { Available: false };
+
+    public string? AdminSpaceReasonText => AdminSpaceCapability is { Available: false } missing
+        ? string.Format(Strings.AdminSpaceUnavailable, PrivilegedText.Reason(missing.Reason))
+        : null;
+
+    /// <summary>Folders the scan could not list and nobody has measured yet.</summary>
+    public int LockedCount => _lockedFolders.Count;
+
+    private PrivilegedCapability? LockedCapability =>
+        IsComplete && LockedCount > 0 && _privileged is { } privileged
+            ? privileged.Capability(PrivilegedOperation.Folders)
+            : null;
+
+    /// <summary>"Measure 3 folders I couldn't read": offered when the folders can be measured.</summary>
+    public bool ShowLockedBanner => LockedCapability is { Available: true };
+
+    public bool ShowLockedReason => LockedCapability is { Available: false };
+
+    public string LockedBannerText => string.Format(LockedCount == 1 ? Strings.LockedBannerOne : Strings.LockedBannerMany, LockedCount);
+
+    public string? LockedReasonText => LockedCapability is { Available: false } missing
+        ? string.Format(Strings.LockedUnavailable, PrivilegedText.Reason(missing.Reason))
+        : null;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PlacesTitle), nameof(ShowPlaces), nameof(ShowUnaccountedExplanation), nameof(SelectedColorKey))]
     public partial CategoryRowViewModel? SelectedCategory { get; set; }
@@ -114,9 +171,11 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
         }
     }
 
+    /// <summary>Shows a finished tree. Called again with the same drive's tree after folders were measured: the selected category stays.</summary>
     public void ApplyResult(StorageTree tree, DateTimeOffset? completedAt = null)
     {
         _tree = tree;
+        _lockedFolders = tree.GetLockedFolders();
         _categoryBytes = Enumerable.Range(0, StorageCategories.Count)
             .Select(i => tree.GetCategoryBytes((StorageCategory)i))
             .ToArray();
@@ -126,17 +185,24 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
         BuildAreas();
         IsComplete = true;
         SelectedCategory ??= Biggest;
+        RaiseAdminOffers();
     }
 
-    /// <summary>Adds the measured hidden space: restore points and NTFS data on Windows, snapshots and filesystem metadata on Linux.</summary>
-    public void ApplyHiddenSpace(HiddenSpaceReport report)
+    /// <summary>
+    /// Adds the measured hidden space: restore points and NTFS data on Windows, snapshots and filesystem metadata on Linux.
+    /// Applying a report replaces the previous one, never adds to it, so the totals keep adding up to the whole drive.
+    /// </summary>
+    /// <param name="includesAdminSpace">The report includes what an administrator measured; the banner that offers it goes away.</param>
+    public void ApplyHiddenSpace(HiddenSpaceReport report, bool includesAdminSpace = false)
     {
         _hidden = report;
+        IncludesAdminSpace |= includesAdminSpace;
         Unaccounted.IsMeasured = true;
         Update();
         BuildAreas();
         OnPropertyChanged(nameof(IsUnlocked));
         OnPropertyChanged(nameof(ShowUnlockBanner));
+        RaiseAdminOffers();
     }
 
     /// <summary>Selects the category drawn with this colour key (a click on the bar).</summary>
@@ -170,6 +236,25 @@ public sealed partial class StorageSummaryViewModel : ObservableObject
 
     [RelayCommand]
     private void Unlock() => _requestUnlock();
+
+    [RelayCommand]
+    private void IncludeAdminSpace() => _requestAdminSpace();
+
+    [RelayCommand]
+    private void MeasureLocked() => _requestLockedMeasure(this);
+
+    private void RaiseAdminOffers()
+    {
+        OnPropertyChanged(nameof(IncludesAdminSpace));
+        OnPropertyChanged(nameof(ShowAdminSpaceBanner));
+        OnPropertyChanged(nameof(ShowAdminSpaceReason));
+        OnPropertyChanged(nameof(AdminSpaceReasonText));
+        OnPropertyChanged(nameof(LockedCount));
+        OnPropertyChanged(nameof(ShowLockedBanner));
+        OnPropertyChanged(nameof(ShowLockedReason));
+        OnPropertyChanged(nameof(LockedBannerText));
+        OnPropertyChanged(nameof(LockedReasonText));
+    }
 
     private void BuildAreas()
     {

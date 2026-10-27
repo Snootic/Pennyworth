@@ -125,7 +125,7 @@
                               Command="{Binding $parent[UserControl].((vm:CleanupViewModel)DataContext).ToggleCommand}"
                               CommandParameter="{Binding}">
                         <Grid ColumnDefinitions="20,*,90" ColumnSpacing="16">
-                          <Border Classes="check" Classes.on="{Binding IsSelected}" Classes.unavailable="{Binding NeedsFullScan}">
+                          <Border Classes="check" Classes.on="{Binding IsSelected}" Classes.unavailable="{Binding IsBlocked}">
                             <TextBlock Text="✓" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Foreground="{DynamicResource Brush.Background}" IsVisible="{Binding IsSelected}" />
                           </Border>
@@ -139,6 +139,10 @@
                             </TextBlock>
                             <TextBlock FontSize="12" Foreground="{DynamicResource Brush.Accent}" TextWrapping="Wrap"
                                        Text="{l:Tr NeedsFullScan}" IsVisible="{Binding NeedsFullScan}" />
+                            <TextBlock FontSize="12" Foreground="{DynamicResource Brush.Accent}" TextWrapping="Wrap"
+                                       Text="{l:Tr CleanNeedsPassword}" IsVisible="{Binding NeedsPassword}" />
+                            <TextBlock FontSize="12" Foreground="{DynamicResource Brush.Accent}" TextWrapping="Wrap"
+                                       Text="{Binding AdminReasonText}" IsVisible="{Binding HasAdminReason}" />
                           </StackPanel>
                           <TextBlock Grid.Column="2" FontSize="15" TextAlignment="Right" Text="{Binding SizeText}" />
                         </Grid>
@@ -191,8 +195,11 @@
               <DataTemplate x:DataType="vm:CleanupItemViewModel">
                 <Border Classes="rule" Padding="0,11">
                   <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Text="{Binding Title}" />
-                    <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding FreedText}" />
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="{Binding Title}" />
+                      <TextBlock Classes="secondary" FontSize="12.5" TextWrapping="Wrap" Text="{Binding OutcomeText}" IsVisible="{Binding HasOutcome}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Classes="secondary" Text="{Binding FreedText}" IsVisible="{Binding !HasOutcome}" />
                   </Grid>
                 </Border>
               </DataTemplate>

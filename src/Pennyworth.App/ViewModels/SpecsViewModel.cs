@@ -5,6 +5,7 @@ using Pennyworth.App.Resources;
 using Pennyworth.App.Services;
 using Pennyworth.Assistant;
 using Pennyworth.Core.Formatting;
+using Pennyworth.Core.Privilege;
 using Pennyworth.Core.Wording;
 using Pennyworth.Monitoring.Hardware;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,6 +19,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
     private const string Unknown = "—";
 
     private MemoryModulesOutcome? _modulesFailure;
+    private PrivilegedUnavailableReason? _modulesReason;
     private CancellationTokenSource? _modulesCancellation;
 
     [ObservableProperty]
@@ -37,12 +39,16 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
     [NotifyCanExecuteChangedFor(nameof(ReadModulesCommand))]
     public partial bool IsReadingModules { get; private set; }
 
-    /// <summary>The one line under the memory modules button: waiting for the password, or why nothing was read.</summary>
+    /// <summary>
+    /// The one line under the memory modules button: waiting for the password, or why nothing was read. When the platform
+    /// says why it could not even ask, that sentence replaces the generic one: it is what the person can act on.
+    /// </summary>
     public string? ModulesMessage => IsReadingModules
         ? Strings.SpecsModulesReading
         : _modulesFailure switch
         {
             MemoryModulesOutcome.Cancelled => Strings.SpecsModulesCancelled,
+            MemoryModulesOutcome.Unavailable when _modulesReason is { } reason => PrivilegedText.Reason(reason),
             MemoryModulesOutcome.Unavailable => Strings.SpecsModulesUnavailable,
             _ => null,
         };
@@ -98,6 +104,7 @@ public sealed partial class SpecsViewModel(ISpecsReader reader, IDialogHost host
         else
         {
             _modulesFailure = result.Outcome;
+            _modulesReason = result.Reason;
             OnPropertyChanged(nameof(ModulesMessage));
         }
     }

@@ -153,11 +153,18 @@
                       ToolTip.Tip="{Binding Name}">
                 <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
                   <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                  <Border Grid.Column="1" Classes="badge" VerticalAlignment="Center" IsVisible="{Binding IsLocked}"
+                  <Border Grid.Column="1" Classes="badge" VerticalAlignment="Center" IsVisible="{Binding ShowLockedBadge}"
                           ToolTip.Tip="{l:Tr LockedHint}">
                     <TextBlock>
                       <Run Text="■ " />
                       <Run Text="{l:Tr Locked, Upper=True}" />
+                    </TextBlock>
+                  </Border>
+                  <Border Grid.Column="1" Classes="badge" VerticalAlignment="Center" IsVisible="{Binding IsMeasured}"
+                          ToolTip.Tip="{l:Tr MeasuredBadgeHint}">
+                    <TextBlock>
+                      <Run Text="■ " />
+                      <Run Text="{l:Tr MeasuredBadge}" />
                     </TextBlock>
                   </Border>
                   <TextBlock Grid.Column="2" Classes="mono secondary" Text="›" VerticalAlignment="Center" IsVisible="{Binding CanOpen}" />
@@ -204,6 +211,20 @@
               <Run Text=" →" />
             </TextBlock>
           </Button>
+        </StackPanel>
+      </Border>
+
+      <!-- Locked folder whose size was measured with a password -->
+      <Border Classes="rule" Padding="0,56" IsVisible="{Binding IsMeasuredLockedFolder}" VerticalAlignment="Top">
+        <StackPanel Spacing="12" HorizontalAlignment="Center" MaxWidth="460">
+          <Border Classes="badge" HorizontalAlignment="Center" Padding="10,6">
+            <TextBlock FontSize="13">
+              <Run Text="■ " />
+              <Run Text="{l:Tr MeasuredBadge}" />
+            </TextBlock>
+          </Border>
+          <TextBlock FontSize="17" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Text="{l:Tr LockedMeasuredTitle}" />
+          <TextBlock Classes="secondary" FontSize="13" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Text="{Binding LockedMeasuredBody}" />
         </StackPanel>
       </Border>
     </Panel>

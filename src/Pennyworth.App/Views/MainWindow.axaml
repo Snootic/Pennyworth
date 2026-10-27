@@ -102,6 +102,46 @@
       </StackPanel>
     </DataTemplate>
 
+    <!-- A read-only request that needs an administrator's password: what it reads, what it leaves alone, then the wait. -->
+    <DataTemplate DataType="vm:PrivilegedDialogViewModel">
+      <StackPanel Spacing="18">
+        <StackPanel Spacing="18" IsVisible="{Binding IsAsking}">
+          <TextBlock Classes="label" Foreground="{DynamicResource Brush.Accent}" Text="[ ] → [■]" />
+          <TextBlock FontSize="24" FontWeight="Medium" TextWrapping="Wrap" Text="{Binding Title}" />
+          <TextBlock Classes="secondary" LineHeight="21" TextWrapping="Wrap" Text="{Binding Why}" />
+          <Border Background="{DynamicResource Brush.Border}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="1">
+              <StackPanel Background="{DynamicResource Brush.Surface}" Spacing="6" Margin="0">
+                <TextBlock Classes="label" Margin="14,14,14,0" Text="{l:Tr CanSee, Upper=True}" />
+                <TextBlock FontSize="13" TextWrapping="Wrap" Margin="14,0,14,14" Text="{Binding Reads}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Background="{DynamicResource Brush.Surface}" Spacing="6">
+                <TextBlock Classes="label" Margin="14,14,14,0" Text="{l:Tr Wont, Upper=True}" />
+                <TextBlock FontSize="13" TextWrapping="Wrap" Margin="14,0,14,14" Text="{Binding Wont}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+          <StackPanel Spacing="10" IsVisible="{Binding IsWaiting}">
+            <ProgressBar Classes="sweep" Foreground="{DynamicResource Brush.Accent}" />
+            <TextBlock Classes="label" LetterSpacing="0" FontSize="11" Text="{l:Tr PrivWaiting}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" IsVisible="{Binding IsIdle}">
+            <Button BorderBrush="{DynamicResource Brush.BorderStrong}" MinHeight="40" Content="{l:Tr NotNow, Upper=True}" Command="{Binding NotNowCommand}" />
+            <Button Classes="primary" MinHeight="40" Padding="18,0" Content="{l:Tr PrivAsk, Upper=True}" Command="{Binding StartCommand}" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Spacing="18" IsVisible="{Binding IsMessage}">
+          <TextBlock FontSize="24" FontWeight="Medium" TextWrapping="Wrap" Text="{Binding Title}" />
+          <TextBlock Classes="secondary" LineHeight="21" TextWrapping="Wrap" Text="{Binding Message}" />
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <Button BorderBrush="{DynamicResource Brush.BorderStrong}" MinHeight="40" Content="{l:Tr PrivTryAgain, Upper=True}" Command="{Binding TryAgainCommand}" />
+            <Button MinHeight="40" Padding="20,0" Background="{DynamicResource Brush.TextPrimary}"
+                    Foreground="{DynamicResource Brush.Background}" Content="{l:Tr Ok}" Command="{Binding CloseCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </StackPanel>
+    </DataTemplate>
+
     <!-- "Clean 18.2 GB?" -->
     <DataTemplate DataType="vm:CleanConfirmDialogViewModel">
       <StackPanel Spacing="18">
@@ -133,6 +173,9 @@
         </StackPanel>
         <Border BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1" Padding="14,12" IsVisible="{Binding ShowBinNote}">
           <TextBlock FontSize="13" TextWrapping="Wrap" Text="{Binding BinNote}" />
+        </Border>
+        <Border BorderBrush="{DynamicResource Brush.BorderStrong}" BorderThickness="1" Padding="14,12" IsVisible="{Binding ShowPasswordNote}">
+          <TextBlock FontSize="13" TextWrapping="Wrap" Text="{Binding PasswordNote}" />
         </Border>
         <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
           <Button BorderBrush="{DynamicResource Brush.BorderStrong}" MinHeight="40" Content="{l:Tr Cancel, Upper=True}" Command="{Binding CancelCommand}" />
