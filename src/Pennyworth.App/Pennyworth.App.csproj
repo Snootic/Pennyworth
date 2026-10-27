@@ -10,6 +10,13 @@
     <ApplicationIcon Condition="'$(OS)' != 'Unix'">Assets\pennyworth.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en;pt-BR</SatelliteResourceLanguages>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- Avalonia's native Wayland backend is opt-in and Linux-only, so it is referenced (and compiled in through WAYLAND) only when the target is not Windows.
+         The runtime identifier decides when there is one; without one, the build host does. -->
+    <TargetsLinux Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier.StartsWith('linux'))</TargetsLinux>
+    <TargetsLinux Condition="'$(RuntimeIdentifier)' == ''">$([System.String]::Equals('$(OS)', 'Unix'))</TargetsLinux>
+    <DefineConstants Condition="'$(TargetsLinux)' == 'true'">$(DefineConstants);WAYLAND</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Pennyworth.App.Tests" />
   </ItemGroup>
@@ -17,9 +24,12 @@
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Themes.Simple" />
+    <PackageReference Include="Avalonia.Wayland" Condition="'$(TargetsLinux)' == 'true'" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <!-- Its build targets copy DirectML.dll, which the local assistant model needs on graphics cards; they do not flow through project references. -->
-    <PackageReference Include="Microsoft.AI.DirectML" />
+    <!-- Its build targets copy DirectML.dll, which the local assistant model needs on graphics cards; they do not flow through project references.
+         DirectML is Windows-only: a Linux publish (and a Linux dev build) must not ship DirectML.dll, so it is referenced for Windows targets only.
+         The runtime identifier decides when there is one (a win-x64 publish started from Linux still gets it); without one, the build host does. -->
+    <PackageReference Include="Microsoft.AI.DirectML" Condition="('$(RuntimeIdentifier)' != '' and $(RuntimeIdentifier.StartsWith('win'))) or ('$(RuntimeIdentifier)' == '' and '$(OS)' == 'Windows_NT')" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pennyworth.Core\Pennyworth.Core.csproj" />
