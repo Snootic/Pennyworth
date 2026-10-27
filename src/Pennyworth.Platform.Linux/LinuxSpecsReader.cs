@@ -6,9 +6,11 @@ namespace Pennyworth.Platform.Linux;
 
 /// <summary>
 /// Reads the hardware from <c>/proc</c>, <c>/sys</c>, <c>/etc/os-release</c>, the udev database and a
-/// few optional helper programs (<c>lspci</c>, <c>nvidia-smi</c>, <c>vulkaninfo</c>, <c>stat</c>).
+/// few optional helper programs (<c>lspci</c>, <c>nvidia-smi</c>, <c>vulkaninfo</c>, <c>stat</c>, and the ones that
+/// know the running session: <c>kscreen-doctor</c>, <c>gdbus</c>, <c>wlr-randr</c>, <c>xrandr</c>).
 /// Nothing needs root: what only root can read (SMBIOS memory modules, serial numbers) stays unknown
-/// instead of being asked for. A missing source empties its own field and nothing else.
+/// instead of being asked for here; the memory modules alone can be read on request by <see cref="PkexecMemoryReader"/>.
+/// A missing source empties its own field and nothing else.
 /// </summary>
 public sealed class LinuxSpecsReader : ISpecsReader
 {
@@ -17,16 +19,28 @@ public sealed class LinuxSpecsReader : ISpecsReader
     private readonly SpecsRoot _fs;
     private readonly Func<string, IReadOnlyList<string>, string?> _probe;
     private readonly Func<string, string?>? _ipv4Of;
+    private readonly Func<string, string?> _environment;
 
     /// <param name="root">Where <c>/proc</c>, <c>/sys</c> and <c>/etc</c> live; null for the real <c>/</c>. A test hands in a fabricated tree.</param>
     /// <param name="probe">Runs a helper program and returns its output, or null when it is missing or fails; defaults to <see cref="ProcessProbe"/>.</param>
     /// <param name="ipv4Of">The IPv4 address of an interface by name, null when it has none; defaults to the system's address table.</param>
-    public LinuxSpecsReader(string? root = null, Func<string, IReadOnlyList<string>, string?>? probe = null, Func<string, string?>? ipv4Of = null)
+    /// <param name="environment">Environment variable lookup (the session type, the desktop); defaults to the process environment.</param>
+    public LinuxSpecsReader(string? root = null, Func<string, IReadOnlyList<string>, string?>? probe = null, Func<string, string?>? ipv4Of = null, Func<string, string?>? environment = null)
     {
         _fs = new SpecsRoot(root);
-        _probe = probe ?? ((file, arguments) => ProcessProbe.Run(file, arguments, HelperTimeout));
+        _probe = probe ?? ((file, arguments) => ProcessProbe.Run(file, arguments, TimeoutOf(file)));
         _ipv4Of = ipv4Of;
+        _environment = environment ?? Environment.GetEnvironmentVariable;
     }
+
+    /// <summary>
+    /// Programs that ask the running session something answer at once or not at all, so they get a short limit: a hung
+    /// <c>kscreen-doctor</c> must not hold the Specs screen for ten seconds.
+    /// </summary>
+    private static TimeSpan TimeoutOf(string file) =>
+        file is "kscreen-doctor" or "gdbus" or "wlr-randr" or "xrandr" ? DisplayProbe.Timeout
+        : CompositorDetector.Programs.Any(program => program.Comm == file) ? CompositorDetector.VersionTimeout
+        : HelperTimeout;
 
     public PcSpecs Read()
     {
@@ -41,11 +55,12 @@ public sealed class LinuxSpecsReader : ISpecsReader
             Safe(() => ProcCpu.Read(_fs), new CpuSpecs("?", null, Environment.ProcessorCount, Environment.ProcessorCount, 1, null, 0, 0, 0, RuntimeInformation.ProcessArchitecture.ToString(), null)),
             Safe(() => MemorySection.Read(_fs), new MemorySpecs(0, null, [])),
             cards.Select(c => c.Gpu).ToArray(),
-            Safe(() => DrmDisplay.Read(_fs, cards), []),
+            Safe(() => DrmDisplay.Read(_fs, cards, DisplayProbe.Read(_environment, _probe)), []),
             Safe(() => SysfsBlock.Read(_fs), []),
             Safe(() => Dmi.ReadBoard(_fs), new BoardSpecs(null, null, null, null, null)),
             Safe(() => NetAdapters.Read(_fs, _ipv4Of ?? NetAdapters.SystemAddresses(), () => pci.Value), []),
-            Safe(() => PowerSupply.Read(_fs), null));
+            Safe(() => PowerSupply.Read(_fs), null),
+            Safe(() => CompositorDetector.Read(_fs, _environment, _probe), null));
     }
 
     /// <summary>One part failing (an unreadable attribute, an odd value) must not hide the rest.</summary>

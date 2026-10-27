@@ -11,7 +11,8 @@ public sealed record PcSpecs(
     IReadOnlyList<DiskSpecs> Disks,
     BoardSpecs Board,
     IReadOnlyList<NetworkSpecs> Networks,
-    BatterySpecs? Battery);
+    BatterySpecs? Battery,
+    CompositorSpecs? Compositor = null);
 
 public sealed record SystemSpecs(string ComputerName, string UserName, string? Manufacturer, string? Model);
 
@@ -37,6 +38,21 @@ public sealed record MemoryModule(
 public sealed record GpuSpecs(string Name, long? Memory, string? DriverVersion, string? DriverDate);
 
 public sealed record DisplaySpecs(string Name, string Adapter, int Width, int Height, int RefreshHz, bool IsPrimary);
+
+/// <summary>
+/// What draws and manages the windows on Linux. Windows leaves it null: its desktop window manager is always the same one.
+/// </summary>
+/// <param name="Session">"Wayland" or "X11".</param>
+/// <param name="Name">"KWin", "Mutter", "sway", "Hyprland", "Openbox"...; null when the session type is known but no running program names its compositor.</param>
+/// <param name="Version">"6.8.1".</param>
+/// <param name="Shell">The desktop shell the compositor is part of, when that tells more than the name ("GNOME Shell" for Mutter).</param>
+public sealed record CompositorSpecs(string Session, string? Name = null, string? Version = null, string? Shell = null)
+{
+    /// <summary>"KWin 6.8.1 (Wayland)", "Mutter 47.1 (GNOME Shell, Wayland)", "Openbox (X11)", or just "X11" when nothing names it.</summary>
+    public string Text => Name is null
+        ? Session
+        : $"{Name}{(Version is null ? "" : " " + Version)} ({(Shell is null ? "" : Shell + ", ")}{Session})";
+}
 
 /// <param name="Bus">"NVMe", "SATA", "USB"...</param>
 /// <param name="IsSsd">Null when Windows can't tell.</param>

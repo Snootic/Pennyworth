@@ -23,14 +23,22 @@ public static class Smbios
 {
     private const int HeaderSize = 8;
 
-    public static SmbiosInfo Parse(ReadOnlySpan<byte> raw)
+    public static SmbiosInfo Parse(ReadOnlySpan<byte> raw) => ParseStructures(raw, HeaderSize);
+
+    /// <summary>
+    /// The same, for a table with no header: the structures alone, as Linux exposes them in
+    /// <c>/sys/firmware/dmi/tables/DMI</c>.
+    /// </summary>
+    public static SmbiosInfo ParseStructures(ReadOnlySpan<byte> table) => ParseStructures(table, 0);
+
+    private static SmbiosInfo ParseStructures(ReadOnlySpan<byte> raw, int start)
     {
         string? systemManufacturer = null, systemProduct = null, boardManufacturer = null, boardProduct = null;
         string? biosVendor = null, biosVersion = null, biosDate = null, socket = null;
         int? slots = null;
         var modules = new List<MemoryModule>();
 
-        int offset = HeaderSize;
+        int offset = start;
         while (offset + 4 <= raw.Length)
         {
             byte type = raw[offset];

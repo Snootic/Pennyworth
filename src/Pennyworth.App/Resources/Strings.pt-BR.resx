@@ -243,6 +243,7 @@
   <data name="SpecVideoMemory" xml:space="preserve"><value>Memória de vídeo</value></data>
   <data name="SpecDriver" xml:space="preserve"><value>Driver</value></data>
   <data name="SpecDisplay" xml:space="preserve"><value>Tela {0}</value></data>
+  <data name="SpecCompositor" xml:space="preserve"><value>Compositor</value></data>
   <data name="SpecMainDisplay" xml:space="preserve"><value>principal</value></data>
   <data name="SpecDisk" xml:space="preserve"><value>Disco {0}</value></data>
   <data name="SpecDisksHeadline" xml:space="preserve"><value>{0} · {1:N0} discos</value></data>
@@ -256,6 +257,11 @@
   <data name="SpecOnBattery" xml:space="preserve"><value>na bateria</value></data>
   <data name="SpecDesktop" xml:space="preserve"><value>Desktop</value></data>
   <data name="SpecNoBattery" xml:space="preserve"><value>Sem bateria: funciona ligado na tomada.</value></data>
+  <data name="SpecsModulesInfo" xml:space="preserve"><value>Quais pentes de memória estão instalados, com marca e velocidade, fica num lugar que só um administrador consegue ler. O Pennyworth pode pedir sua senha de administrador uma vez para olhar. Nada é alterado e nada é guardado.</value></data>
+  <data name="SpecsModulesRead" xml:space="preserve"><value>Ler módulos de memória</value></data>
+  <data name="SpecsModulesReading" xml:space="preserve"><value>Aguardando a senha…</value></data>
+  <data name="SpecsModulesCancelled" xml:space="preserve"><value>Nenhuma senha foi informada, então nada foi lido.</value></data>
+  <data name="SpecsModulesUnavailable" xml:space="preserve"><value>Não foi possível ler os módulos de memória neste PC.</value></data>
   <data name="UptimeDays" xml:space="preserve"><value>{0} d {1} h</value></data>
   <data name="UptimeHours" xml:space="preserve"><value>{0} h {1} min</value></data>
   <data name="Hint3d" xml:space="preserve"><value>Arraste para girar · role para zoom · clique numa peça</value></data>

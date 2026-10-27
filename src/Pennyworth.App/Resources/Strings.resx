@@ -243,6 +243,7 @@
   <data name="SpecVideoMemory" xml:space="preserve"><value>Video memory</value></data>
   <data name="SpecDriver" xml:space="preserve"><value>Driver</value></data>
   <data name="SpecDisplay" xml:space="preserve"><value>Display {0}</value></data>
+  <data name="SpecCompositor" xml:space="preserve"><value>Compositor</value></data>
   <data name="SpecMainDisplay" xml:space="preserve"><value>main</value></data>
   <data name="SpecDisk" xml:space="preserve"><value>Disk {0}</value></data>
   <data name="SpecDisksHeadline" xml:space="preserve"><value>{0} · {1:N0} disks</value></data>
@@ -256,6 +257,11 @@
   <data name="SpecOnBattery" xml:space="preserve"><value>on battery</value></data>
   <data name="SpecDesktop" xml:space="preserve"><value>Desktop</value></data>
   <data name="SpecNoBattery" xml:space="preserve"><value>No battery: it runs on mains power.</value></data>
+  <data name="SpecsModulesInfo" xml:space="preserve"><value>Which memory sticks are installed, with their brand and speed, is kept where only an administrator can read it. Pennyworth can ask for your administrator password once to look. Nothing is changed and nothing is stored.</value></data>
+  <data name="SpecsModulesRead" xml:space="preserve"><value>Read memory modules</value></data>
+  <data name="SpecsModulesReading" xml:space="preserve"><value>Waiting for the password prompt…</value></data>
+  <data name="SpecsModulesCancelled" xml:space="preserve"><value>No password was given, so nothing was read.</value></data>
+  <data name="SpecsModulesUnavailable" xml:space="preserve"><value>Couldn't read the memory modules on this PC.</value></data>
   <data name="UptimeDays" xml:space="preserve"><value>{0} d {1} h</value></data>
   <data name="UptimeHours" xml:space="preserve"><value>{0} h {1} min</value></data>
   <data name="Hint3d" xml:space="preserve"><value>Drag to rotate · scroll to zoom · click a part</value></data>

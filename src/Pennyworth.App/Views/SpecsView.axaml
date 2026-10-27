@@ -62,6 +62,15 @@
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
+                  <StackPanel Spacing="8" IsVisible="{Binding OffersModules}">
+                    <TextBlock Classes="secondary" FontSize="12.5" TextWrapping="Wrap" Text="{l:Tr SpecsModulesInfo}" />
+                    <Button Classes="small" Content="{l:Tr SpecsModulesRead, Upper=True}" HorizontalAlignment="Left"
+                            Command="{Binding $parent[UserControl].((vm:SpecsViewModel)DataContext).ReadModulesCommand}" />
+                    <ProgressBar Classes="sweep" IsVisible="{Binding $parent[UserControl].((vm:SpecsViewModel)DataContext).IsReadingModules}" />
+                    <TextBlock Classes="secondary" FontSize="12.5" TextWrapping="Wrap"
+                               Text="{Binding $parent[UserControl].((vm:SpecsViewModel)DataContext).ModulesMessage}"
+                               IsVisible="{Binding $parent[UserControl].((vm:SpecsViewModel)DataContext).ModulesMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                  </StackPanel>
                 </StackPanel>
               </Border>
             </DataTemplate>
