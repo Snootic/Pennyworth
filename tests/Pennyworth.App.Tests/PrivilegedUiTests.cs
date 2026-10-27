@@ -488,27 +488,19 @@ public class PrivilegedUiTests
     [Fact]
     public void Every_reason_has_its_own_sentence_in_both_languages()
     {
-        CultureInfo before = CultureInfo.CurrentUICulture;
-        try
+        // Resolved through the resource manager with explicit cultures: switching the thread's culture would leak into tests running beside this one.
+        string[] keys = ["PrivReasonNoPkexec", "PrivReasonNoAuthenticationAgent", "PrivReasonHelperNotInstalled", "PrivReasonHelperNotTrusted", "PrivReasonHelperOutdated", "PrivReasonUnknown"];
+        foreach (string culture in new[] { "en", "pt-BR" })
         {
-            var seen = new HashSet<string>();
-            foreach (string culture in new[] { "en", "pt-BR" })
-            {
-                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(culture);
-                foreach (PrivilegedUnavailableReason reason in Enum.GetValues<PrivilegedUnavailableReason>())
-                {
-                    string text = PrivilegedText.Reason(reason);
-                    Assert.False(string.IsNullOrWhiteSpace(text));
-                    Assert.True(seen.Add($"{culture}:{text}"), $"{reason} repeats a sentence in {culture}.");
-                }
-            }
+            string[] sentences = [.. keys.Select(key => Strings.ResourceManager.GetString(key, CultureInfo.GetCultureInfo(culture)) ?? "")];
+            Assert.All(sentences, sentence => Assert.False(string.IsNullOrWhiteSpace(sentence)));
+            Assert.Equal(sentences.Length, sentences.Distinct().Count());
+        }
 
-            Assert.NotEqual(Strings.PrivReasonNoPkexec, PrivilegedText.Reason(null));
-        }
-        finally
-        {
-            CultureInfo.CurrentUICulture = before;
-        }
+        // And every reason picks a sentence of its own.
+        var seen = Enum.GetValues<PrivilegedUnavailableReason>().Select(reason => PrivilegedText.Reason(reason)).ToList();
+        seen.Add(PrivilegedText.Reason(null));
+        Assert.Equal(seen.Count, seen.Distinct().Count());
     }
 
     private static async Task WaitFor(Func<bool> done)

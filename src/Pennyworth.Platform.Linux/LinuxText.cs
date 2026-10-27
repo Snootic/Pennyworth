@@ -48,7 +48,7 @@ public sealed class LinuxText : IPlatformText
         PlatformText.UnlockAction => "Measure system space",
         PlatformText.UnlockActionHint => "offers to measure the system space",
         PlatformText.UnlockTitle => "May I measure the system space?",
-        PlatformText.UnlockWhy => "The filesystem keeps some space for itself: metadata, reserved blocks and, on btrfs, snapshots. I read those numbers straight from the system, in seconds. No password is needed; I never ask for one.",
+        PlatformText.UnlockWhy => "The filesystem keeps some space for itself: metadata, reserved blocks and, on btrfs, snapshots. I read those numbers straight from the system, in seconds. This step needs no password; a second, optional step can add what only an administrator can see.",
         PlatformText.UnlockSees => "Reserved blocks, filesystem metadata and snapshot space, as far as your account may read them.",
         PlatformText.UnlockButton => "Measure",
         PlatformText.UnlockWaiting => "Measuring…",
@@ -57,7 +57,7 @@ public sealed class LinuxText : IPlatformText
         PlatformText.UnaccountedHint => "The filesystem keeps a few rooms to itself, metadata and snapshots among them. I can measure them precisely, and without a password.",
         PlatformText.OvercountHint => "A small confession: some files were counted twice (hard links), so these totals run a touch high.",
         PlatformText.LockedBody => "Quite normal for system folders; nothing is amiss. Only an administrator may read this one, so its size stays out of the list.",
-        PlatformText.NeedsFullScan => "Needs administrator rights, which I never ask for.",
+        PlatformText.NeedsFullScan => "Needs administrator rights, which this system has no way to ask for.",
         _ => throw new ArgumentOutOfRangeException(nameof(text), text, null),
     };
 
@@ -92,7 +92,7 @@ public sealed class LinuxText : IPlatformText
         PlatformText.UnlockAction => "Medir o espaço do sistema",
         PlatformText.UnlockActionHint => "oferece medir o espaço do sistema",
         PlatformText.UnlockTitle => "Posso medir o espaço do sistema?",
-        PlatformText.UnlockWhy => "O sistema de arquivos guarda um pouco de espaço para si: metadados, blocos reservados e, no btrfs, snapshots. Leio esses números direto do sistema, em segundos. Não é preciso senha; nunca peço uma.",
+        PlatformText.UnlockWhy => "O sistema de arquivos guarda um pouco de espaço para si: metadados, blocos reservados e, no btrfs, snapshots. Leio esses números direto do sistema, em segundos. Esta etapa não precisa de senha; uma segunda etapa, opcional, pode incluir o que só um administrador enxerga.",
         PlatformText.UnlockSees => "Blocos reservados, metadados do sistema de arquivos e o espaço dos snapshots, até onde a sua conta consegue ler.",
         PlatformText.UnlockButton => "Medir",
         PlatformText.UnlockWaiting => "Medindo…",
@@ -101,7 +101,7 @@ public sealed class LinuxText : IPlatformText
         PlatformText.UnaccountedHint => "O sistema de arquivos guarda alguns cômodos para si, como metadados e snapshots. Consigo medi-los com precisão, e sem pedir senha.",
         PlatformText.OvercountHint => "Uma pequena confissão: alguns arquivos foram contados duas vezes (links físicos), então os totais estão um tanto altos.",
         PlatformText.LockedBody => "Perfeitamente normal em pastas do sistema; não há nada de errado. Só um administrador pode ler esta, então o tamanho dela fica fora da lista.",
-        PlatformText.NeedsFullScan => "Precisa de direitos de administrador, que nunca peço.",
+        PlatformText.NeedsFullScan => "Precisa de direitos de administrador, e este sistema não tem como pedi-los.",
         _ => throw new ArgumentOutOfRangeException(nameof(text), text, null),
     };
 }
