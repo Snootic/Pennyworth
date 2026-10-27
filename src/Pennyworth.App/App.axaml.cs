@@ -1,3 +1,4 @@
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -28,6 +29,14 @@ public sealed partial class App : Application
             // asks which operating system this is.
             IPlatform platform = CreatePlatform();
             Localizer.Instance.UseWording(platform);
+            if (OperatingSystem.IsLinux() && platform is LinuxPlatform linux && ReportPreflight(linux.Preflight) is { Count: > 0 } blocking)
+            {
+                // The scan or the live numbers cannot work here: say what is missing instead of showing broken screens.
+                desktop.MainWindow = new StartupProblemWindow(blocking);
+                base.OnFrameworkInitializationCompleted();
+                return;
+            }
+
             var classifier = new RuleClassifier(KnowledgeBaseLoader.LoadEmbedded(platform.Name).Locations, platform.ResolveVariable);
             ISystemMonitor? monitor = platform.CreateMonitor(KnowledgeBaseLoader.LoadProcesses(platform.Name).Processes);
             var viewModel = new MainWindowViewModel(new AppServices(
@@ -70,6 +79,27 @@ public sealed partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    /// <summary>
+    /// Writes each missing native part to standard error as one sentence (a missing keyring library only turns the
+    /// keyring off) and returns the localized sentences for the parts the core screens cannot work without.
+    /// </summary>
+    [System.Runtime.Versioning.SupportedOSPlatform("linux")]
+    private static List<string> ReportPreflight(PreflightReport report)
+    {
+        foreach (PreflightProblem problem in report.Problems)
+        {
+            Console.Error.WriteLine($"Pennyworth: {problem.Message}");
+        }
+
+        return
+        [
+            .. report.Blocking.Select(problem => string.Format(
+                CultureInfo.CurrentCulture,
+                Localizer.Instance[problem.Feature == PreflightFeature.Storage ? "StartupProblemStorage" : "StartupProblemMonitoring"],
+                problem.Missing)),
+        ];
     }
 
     private static IPlatform CreatePlatform() =>

@@ -402,4 +402,9 @@
   <data name="ActionUnlock" xml:space="preserve"><value>Unlock full scan</value></data>
   <data name="DeviceGpu" xml:space="preserve"><value>{0} on the graphics card</value></data>
   <data name="DeviceCpu" xml:space="preserve"><value>{0} on the processor</value></data>
+  <data name="StartupProblemTitle" xml:space="preserve"><value>Pennyworth can't start</value></data>
+  <data name="StartupProblemStorage" xml:space="preserve"><value>Reading your drives needs {0}, which this system does not provide.</value></data>
+  <data name="StartupProblemMonitoring" xml:space="preserve"><value>Live monitoring needs {0}, which this system does not provide.</value></data>
+  <data name="StartupProblemHint" xml:space="preserve"><value>Install or repair the missing part and start Pennyworth again. Nothing was changed.</value></data>
+  <data name="StartupProblemClose" xml:space="preserve"><value>Close</value></data>
 </root>

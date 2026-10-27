@@ -21,10 +21,21 @@ public sealed class LinuxPlatform : IPlatform
 
     /// <exception cref="InvalidOperationException">The home directory is unknown, so there is nowhere to keep files.</exception>
     public LinuxPlatform()
+        : this(LinuxPreflight.Run())
     {
+    }
+
+    /// <param name="preflight">What the machine lacks; a missing keyring library turns the keyring off and nothing else.</param>
+    /// <exception cref="InvalidOperationException">The home directory is unknown, so there is nowhere to keep files.</exception>
+    public LinuxPlatform(PreflightReport preflight)
+    {
+        Preflight = preflight;
         _paths = new XdgPaths();
         _scope = new EnvironmentScope(_paths);
     }
+
+    /// <summary>The native parts this machine lacks, checked once when the platform was created.</summary>
+    public PreflightReport Preflight { get; }
 
     public string Name => KnowledgeBaseLoader.Linux;
 
@@ -61,5 +72,8 @@ public sealed class LinuxPlatform : IPlatform
     public ISystemMonitor? CreateMonitor(IEnumerable<ProcessExplanation> explanations) => new LinuxMonitor(explanations);
 
     public AssistantServices CreateAssistant(Func<long> availableMemory) =>
-        LinuxAssistantServices.Create(_paths, new SecretServiceStore(), availableMemory);
+        LinuxAssistantServices.Create(
+            _paths,
+            Preflight.Keyring is { } keyring ? new SecretServiceStore(new UnavailableKeyring(keyring.Message)) : new SecretServiceStore(),
+            availableMemory);
 }

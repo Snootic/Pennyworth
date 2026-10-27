@@ -15,6 +15,19 @@ internal interface ISecretBackend
     void Clear(string profileId);
 }
 
+/// <summary>
+/// The keyring when <see cref="LinuxPreflight"/> found libsecret missing: every call fails with the same plain
+/// sentence, so nothing is stored and nothing tries to load the library again.
+/// </summary>
+internal sealed class UnavailableKeyring(string message) : ISecretBackend
+{
+    public void Store(string profileId, string label, string secret) => throw new KeyringException(message);
+
+    public string? Lookup(string profileId) => throw new KeyringException(message);
+
+    public void Clear(string profileId) => throw new KeyringException(message);
+}
+
 /// <summary>The keyring answered with an error, or no keyring answered. The message is safe to show.</summary>
 internal sealed class KeyringException(string message, Exception? inner = null) : InvalidOperationException(message, inner);
 
