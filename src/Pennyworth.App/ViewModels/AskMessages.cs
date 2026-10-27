@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Pennyworth.App.Localization;
 using Pennyworth.App.Resources;
 using Pennyworth.Assistant;
 using Pennyworth.Assistant.Providers;
@@ -119,6 +120,6 @@ public sealed record AskActionViewModel(AssistantAction Action, string? AppName 
         ActionKind.Storage => Strings.ActionStorage,
         ActionKind.Folders => Strings.ActionFolders,
         ActionKind.Specs => Strings.ActionSpecs,
-        _ => Strings.ActionUnlock,
+        _ => Localizer.Instance.Resolve(Strings.ActionUnlock),
     };
 }

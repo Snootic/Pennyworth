@@ -35,7 +35,7 @@ public sealed record AppSettings
     public override int GetHashCode() => HashCode.Combine(Language, Theme, WelcomeSeen);
 }
 
-/// <summary>How the assistant answers. API keys are never here; they live in the Windows Credential Manager.</summary>
+/// <summary>How the assistant answers. API keys are never here; they live in the platform's key store (Windows Credential Manager, the Secret Service on Linux).</summary>
 public sealed record AssistantSettings
 {
     public IReadOnlyList<AssistantProfile> Profiles { get => field ?? []; init; }

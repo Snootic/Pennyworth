@@ -22,6 +22,34 @@ public class FactCollectorTests
     }
 
     [Fact]
+    public void On_Linux_no_fact_label_talks_about_drive_letters_Windows_or_the_full_scan()
+    {
+        PcSpecs specs = Specs() with { Os = new OsSpecs("openSUSE Tumbleweed", "20261024", "7.3.0-1-default", "X64", null, TimeSpan.FromHours(3)) };
+        var wordsOfWindows = new System.Text.RegularExpressions.Regex(@"Windows|drive letter|letra de unidade|full-scan|verificação completa", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+        foreach (var culture in new[] { En, Pt })
+        {
+            var facts = FactCollector.Collect(Snapshot(specs: specs), culture);
+
+            Assert.All(facts, fact => Assert.False(wordsOfWindows.IsMatch(fact.Label), $"{fact.Id}: {fact.Label}"));
+        }
+
+        Assert.Equal("SSDs with nothing mounted (not in use)", FactCollector.Collect(Snapshot(specs: specs), En).Get("disk.unused_ssd_count").Label);
+        Assert.Equal("SSDs sem nada montado (sem uso)", FactCollector.Collect(Snapshot(specs: specs), Pt).Get("disk.unused_ssd_count").Label);
+        Assert.Equal("System space measured (1 = yes)", FactCollector.Collect(Snapshot(specs: specs), En).Get("unlock.state").Label);
+    }
+
+    [Fact]
+    public void Windows_keeps_its_drive_letter_and_full_scan_labels()
+    {
+        var facts = FactCollector.Collect(Snapshot(), En);
+
+        Assert.Equal("SSDs with no drive letter (not in use)", facts.Get("disk.unused_ssd_count").Label);
+        Assert.Equal("Full-scan permission granted (1 = yes)", facts.Get("unlock.state").Label);
+        Assert.Equal("SSDs sem letra de unidade (sem uso)", FactCollector.Collect(Snapshot(), Pt).Get("disk.unused_ssd_count").Label);
+    }
+
+    [Fact]
     public void Names_Windows_when_the_specs_say_it_is_Windows()
     {
         var facts = FactCollector.Collect(Snapshot(), En);

@@ -399,7 +399,7 @@
   <data name="ActionStorage" xml:space="preserve"><value>Open storage</value></data>
   <data name="ActionFolders" xml:space="preserve"><value>Open folders</value></data>
   <data name="ActionSpecs" xml:space="preserve"><value>Open specs</value></data>
-  <data name="ActionUnlock" xml:space="preserve"><value>Unlock full scan</value></data>
+  <data name="ActionUnlock" xml:space="preserve"><value>{@UnlockAction}</value></data>
   <data name="DeviceGpu" xml:space="preserve"><value>{0} on the graphics card</value></data>
   <data name="DeviceCpu" xml:space="preserve"><value>{0} on the processor</value></data>
 </root>

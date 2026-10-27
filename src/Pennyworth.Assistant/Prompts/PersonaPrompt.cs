@@ -38,7 +38,7 @@ public static class PersonaPrompt
               """);
         foreach (AssistantAction action in bundle.AllowedActions)
         {
-            sb.Append("  ").Append(action.Token).Append(" — ").AppendLine(Describe(action, pt));
+            sb.Append("  ").Append(action.Token).Append(" — ").AppendLine(Describe(action, pt, bundle.Wording));
         }
 
         sb.AppendLine(pt
@@ -49,7 +49,7 @@ public static class PersonaPrompt
         return sb.ToString();
     }
 
-    private static string Describe(AssistantAction action, bool pt) => action.Kind switch
+    private static string Describe(AssistantAction action, bool pt, IPlatformText wording) => action.Kind switch
     {
         ActionKind.Cleanup => pt ? "abre a limpeza guiada" : "opens the guided cleanup",
         ActionKind.CleanupItem => pt ? "mostra tudo o que esse item da limpeza apagaria" : "shows everything this cleanup item would delete",
@@ -58,6 +58,6 @@ public static class PersonaPrompt
         ActionKind.Storage => pt ? "abre o resumo do armazenamento" : "opens the storage summary",
         ActionKind.Folders => pt ? "abre o navegador de pastas" : "opens the folder browser",
         ActionKind.Specs => pt ? "abre as especificações completas do PC" : "opens the full PC specs",
-        _ => pt ? "pede a permissão da verificação completa" : "asks for the full-scan permission",
+        _ => wording.Text(PlatformText.UnlockActionHint, pt),
     };
 }

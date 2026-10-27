@@ -54,7 +54,7 @@
     </Style>
   </UserControl.Styles>
 
-  <Grid RowDefinitions="Auto,Auto,*">
+  <Grid RowDefinitions="Auto,Auto,*" Grid.IsSharedSizeScope="True">
     <StackPanel Margin="36,28,36,14" Spacing="12">
       <TextBlock Classes="label">
         <Run Text="05 / " />
@@ -106,7 +106,15 @@
     </StackPanel>
 
     <!-- Column headers, aligned with the row grid below. -->
-    <Grid Grid.Row="1" Margin="46,0,46,8" ColumnDefinitions="22,*,150,84,156" ColumnSpacing="14" IsVisible="{Binding HasItems}">
+    <Grid Grid.Row="1" Margin="46,0,46,8" ColumnSpacing="14" IsVisible="{Binding HasItems}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="22" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="150" />
+        <ColumnDefinition Width="84" />
+        <!-- Wide enough for the longest "Show in ..." label in either language; never narrower than before. -->
+        <ColumnDefinition Width="Auto" MinWidth="156" SharedSizeGroup="ShowInFiles" />
+      </Grid.ColumnDefinitions>
       <TextBlock Grid.Column="1" Classes="column" Text="{l:Tr ColumnName, Upper=True}" />
       <TextBlock Grid.Column="2" Classes="column" Text="{l:Tr ColumnShare, Upper=True}" TextTrimming="CharacterEllipsis" />
       <TextBlock Grid.Column="3" Classes="column" TextAlignment="Right" Text="{l:Tr ColumnSize, Upper=True}" />
@@ -117,7 +125,15 @@
                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="vm:FolderItemViewModel">
-            <Grid ColumnDefinitions="22,*,150,84,156" ColumnSpacing="14">
+            <Grid ColumnSpacing="14">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="22" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="84" />
+                <!-- Wide enough for the longest "Show in ..." label in either language; never narrower than before. -->
+                <ColumnDefinition Width="Auto" MinWidth="156" SharedSizeGroup="ShowInFiles" />
+              </Grid.ColumnDefinitions>
               <!-- Folder: filled tab and body. File: outlined sheet. Drive: outlined box with a light. -->
               <Panel Width="18" Height="15" VerticalAlignment="Center" IsVisible="{Binding IsFolder}">
                 <Border Width="8" Height="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,1,0,0" Background="{DynamicResource Brush.TextSecondary}" />
